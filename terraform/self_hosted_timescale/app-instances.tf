@@ -6,7 +6,7 @@ resource "aws_instance" "primary_1" {
   connection {
     host        = self.public_ip
     user        = "ec2-user"
-    private_key = file("${path.module}/id_rsa.pem")
+    private_key = var.private_key
   }
   provisioner "remote-exec" {
     inline = [
