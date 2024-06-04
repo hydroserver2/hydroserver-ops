@@ -69,7 +69,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: ./ops/terraform/self_hosted_timescale
-        run: terraform plan -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.USER_ACCESS_KEY_ID }}" -var secret_key="${{ secrets.USER_SECRET_ACCESS_KEY }}" -var private_key="${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY }}"
+        run: terraform plan -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.USER_ACCESS_KEY_ID }}" -var secret_key="${{ secrets.USER_SECRET_ACCESS_KEY }}" -var private_key="${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY }}" -var public_key="${{ secrets.SELF_HOSTED_TIMESCALE_PUBLIC_KEY }}"
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -79,7 +79,7 @@ jobs:
       - name: Terraform Apply
         working-directory: ./ops/terraform/self_hosted_timescale
         run: |
-          terraform apply -auto-approve -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}" -var private_key="${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY }}"
+          terraform apply -auto-approve -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}" -var private_key="${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY }}" -var public_key="${{ secrets.SELF_HOSTED_TIMESCALE_PUBLIC_KEY }}"
           echo "HOSTNAME=$(terraform output -json | jq -r '.self_hosted_tsdb_hostname.value')" > timescale_${{ github.event.inputs.environment }}_connection.txt
           echo "PORT=5432" >> timescale_${{ github.event.inputs.environment }}_connection.txt
           echo "PASSWORD=${{ github.event.inputs.db-password }}" >> timescale_${{ github.event.inputs.environment }}_connection.txt
