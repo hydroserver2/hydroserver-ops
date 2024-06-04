@@ -1,4 +1,4 @@
-name: Create HydroServer Timescale Cloud Database
+name: Create HydroServer Self Hosted TimescaleScale Database Cluster with Backup
 
 on:
   workflow_dispatch:
