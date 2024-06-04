@@ -6,7 +6,7 @@ variable "region" {}
 variable "db_user" {}
 variable "db_password" {}
 variable "aws_ami" {
-  default = "ami-09e647bf7a368e505"
+  default = "ami-00beae93a2d981137"
 }
 variable "private_key" {}
 variable "public_key" {}
