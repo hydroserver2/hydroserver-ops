@@ -31,7 +31,7 @@ resource "aws_instance" "primary_1" {
   ]
 }
 resource "aws_instance" "replica_1" {
-  ami             = "ami-00798d7180f25aac2"
+  ami             = var.aws_ami
   instance_type   = var.aws_type
   security_groups = ["${aws_security_group.swarm.name}"]
   key_name        = aws_key_pair.deployer.key_name
