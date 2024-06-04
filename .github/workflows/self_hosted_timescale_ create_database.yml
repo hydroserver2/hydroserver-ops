@@ -69,7 +69,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: ./ops/terraform/self_hosted_timescale
-        run: terraform plan -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.USER_ACCESS_KEY_ID }}" -var secret_key="${{ secrets.USER_SECRET_ACCESS_KEY }} -var private_key="${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY }}"
+        run: terraform plan -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.USER_ACCESS_KEY_ID }}" -var secret_key="${{ secrets.USER_SECRET_ACCESS_KEY }}" -var private_key="${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY }}"
         continue-on-error: true
 
       - name: Terraform Plan Status
