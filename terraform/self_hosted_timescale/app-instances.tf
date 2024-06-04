@@ -1,8 +1,3 @@
-/* Setup our aws provider */
-provider "aws" {
-  region = var.region
-}
-
 resource "aws_instance" "primary_1" {
   ami             = var.aws_ami
   instance_type   = var.aws_type
