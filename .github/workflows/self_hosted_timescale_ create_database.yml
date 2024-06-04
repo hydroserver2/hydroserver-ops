@@ -1,0 +1,121 @@
+name: Create HydroServer Timescale Cloud Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Enter a deployment environment name.'
+        required: true
+      superuser-email:
+        description: 'Enter the email for the Django superuser.'
+        required: true
+      superuser-password:
+        description: 'Enter the password for the Django superuser.'
+        required: true
+      partition-interval:
+        description: 'Enter a partition interval in days.'
+        default: '365'
+        required: true
+      db-user:
+        description: 'Enter a username for the timescale db'
+        required: true
+      db-password:
+        description: 'Enter a password for the timescale db'
+        required: true
+      hydroserver-version:
+        description: 'Enter a version of HydroServer to use. Leave blank to use the latest version.'
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup-deployment:
+    runs-on: ubuntu-20.04
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: configureawscredentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_IAM_ROLE }}
+          role-session-name: create-hydroserver-resources
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          path: ops
+
+      - name: Get Latest HydroServer Version
+        id: get_latest_tag
+        run: echo "tag=$(curl -sL https://api.github.com/repos/hydroserver2/hydroserver-webapp-back/releases/latest | jq -r '.tag_name')" >> $GITHUB_OUTPUT
+
+      - name: Checkout Backend Repo
+        uses: actions/checkout@v4
+        with:
+          repository: hydroserver2/hydroserver-webapp-back
+          ref: refs/tags/${{ github.event.inputs.hydroserver-version || steps.get_latest_tag.outputs.tag }}
+          path: backend
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./ops/terraform/self_hosted_timescale
+        run: terraform init -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="key=state/timescale_self_hosted_database_${{ github.event.inputs.environment }}"
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: ./ops/terraform/self_hosted_timescale
+        run: terraform plan -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var db_user="${{ github.event.inputs.db-user }}" -var db_password="${{ github.event.inputs.db-password }}" -var access_key="${{ secrets.USER_ACCESS_KEY_ID }}" -var secret_key="${{ secrets.USER_SECRET_ACCESS_KEY }} -var private_key =${{ secrets.SELF_HOSTED_TIMESCALE_PRIVATE_KEY}}"
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        working-directory: ./ops/terraform/self_hosted_timescale
+        run: |
+          terraform apply -auto-approve -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var project_id="${{ vars.TIMESCALE_PROJECT_ID }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}"
+          echo "HOSTNAME=$(terraform output -json | jq -r '.self_hosted_tsdb_hostname.value')" > timescale_${{ github.event.inputs.environment }}_connection.txt
+          echo "PORT=5432" >> timescale_${{ github.event.inputs.environment }}_connection.txt
+          echo "PASSWORD=${{ github.event.inputs.db-password }}" >> timescale_${{ github.event.inputs.environment }}_connection.txt
+          echo "CONNECTION_STRING=postgresql://${{ github.event.inputs.db-user }}:${{ github.event.inputs.db-password }}@$(terraform output -json | jq -r '.self_hosted_tsdb_hostname.value'):5432/tsdb" >> timescale_${{ github.event.inputs.environment }}_connection.txt
+          cat << EOF > ../../../backend/.env
+          PROXY_BASE_URL=http://127.0.0.1:8000
+          DATABASE_URL=postgresql://${{ github.event.inputs.db-user }}:${{ github.event.inputs.db-password }}@$(terraform output -json | jq -r '.self_hosted_tsdb_hostname.value'):5432/tsdb
+          DEPLOYED=True
+          EOF
+
+      - name: Upload Connection Details to S3
+        working-directory: ./ops/terraform/self_hosted_timescale
+        run: |
+          aws s3 cp timescale_${{ github.event.inputs.environment }}_connection.txt s3://${{ vars.TERRAFORM_BUCKET }}/output/timescale_${{ github.event.inputs.environment }}_connection.txt
+
+      - name: Install Django Dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyopenssl --upgrade
+
+      - name: Run Database Setup Commands
+        working-directory: ./backend
+        env:
+          DJANGO_SETTINGS_MODULE: hydroserver.settings
+          DJANGO_SUPERUSER_EMAIL: ${{ github.event.inputs.superuser-email }}
+          DJANGO_SUPERUSER_PASSWORD: ${{ github.event.inputs.superuser-password }}
+          DJANGO_SUPERUSER_FIRST_NAME: ADMIN
+          DJANGO_SUPERUSER_LAST_NAME: ADMIN
+        run: |
+          python manage.py migrate
+          python manage.py configure_timescaledb --partition-interval-days ${{ github.event.inputs.partition-interval }}
+          python manage.py createsuperuser --noinput
