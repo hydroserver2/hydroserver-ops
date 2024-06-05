@@ -47,7 +47,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ./ops/terraform/self_hosted_timescale
-        run: terraform init -destroy -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="key=state/timescale_self_hosted_database_${{ github.event.inputs.environment }}"
+        run: terraform init -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="key=state/timescale_self_hosted_database_${{ github.event.inputs.environment }}"
 
       - name: Terraform Plan
         id: plan
