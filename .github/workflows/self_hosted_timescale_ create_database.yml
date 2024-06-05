@@ -1,4 +1,4 @@
-name: Create HydroServer Self Hosted TimescaleScale Database Cluster with Backup
+name: Create Self Hosted TimescaleScale Database Cluster with Backup For HydroServer
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ on:
         description: 'Enter a password for the timescale db'
         required: true
       aws-instance-type:
-        description: 'Enter aaws ec2 isntance type (default is t2.micro)'
+        description: 'Enter aws ec2 isntance type (default is t2.micro)'
         required: false
       hydroserver-version:
         description: 'Enter a version of HydroServer to use. Leave blank to use the latest version.'
