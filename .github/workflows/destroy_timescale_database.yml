@@ -39,7 +39,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: ./ops/terraform/timescale
-        run: terraform plan -destroy -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var project_id="${{ vars.TIMESCALE_PROJECT_ID }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}"
+        run: terraform plan -destroy -no-color -plan=timescale_service.hydroserver_timescale -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var project_id="${{ vars.TIMESCALE_PROJECT_ID }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}"
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -49,7 +49,7 @@ jobs:
       - name: Terraform Apply
         working-directory: ./ops/terraform/timescale
         run: |
-          terraform apply -destroy -auto-approve -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var project_id="${{ vars.TIMESCALE_PROJECT_ID }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}"
+          terraform apply -destroy -plan=timescale_service.hydroserver_timescale -auto-approve -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}" -var project_id="${{ vars.TIMESCALE_PROJECT_ID }}" -var access_key="${{ secrets.TIMESCALE_ACCESS_KEY }}" -var secret_key="${{ secrets.TIMESCALE_SECRET_KEY }}"
 
       - name: Delete Connection Details to S3
         working-directory: ./ops/terraform/timescale
