@@ -1,4 +1,4 @@
-name: Create HydroServer Timescale Cloud Database
+name: Destroy HydroServer Timescale Cloud Database
 
 on:
   workflow_dispatch:
