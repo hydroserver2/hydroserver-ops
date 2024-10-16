@@ -20,12 +20,12 @@ resource "aws_ecr_repository" "hydroserver_api_repo" {
 
 resource "aws_apprunner_service" "hydroserver_api_service" {
   service_name = "hydroserver-api-${var.instance}"
-  
+
   service_role_arn = aws_iam_role.apprunner_service_role.arn
 
   source {
     image_repository {
-      image_identifier = "${aws_ecr_repository.hydroserver_repo.repository_url}:latest"
+      image_identifier = "${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
         port = "8000"
@@ -69,6 +69,10 @@ resource "aws_iam_role" "apprunner_service_role" {
     (var.tag_key) = local.tag_value
   }
 }
+
+# ------------------------------------------------ #
+# Attach Policies to Service Role                  #
+# ------------------------------------------------ #
 
 resource "aws_iam_role_policy_attachment" "service_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/hydroserver-api-service-role-${var.instance}"
