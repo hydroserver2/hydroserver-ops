@@ -15,7 +15,7 @@ resource "aws_ecr_repository" "hydroserver_api_repo" {
 }
 
 # ------------------------------------------------ #
-# Create App Runner Service                         #
+# Create App Runner Service                        #
 # ------------------------------------------------ #
 
 resource "aws_apprunner_service" "hydroserver_api_service" {
@@ -46,7 +46,7 @@ resource "aws_apprunner_service" "hydroserver_api_service" {
 }
 
 # ------------------------------------------------ #
-# Create a Service Role for App Runner            #
+# Create a Service Role for App Runner             #
 # ------------------------------------------------ #
 
 resource "aws_iam_role" "apprunner_service_role" {
@@ -74,12 +74,41 @@ resource "aws_iam_role" "apprunner_service_role" {
 # Attach Policies to Service Role                  #
 # ------------------------------------------------ #
 
-resource "aws_iam_role_policy_attachment" "service_role_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/hydroserver-api-service-role-${var.instance}"
-  role       = aws_iam_role.apprunner_service_role.name
+resource "aws_iam_policy" "apprunner_service_role_policy" {
+  name = "hydroserver-api-service-role-policy-${var.instance}"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::hydroserver-api-storage-${var.instance}",
+          "arn:aws:s3:::hydroserver-api-storage-${var.instance}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:DescribeImages",
+          "ecr:DescribeRepositories",
+          "ecr:GetAuthorizationToken"
+        ]
+        Resource = "arn:aws:ecr:${var.aws_region}:${var.aws_account_id}:repository/hydroserver-api-${var.instance}"
+      }
+    ]
+  })
 }
 
-resource "aws_iam_role_policy_attachment" "ecr_access_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+resource "aws_iam_role_policy_attachment" "apprunner_service_role_policy_attachment" {
   role       = aws_iam_role.apprunner_service_role.name
+  policy_arn = aws_iam_policy.apprunner_service_role_policy.arn
 }
