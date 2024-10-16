@@ -21,9 +21,10 @@ resource "aws_ecr_repository" "hydroserver_api_repo" {
 resource "aws_apprunner_service" "hydroserver_api_service" {
   service_name = "hydroserver-api-${var.instance}"
 
-  access_role_arn = aws_iam_role.apprunner_service_role.arn
-
   source_configuration {
+    authentication_configuration {
+      access_role_arn = aws_iam_role.apprunner_service_role.arn
+    }
     image_repository {
       image_identifier = "${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest"
       image_repository_type = "ECR"
@@ -36,6 +37,7 @@ resource "aws_apprunner_service" "hydroserver_api_service" {
   instance_configuration {
     cpu    = "1 vCPU"
     memory = "2 GB"
+    instance_role_arn = aws_iam_role.apprunner_service_role.arn
   }
 
   tags = {
