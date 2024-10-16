@@ -13,7 +13,27 @@ provider "aws" {
   region = var.region
 }
 
-variable "instance" {}
-variable "region" {}
+variable "instance" {
+  description = "The name of this HydroServer instance."
+  type        = string
+}
+variable "region" {
+  description = "The AWS region this HydroServer instance will be deployed in."
+  type        = string
+}
+variable "tag_key" {
+  description = "The key of the AWS tag that will be attached to this HydroServer instance."
+  type        = string
+  default     = "HydroServerInstance"
+}
+variable "tag_value" {
+  description = "The value of the AWS tag that will be attached to this HydroServer instance."
+  type        = string
+  default     = ""
+}
+
+locals {
+  tag_value = var.tag_value != "" ? var.tag_value : var.instance
+}
 
 data "aws_caller_identity" "current" {}
