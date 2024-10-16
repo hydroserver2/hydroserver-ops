@@ -138,6 +138,10 @@ resource "aws_cloudfront_distribution" "hydroserver_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
   web_acl_id          = aws_wafv2_web_acl.hydroserver_core_rules.arn
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
 # ------------------------------------------------ #
@@ -158,6 +162,10 @@ resource "aws_cloudfront_function" "hydroserver_frontend_routing" {
   comment = "Preserve Vue client-side routing."
   code    = file("${path.module}/frontend-routing.js")
   publish = true
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
 resource "aws_cloudfront_function" "hydroserver_x_forward_host" {
@@ -166,9 +174,17 @@ resource "aws_cloudfront_function" "hydroserver_x_forward_host" {
   comment = "Include x-forwarded-host in the header."
   code    = file("${path.module}/x-forwarded-host.js")
   publish = true
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
-resource "aws_cloudfront_origin_access_identity" "hydroserver_oai" {}
+resource "aws_cloudfront_origin_access_identity" "hydroserver_oai" {
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
+}
 
 resource "aws_cloudfront_origin_access_control" "hydroserver_oac" {
   name                              = "hydroserver-oac-${var.instance}"
@@ -176,6 +192,10 @@ resource "aws_cloudfront_origin_access_control" "hydroserver_oac" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
 resource "aws_wafv2_web_acl" "hydroserver_core_rules" {
@@ -223,5 +243,9 @@ resource "aws_wafv2_web_acl" "hydroserver_core_rules" {
       metric_name                = "AWS-AWSManagedRulesCommonRuleSet"
       sampled_requests_enabled   = true
     }
+  }
+
+  tags = {
+    (var.tag_key) = local.tag_value
   }
 }
