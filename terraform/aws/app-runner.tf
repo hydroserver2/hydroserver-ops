@@ -10,7 +10,7 @@ resource "aws_ecr_repository" "hydroserver_api_repo" {
   }
 
   tags = {
-    "${local.effective_tag_key}" = var.tag_value
+    (var.tag_key) = local.tag_value
   }
 }
 
@@ -39,6 +39,10 @@ resource "aws_apprunner_service" "hydroserver_api_service" {
   }
 
   auto_deployments_enabled = true
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
 # ------------------------------------------------ #
@@ -60,6 +64,10 @@ resource "aws_iam_role" "apprunner_service_role" {
       }
     ]
   })
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "service_role_policy" {
