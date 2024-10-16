@@ -102,7 +102,7 @@ resource "aws_iam_policy" "apprunner_service_role_policy" {
           "ecr:DescribeRepositories",
           "ecr:GetAuthorizationToken"
         ]
-        Resource = "arn:aws:ecr:${var.region}:${var.account_id}:repository/hydroserver-api-${var.instance}"
+        Resource = "arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/hydroserver-api-${var.instance}"
       }
     ]
   })
