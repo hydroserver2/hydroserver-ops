@@ -139,7 +139,7 @@ resource "aws_s3_bucket_policy" "hydroserver_api_storage_bucket" {
 }
 
 # ------------------------------------------------ #
-# HydroServer S3 API Storage Folders                   #
+# HydroServer S3 API Storage Folders               #
 # ------------------------------------------------ #
 
 resource "aws_s3_object" "media_folder" {
