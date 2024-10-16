@@ -150,18 +150,10 @@ resource "aws_cloudfront_distribution" "hydroserver_distribution" {
 
 data "aws_cloudfront_cache_policy" "cdn_managed_caching_disabled_cache_policy" {
   name = "Managed-CachingDisabled"
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
 }
 
 data "aws_cloudfront_origin_request_policy" "cdn_managed_all_viewer_origin_request_policy" {
   name = "Managed-AllViewer"
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
 }
 
 resource "aws_cloudfront_function" "hydroserver_frontend_routing" {
@@ -170,10 +162,6 @@ resource "aws_cloudfront_function" "hydroserver_frontend_routing" {
   comment = "Preserve Vue client-side routing."
   code    = file("${path.module}/frontend-routing.js")
   publish = true
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
 }
 
 resource "aws_cloudfront_function" "hydroserver_x_forward_host" {
@@ -182,17 +170,9 @@ resource "aws_cloudfront_function" "hydroserver_x_forward_host" {
   comment = "Include x-forwarded-host in the header."
   code    = file("${path.module}/x-forwarded-host.js")
   publish = true
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
 }
 
-resource "aws_cloudfront_origin_access_identity" "hydroserver_oai" {
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
-}
+resource "aws_cloudfront_origin_access_identity" "hydroserver_oai" {}
 
 resource "aws_cloudfront_origin_access_control" "hydroserver_oac" {
   name                              = "hydroserver-oac-${var.instance}"
@@ -200,10 +180,6 @@ resource "aws_cloudfront_origin_access_control" "hydroserver_oac" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
 }
 
 resource "aws_wafv2_web_acl" "hydroserver_core_rules" {
