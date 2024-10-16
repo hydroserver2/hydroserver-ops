@@ -35,34 +35,3 @@ resource "aws_apprunner_service" "hydroserver_api_service" {
 
   auto_deployments_enabled = true
 }
-
-# ------------------------------------------------ #
-# Create a Service Role for App Runner            #
-# ------------------------------------------------ #
-
-resource "aws_iam_role" "apprunner_service_role" {
-  name = "hydroserver-api-service-role-${var.instance}"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "build.apprunner.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "service_role_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/hydroserver-api-service-role-${var.instance}"
-  role       = aws_iam_role.apprunner_service_role.name
-}
-
-resource "aws_iam_role_policy_attachment" "ecr_access_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.apprunner_service_role.name
-}
