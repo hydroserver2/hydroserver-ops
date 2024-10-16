@@ -16,7 +16,7 @@ resource "aws_cloudfront_distribution" "hydroserver_distribution" {
   }
 
   origin {
-    domain_name = aws_apprunner_service.hydroserver_app_runner.service_url
+    domain_name = aws_apprunner_service.hydroserver_api_runner.service_url
     origin_id   = "hydroserver-api"
 
     custom_origin_config {
