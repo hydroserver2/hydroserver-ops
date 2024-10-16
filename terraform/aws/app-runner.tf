@@ -21,7 +21,7 @@ resource "aws_ecr_repository" "hydroserver_api_repo" {
 resource "aws_apprunner_service" "hydroserver_api_service" {
   service_name = "hydroserver-api-${var.instance}"
 
-  service_role = aws_iam_role.apprunner_service_role.arn
+  access_role_arn = aws_iam_role.apprunner_service_role.arn
 
   source_configuration {
     image_repository {
