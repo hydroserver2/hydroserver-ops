@@ -134,7 +134,7 @@ resource "aws_s3_bucket_policy" "hydroserver_api_storage_bucket" {
 
   depends_on = [
     aws_cloudfront_distribution.hydroserver_distribution,
-    aws_s3_bucket_public_access_block.hydroserver_storage_bucket
+    aws_s3_bucket_public_access_block.hydroserver_api_storage_bucket
   ]
 }
 
