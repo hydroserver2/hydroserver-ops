@@ -4,8 +4,13 @@
 
 resource "aws_ecr_repository" "hydroserver_api_repo" {
   name = "hydroserver-api-${var.instance}"
+
   lifecycle {
     prevent_destroy = false
+  }
+
+  tags = {
+    "${local.effective_tag_key}" = var.tag_value
   }
 }
 
