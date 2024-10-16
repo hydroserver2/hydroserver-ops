@@ -6,6 +6,12 @@ on:
       environment:
         description: 'Enter a deployment environment name.'
         required: true
+      environment_tag_key:
+        description: 'Enter a tag key to attach to this environment.'
+        required: false
+      environment_tag_value:
+        description: 'Enter a tag value to attach to this environment.'
+        required: false
 
 permissions:
   id-token: write
@@ -35,11 +41,21 @@ jobs:
         uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="key=state/aws_application_${{ github.event.inputs.environment }}"
+        run: |
+          terraform init \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="region=${{ vars.AWS_REGION }}" \
+          -backend-config="key=state/aws_application_${{ github.event.inputs.environment }}"
   
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}"
+        run: |
+          terraform plan \
+          -no-color \
+          -var "instance=${{ github.event.inputs.environment }}" \
+          -var "region=${{ vars.AWS_REGION }}" \
+          -var "tag_key=${{ github.event.inputs.environment_tag_key || 'HydroServerInstance' }}" \
+          -var "tag_value=${{ github.event.inputs.environment_tag_value || github.event.inputs.environment }}"
         continue-on-error: true
 
       - name: Terraform Plan Status
@@ -47,4 +63,10 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var instance="${{ github.event.inputs.environment }}" -var region="${{ vars.AWS_REGION }}"
+        run: |
+          terraform apply \
+          -auto-approve \
+          -var "instance=${{ github.event.inputs.environment }}" \
+          -var "region=${{ vars.AWS_REGION }}" \
+          -var "tag_key=${{ github.event.inputs.environment_tag_key || 'HydroServerInstance' }}" \
+          -var "tag_value=${{ github.event.inputs.environment_tag_value || github.event.inputs.environment }}"
