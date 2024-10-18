@@ -47,10 +47,11 @@ resource "null_resource" "copy_image_to_ecr" {
 
   provisioner "local-exec" {
     command = <<EOT
+      set -e
       aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.hydroserver_api_repo.repository_url}
-      docker pull ghcr.io/hydroserver2/hydroserver-api-services:${var.hydroserver_version}
+      docker pull ghcr.io/hydroserver2/hydroserver-api-services:${var.hydroserver_version} || { echo "Failed to pull HydroServer image"; exit 1; }
       docker tag ghcr.io/hydroserver2/hydroserver-api-services:${var.hydroserver_version} ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
-      docker push ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
+      docker push ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest || { echo "Failed to push image"; exit 1; }
     EOT
   }
 
