@@ -42,14 +42,14 @@ resource "aws_ecr_repository_policy" "public_policy" {
 
 resource "null_resource" "copy_image_to_ecr" {
   triggers = {
-    image_tag = "ghcr.io/hydroserver2/hydroserver-api-services:${var.version}"
+    image_tag = "ghcr.io/hydroserver2/hydroserver-api-services:${var.hydroserver_version}"
   }
 
   provisioner "local-exec" {
     command = <<EOT
       aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.hydroserver_api_repo.repository_url}
-      docker pull ghcr.io/hydroserver2/hydroserver-api-services:${var.version}
-      docker tag ghcr.io/hydroserver2/hydroserver-api-services:${var.version} ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
+      docker pull ghcr.io/hydroserver2/hydroserver-api-services:${var.hydroserver_version}
+      docker tag ghcr.io/hydroserver2/hydroserver-api-services:${var.hydroserver_version} ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
       docker push ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
     EOT
   }
