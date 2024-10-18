@@ -21,6 +21,11 @@ variable "region" {
   description = "The AWS region this HydroServer instance will be deployed in."
   type        = string
 }
+variable "version" {
+  description = "The version of HydroServer to deploy."
+  type        = string
+  default     = "latest"
+}
 variable "tag_key" {
   description = "The key of the AWS tag that will be attached to this HydroServer instance."
   type        = string
