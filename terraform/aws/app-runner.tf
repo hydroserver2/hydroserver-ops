@@ -9,9 +9,35 @@ resource "aws_ecr_repository" "hydroserver_api_repo" {
     prevent_destroy = false
   }
 
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
   tags = {
     (var.tag_key) = local.tag_value
   }
+}
+
+resource "aws_ecr_repository_policy" "public_policy" {
+  repository = aws_ecr_repository.hydroserver_api_repo.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = "*",
+        Action = "ecr:BatchGetImage",
+        Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Principal = "*",
+        Action = "ecr:GetDownloadUrlForLayer",
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 # ------------------------------------------------ #
