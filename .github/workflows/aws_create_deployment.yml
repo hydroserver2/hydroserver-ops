@@ -5,7 +5,16 @@ on:
     inputs:
       environment:
         description: 'Enter a deployment environment name.'
+        type: environment
         required: true
+
+      name:
+        type: database
+        options: 
+        - PostgreSQL
+        - TimescaleDB
+      initial_setup:
+        type: boolean
       environment_tag_key:
         description: 'Enter a tag key to attach to this environment.'
         required: false
