@@ -21,7 +21,7 @@ variable "region" {
   description = "The AWS region this HydroServer instance will be deployed in."
   type        = string
 }
-variable "version" {
+variable "hydroserver_version" {
   description = "The version of HydroServer to deploy."
   type        = string
   default     = "latest"
