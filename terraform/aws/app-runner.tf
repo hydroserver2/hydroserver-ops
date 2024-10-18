@@ -40,6 +40,23 @@ resource "aws_ecr_repository_policy" "public_policy" {
   })
 }
 
+resource "null_resource" "copy_image_to_ecr" {
+  triggers = {
+    image_tag = "ghcr.io/hydroserver2/hydroserver-api-services:${var.version}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${aws_ecr_repository.hydroserver_api_repo.repository_url}
+      docker pull ghcr.io/hydroserver2/hydroserver-api-services:${var.version}
+      docker tag ghcr.io/hydroserver2/hydroserver-api-services:${var.version} ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
+      docker push ${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest
+    EOT
+  }
+
+  depends_on = [aws_ecr_repository.hydroserver_api_repo]
+}
+
 # ------------------------------------------------ #
 # Create App Runner Service                        #
 # ------------------------------------------------ #
