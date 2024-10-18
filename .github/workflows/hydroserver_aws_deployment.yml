@@ -16,7 +16,7 @@ on:
         - Update HydroServer Deployment
         - Teardown HydroServer Deployment
       release:
-        description: 'Enter the HydroServer release tag to use. Leave blank to use the latest release.' 
+        description: 'Enter the HydroServer release tag to use.' 
         type: string
         required: false
         default: 'latest'
