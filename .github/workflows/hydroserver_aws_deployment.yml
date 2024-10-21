@@ -41,6 +41,33 @@ jobs:
             fi
           done
 
+  setup-hydroserver-vpc:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    defaults:
+      run:
+        working-directory: ./terraform/aws/network
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_IAM_ROLE }}
+          role-session-name: create-hydroserver-resources
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Initialize Terraform
+        run: |
+          terraform init \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="region=${{ vars.AWS_REGION }}" \
+          -backend-config="key=state/hydroserver_network_${{ github.event.inputs.environment }}"
+
   setup-hydroserver-database:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
@@ -66,7 +93,7 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/aws_database_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_database_${{ github.event.inputs.environment }}"
 
   setup-hydroserver-ecr:
     runs-on: ubuntu-latest
@@ -74,7 +101,7 @@ jobs:
     if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' }}
     defaults:
       run:
-        working-directory: ./terraform/aws/services
+        working-directory: ./terraform/aws/app
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v3
@@ -93,7 +120,7 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/aws_application_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
 
   push-hydroserver-api-image:
     runs-on: ubuntu-latest
@@ -113,7 +140,7 @@ jobs:
     if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' }}
     defaults:
       run:
-        working-directory: ./terraform/aws/services
+        working-directory: ./terraform/aws/app
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v3
@@ -132,7 +159,7 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/aws_application_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
 
   deploy-hydroserver-api:
     runs-on: ubuntu-latest
@@ -164,7 +191,7 @@ jobs:
     if: ${{ github.event.inputs.action == 'Teardown HydroServer Deployment' }}
     defaults:
       run:
-        working-directory: ./terraform/aws/services
+        working-directory: ./terraform/aws/app
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v3
@@ -183,7 +210,7 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/aws_application_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
