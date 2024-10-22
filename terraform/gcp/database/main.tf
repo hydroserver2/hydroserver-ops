@@ -38,7 +38,7 @@ variable "hydroserver_version" {
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
   type        = string
-  default     = "HydroServerInstance"
+  default     = "hydroserver-instance"
 }
 variable "label_value" {
   description = "The value of the GCP label that will be attached to this HydroServer instance."
