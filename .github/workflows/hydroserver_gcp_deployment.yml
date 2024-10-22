@@ -1,0 +1,155 @@
+name: HydroServer GCP Cloud Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Enter a deployment environment to use.'
+        type: environment
+        required: true
+      action:
+        description: 'Enter the action you want to perform.'
+        type: choice
+        required: true
+        options:
+        - Initialize HydroServer Deployment
+        - Update HydroServer Deployment
+        - Teardown HydroServer Deployment
+      release:
+        description: 'Enter the HydroServer release tag to use.' 
+        type: string
+        required: false
+        default: 'latest'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  check-environment-variables:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Check Required Environment Variables
+        run: |
+          echo "Checking required environment variables..."
+          required_vars=(GCP_REGION GCP_PROJECT_ID GCP_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT TERRAFORM_BUCKET)
+          for var in "${required_vars[@]}"; do
+            if [ -z "${!var}" ]; then
+              echo "Error: Environment variable $var is not defined."
+              exit 1
+            fi
+          done
+
+  setup-hydroserver-database:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ (vars.DATABASE_URL == '' || vars.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    defaults:
+      run:
+        working-directory: ./terraform/gcp/database
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: |
+          terraform init \
+          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="prefix=state/gcp_application_${{ github.event.inputs.environment }}"
+
+  setup-hydroserver-services:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    defaults:
+      run:
+        working-directory: ./terraform/gcp/app
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: |
+          terraform init \
+          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="prefix=state/gcp_application_${{ github.event.inputs.environment }}"
+
+  deploy-hydroserver-api:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment' }}
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+  deploy-hydroserver-data-mgmt-app:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment' }}
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+  teardown-hydroserver-services:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.action == 'Teardown HydroServer Deployment' }}
+    defaults:
+      run:
+        working-directory: ./terraform/gcp/app
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: |
+          terraform init \
+          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="prefix=state/gcp_application_${{ github.event.inputs.environment }}"
