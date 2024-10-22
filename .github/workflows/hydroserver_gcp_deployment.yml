@@ -42,9 +42,10 @@ jobs:
           done
 
   setup-hydroserver-database:
+    needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: ${{ (vars.DATABASE_URL == '' || vars.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    if: (vars.DATABASE_URL == '' || vars.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/database
@@ -69,9 +70,10 @@ jobs:
           -backend-config="prefix=state/gcp_application_${{ github.event.inputs.environment }}"
 
   setup-hydroserver-services:
+    needs: setup-hydroserver-database
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    if: success() && github.event.inputs.action == 'Initialize HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/app
@@ -96,9 +98,10 @@ jobs:
           -backend-config="prefix=state/gcp_application_${{ github.event.inputs.environment }}"
 
   deploy-hydroserver-api:
+    needs: setup-hydroserver-services
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment' }}
+    if: success() && (github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment')
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -112,9 +115,10 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   deploy-hydroserver-data-mgmt-app:
+    needs: setup-hydroserver-services
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: ${{ github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment' }}
+    if: success() && (github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment')
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -128,9 +132,10 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   teardown-hydroserver-services:
+    needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: ${{ github.event.inputs.action == 'Teardown HydroServer Deployment' }}
+    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/app
