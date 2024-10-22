@@ -32,7 +32,7 @@ resource "random_password" "hydroserver_db_user_password" {
 
 resource "google_sql_user" "hydroserver_db_user" {
   name     = "hsdbadmin"
-  instance = google_sql_database_instance.default.name
+  instance = google_sql_database_instance.hydroserver_db_instance.name
   password = random_password.hydroserver_db_user_password.result
 }
 
