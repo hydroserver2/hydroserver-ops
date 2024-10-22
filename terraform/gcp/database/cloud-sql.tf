@@ -13,5 +13,8 @@ resource "google_sql_database_instance" "default" {
       name  = "max_connections"
       value = "100"
     }
+    user_labels = {
+      (var.label_key) = local.label_value
+    }
   }
 }
