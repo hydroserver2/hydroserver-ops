@@ -50,4 +50,7 @@ locals {
   label_value = var.label_value != "" ? var.label_value : var.instance
 }
 
+data "google_project" "gcp_project" {
+  project_id = var.project_id
+}
 data "google_client_config" "current" {}
