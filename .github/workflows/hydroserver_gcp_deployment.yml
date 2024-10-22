@@ -29,6 +29,12 @@ jobs:
   check-environment-variables:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    env:
+      GCP_REGION: ${{ secrets.GCP_REGION }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_IDENTITY_PROVIDER: ${{ secrets.GCP_IDENTITY_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      TERRAFORM_BUCKET: ${{ secrets.TERRAFORM_BUCKET }}
     steps:
       - name: Check Required Environment Variables
         run: |
