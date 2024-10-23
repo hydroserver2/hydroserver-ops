@@ -85,45 +85,23 @@ jobs:
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
           -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
           -var "hydroserver_version=${{ github.events.inputs.release }}" \
-          -var "state_bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
-      # - name: Terraform Apply
-      #  run: |
-      #     terraform apply \
-      #     -auto-approve -input=false \
-      #     -var instance="${{ github.event.inputs.environment }}" \
-      #     -var region="${{ vars.GCP_REGION }}" \
-      #     -var project_id="${{ vars.GCP_PROJECT_ID }}" \
-      #     -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
-      #     -var "hydroserver_version=${{ github.events.inputs.release }}" \
-      #     -var "state_bucket=${{ vars.TERRAFORM_BUCKET }}" \
-      #     -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-      #     -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-      - name: Get Database Connection URL
-        id: db_output
+      - name: Terraform Apply
         run: |
-          DB_URL=http://www.example.com
-          echo "DB_URL=$DB_URL" >> $GITHUB_ENV
-        # run: |
-        #   DB_URL=$(terraform output -raw hydroserver_db_connection_url)
-        #   echo "DB_URL=$DB_URL" >> $GITHUB_ENV
-      - name: Set Database Connection URL as Environment Secret
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DB_URL: ${{ env.DB_URL }}
-        run: |
-          echo "Setting secret for DATABASE_URL"
-          gh api \
-            --method PUT \
-            -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository }}/environments/${{ github.event.inputs.environment }}/secrets/DATABASE_URL \
-            -f encrypted_value="$(echo -n $DB_URL | base64)" \
-            -f key="DATABASE_URL"
+          terraform apply \
+          -auto-approve -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.GCP_REGION }}" \
+          -var project_id="${{ vars.GCP_PROJECT_ID }}" \
+          -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
+          -var "hydroserver_version=${{ github.events.inputs.release }}" \
+          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
+          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   setup-hydroserver-services:
     needs: setup-hydroserver-database
