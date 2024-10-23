@@ -111,14 +111,23 @@ jobs:
         # run: |
         #   DB_URL=$(terraform output -raw hydroserver_db_connection_url)
         #   echo "DB_URL=$DB_URL" >> $GITHUB_ENV
-      - name: Set Database Connection URL as Environment Secret
+      - name: Get Database Connection URL
+        id: db_output
         run: |
+          DB_URL=$(terraform output -raw hydroserver_db_connection_url)
+          echo "DB_URL=$DB_URL" >> $GITHUB_ENV
+      - name: Set Database Connection URL as Environment Secret
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DB_URL: ${{ env.DB_URL }}
+        run: |
+          echo "Setting secret for DATABASE_URL"
           gh api \
-          --method PUT \
-          -H "Accept: application/vnd.github+json" \
-          /repos/${{ github.repository }}/environments/${{ github.event.inputs.environment }}/secrets/DATABASE_URL \
-          -f encrypted_value="$(echo -n $DB_URL | base64)" \
-          -f key="DATABASE_URL"
+            --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/environments/${{ github.event.inputs.environment }}/secrets/DATABASE_URL \
+            -f encrypted_value="$(echo -n $DB_URL | base64)" \
+            -f key="DATABASE_URL"
 
   setup-hydroserver-services:
     needs: setup-hydroserver-database
