@@ -35,6 +35,10 @@ variable "hydroserver_version" {
   type        = string
   default     = "latest"
 }
+variable "state_bucket" {
+  description = "The bucket used to store HydroServer's Terrform state."
+  type        = string
+}
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
   type        = string
