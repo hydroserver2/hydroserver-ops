@@ -22,8 +22,9 @@ on:
         default: 'latest'
 
 permissions:
+  contents: write
   id-token: write
-  contents: read
+  actions: write
 
 jobs:
   check-environment-variables:
