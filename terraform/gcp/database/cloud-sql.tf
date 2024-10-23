@@ -36,7 +36,25 @@ resource "google_sql_user" "hydroserver_db_user" {
   password = random_password.hydroserver_db_user_password.result
 }
 
+locals {
+  hydroserver_db_connection_url = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.connection_name}/${google_sql_database.hydroserver_db.name}"
+}
+
+resource "google_storage_bucket_object" "hydroserver_db_connection_file" {
+  name   = "credentials/${var.instance}/postgresql-connection.txt"
+  bucket = var.terraform_bucket
+  content = <<EOT
+# Database connection details for HydroServer instance: ${var.instance}
+Database Name: ${google_sql_database.hydroserver_db.name}
+Username: ${google_sql_user.hydroserver_db_user.name}
+Password: ${google_sql_user.hydroserver_db_user.password}
+Host: ${google_sql_database_instance.hydroserver_db_instance.connection_name}
+Port: 5432
+Connection URL: ${local.hydroserver_db_connection_url}
+EOT
+}
+
 output "hydroserver_db_connection_url" {
-  value     = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.connection_name}/${google_sql_database.hydroserver_db.name}"
+  value     = local.hydroserver_db_connection_url
   sensitive = true
 }
