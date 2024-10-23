@@ -37,7 +37,7 @@ resource "google_sql_user" "hydroserver_db_user" {
 }
 
 locals {
-  hydroserver_db_connection_url = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.connection_name}/${google_sql_database.hydroserver_db.name}"
+  hydroserver_db_connection_url = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.ip_address[0].ip_address}/${google_sql_database.hydroserver_db.name}"
 }
 
 resource "google_storage_bucket_object" "hydroserver_db_connection_file" {
@@ -48,7 +48,7 @@ resource "google_storage_bucket_object" "hydroserver_db_connection_file" {
 Database Name: ${google_sql_database.hydroserver_db.name}
 Username: ${google_sql_user.hydroserver_db_user.name}
 Password: ${google_sql_user.hydroserver_db_user.password}
-Host: ${google_sql_database_instance.hydroserver_db_instance.connection_name}
+Host: ${google_sql_database_instance.hydroserver_db_instance.ip_address[0].ip_address}
 Port: 5432
 Connection URL: ${local.hydroserver_db_connection_url}
 EOT
