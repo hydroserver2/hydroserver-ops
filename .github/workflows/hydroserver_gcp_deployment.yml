@@ -117,7 +117,7 @@ jobs:
           --method PUT \
           -H "Accept: application/vnd.github+json" \
           /repos/${{ github.repository }}/environments/${{ github.event.inputs.environment }}/secrets/DATABASE_URL \
-          -f encrypted_value="$(echo -n $DB_URL | gh secret encrypt)" \
+          -f encrypted_value="$(echo -n $DB_URL | base64)" \
           -f key="DATABASE_URL"
 
   setup-hydroserver-services:
