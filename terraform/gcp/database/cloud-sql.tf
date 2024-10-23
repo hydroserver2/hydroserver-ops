@@ -42,7 +42,7 @@ locals {
 
 resource "google_storage_bucket_object" "hydroserver_db_connection_file" {
   name   = "credentials/${var.instance}/postgresql-connection.txt"
-  bucket = var.terraform_bucket
+  bucket = var.state_bucket
   content = <<EOT
 # Database connection details for HydroServer instance: ${var.instance}
 Database Name: ${google_sql_database.hydroserver_db.name}
