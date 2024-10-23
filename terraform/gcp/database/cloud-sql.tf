@@ -30,15 +30,16 @@ resource "random_password" "hydroserver_db_user_password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource "google_secret_manager_secret" "hydroserver_secret_key_secret" {
+resource "google_secret_manager_regional_secret" "hydroserver_secret_key" {
   secret_id = "hydroserver-secret-key-${var.instance}"
+  location  = var.region
   replication {
-    automatic = true
+    automatic {}
   }
 }
 
 resource "google_secret_manager_secret_version" "hydroserver_secret_key_secret_version" {
-  secret      = google_secret_manager_secret.hydroserver_secret_key_secret.id
+  secret      = google_secret_manager_regional_secret.hydroserver_secret_key.id
   secret_data = random_password.hydroserver_db_user_password.result
 }
 
