@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     if: github.event.inputs.action == 'Initialize HydroServer Deployment'
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     defaults:
       run:
         working-directory: ./terraform/gcp/database
@@ -77,7 +79,7 @@ jobs:
           -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
       - name: Terraform Plan (Managed Database)
         id: full-plan
-        if: ${{ secrets.DATABASE_URL == '' }} || ${{ secrets.DATABASE_URL == null }}
+        if: ${{ env.DATABASE_URL == '' || env.DATABASE_URL == null }}
         run: |
           terraform plan \
           -no-color -input=false \
@@ -89,10 +91,10 @@ jobs:
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
       - name: Terraform Plan Status (Managed Database)
-        if: ${{ (secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null) && steps.full-plan.outcome == 'failure' }}
+        if: ${{ (env.DATABASE_URL == '' || env.DATABASE_URL == null) && steps.full-plan.outcome == 'failure' }}
         run: exit 1
       - name: Terraform Apply (Managed Database)
-        if: ${{ secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null }}
+        if: ${{ env.DATABASE_URL == '' || env.DATABASE_URL == null }}
         run: |
           terraform apply \
           -auto-approve -input=false \
@@ -104,7 +106,7 @@ jobs:
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
       - name: Terraform Plan (Existing Database)
         id: target-plan
-        if: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null }}
+        if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null }}
         run: |
           terraform plan \
           -no-color -input=false \
@@ -118,10 +120,10 @@ jobs:
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
       - name: Terraform Plan Status (Existing Database)
-        if: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null && steps.target-plan.outcome == 'failure' }}
+        if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null && steps.target-plan.outcome == 'failure' }}
         run: exit 1
       - name: Terraform Apply (Existing Database)
-        if: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null }}
+        if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null }}
         run: |
           terraform apply \
           -auto-approve -input=false \
