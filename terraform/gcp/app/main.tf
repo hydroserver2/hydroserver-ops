@@ -22,6 +22,10 @@ variable "project_id" {
   description = "The project ID for this HydroServer instance."
   type        = string
 }
+variable "vpc_name" {
+  description = "The VPC that this HydroServer instance will run in."
+  type        = string
+}
 variable "region" {
   description = "The AWS region this HydroServer instance will be deployed in."
   type        = string
@@ -34,7 +38,7 @@ variable "hydroserver_version" {
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
   type        = string
-  default     = "HydroServerInstance"
+  default     = "hydroserver-instance"
 }
 variable "label_value" {
   description = "The value of the GCP label that will be attached to this HydroServer instance."
@@ -46,4 +50,7 @@ locals {
   label_value = var.label_value != "" ? var.label_value : var.instance
 }
 
+data "google_project" "gcp_project" {
+  project_id = var.project_id
+}
 data "google_client_config" "current" {}
