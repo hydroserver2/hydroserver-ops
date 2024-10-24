@@ -18,6 +18,10 @@ variable "instance" {
   description = "The name of this HydroServer instance."
   type        = string
 }
+variable "project_id" {
+  description = "The project ID for this HydroServer instance."
+  type        = string
+}
 variable "region" {
   description = "The GCP region this HydroServer instance will be deployed in."
   type        = string
