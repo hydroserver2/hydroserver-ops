@@ -77,7 +77,7 @@ jobs:
           -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
       - name: Terraform Plan (Managed Database)
         id: full-plan
-        if: ${{ secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null }}
+        if: ${{ secrets.DATABASE_URL == '' }} || ${{ secrets.DATABASE_URL == null }}
         run: |
           terraform plan \
           -no-color -input=false \
