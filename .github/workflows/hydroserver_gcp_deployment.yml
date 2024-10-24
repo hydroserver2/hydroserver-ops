@@ -150,6 +150,7 @@ jobs:
           -no-color -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
+          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
           -var "database_url=${{ secrets.DATABASE_URL }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
@@ -163,15 +164,16 @@ jobs:
           -auto-approve -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
+          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
           -var "database_url=${{ secrets.DATABASE_URL }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   setup-hydroserver-services:
-    needs: setup-hydroserver-database
+    needs: [link-hydroserver-database, setup-hydroserver-database]
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: success() && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    if: (needs.link-hydroserver-database.result == 'success' || needs.setup-hydroserver-database.result == 'success') && github.event.inputs.action == 'Initialize HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/app
