@@ -54,7 +54,7 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-    if: (env.DATABASE_URL == '' || env.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    if: ${{ (env.DATABASE_URL == '' || env.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
     defaults:
       run:
         working-directory: ./terraform/gcp/database
@@ -109,7 +109,7 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-    if: env.DATABASE_URL != '' && env.DATABASE_URL != null && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
     defaults:
       run:
         working-directory: ./terraform/gcp/database/connection
