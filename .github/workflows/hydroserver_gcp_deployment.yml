@@ -77,7 +77,7 @@ jobs:
           -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
       - name: Terraform Plan (Managed Database)
         id: full-plan
-        if: secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null
+        if: ${{ secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null }}
         run: |
           terraform plan \
           -no-color -input=false \
@@ -89,10 +89,10 @@ jobs:
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
       - name: Terraform Plan Status (Managed Database)
-        if: (secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null) && steps.full-plan.outcome == 'failure'
+        if: ${{ (secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null) && steps.full-plan.outcome == 'failure' }}
         run: exit 1
       - name: Terraform Apply (Managed Database)
-        if: secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null
+        if: ${{ secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null }}
         run: |
           terraform apply \
           -auto-approve -input=false \
@@ -104,7 +104,7 @@ jobs:
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
       - name: Terraform Plan (Existing Database)
         id: target-plan
-        if: secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null
+        if: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null }}
         run: |
           terraform plan \
           -no-color -input=false \
@@ -118,10 +118,10 @@ jobs:
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
       - name: Terraform Plan Status (Existing Database)
-        if: secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null && steps.target-plan.outcome == 'failure'
+        if: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null && steps.target-plan.outcome == 'failure' }}
         run: exit 1
       - name: Terraform Apply (Existing Database)
-        if: secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null
+        if: ${{ secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null }}
         run: |
           terraform apply \
           -auto-approve -input=false \
