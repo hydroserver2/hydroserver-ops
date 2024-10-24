@@ -198,10 +198,10 @@ jobs:
           -backend-config="prefix=state/hydroserver_application_${{ github.event.inputs.environment }}"
 
   deploy-hydroserver-api:
-    needs: setup-hydroserver-services
+    needs: [check-environment-variables, setup-hydroserver-services]
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: always() && needs.setup-hydroserver-services.result == 'success' && (github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment')
+    if: always() && ((github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.setup-hydroserver-services.result == 'success') || (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success'))
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -215,10 +215,10 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   deploy-hydroserver-data-mgmt-app:
-    needs: setup-hydroserver-services
+    needs: [check-environment-variables, setup-hydroserver-services]
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: always() && needs.setup-hydroserver-services.result == 'success' && (github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment')
+    if: always() && ((github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.setup-hydroserver-services.result == 'success') || (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success'))
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
