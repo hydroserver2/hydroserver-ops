@@ -111,7 +111,7 @@ jobs:
           terraform plan \
           -no-color -input=false \
           -target google_secret_manager_secret.hydroserver_db_connection \
-          -target google_secret_manager_secret_version.hydroserver_secret_key_secret_version \
+          -target google_secret_manager_secret_version.hydroserver_db_connection_version \
           -var instance="${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
@@ -128,7 +128,7 @@ jobs:
           terraform apply \
           -auto-approve -input=false \
           -target google_secret_manager_secret.hydroserver_db_connection \
-          -target google_secret_manager_secret_version.hydroserver_secret_key_secret_version \
+          -target google_secret_manager_secret_version.hydroserver_db_connection_version \
           -var instance="${{ github.event.inputs.environment }}" \
           -var region="${{ vars.GCP_REGION }}" \
           -var project_id="${{ vars.GCP_PROJECT_ID }}" \
