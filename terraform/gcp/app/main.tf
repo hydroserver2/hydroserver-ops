@@ -27,7 +27,7 @@ variable "vpc_name" {
   type        = string
 }
 variable "region" {
-  description = "The AWS region this HydroServer instance will be deployed in."
+  description = "The GCP region this HydroServer instance will be deployed in."
   type        = string
 }
 variable "hydroserver_version" {
