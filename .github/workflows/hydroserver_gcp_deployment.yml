@@ -52,9 +52,9 @@ jobs:
     needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: github.event.inputs.action == 'Initialize HydroServer Deployment'
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    if: (env.DATABASE_URL == '' || env.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/database
@@ -78,62 +78,80 @@ jobs:
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
       - name: Terraform Plan (Managed Database)
-        id: full-plan
-        if: ${{ env.DATABASE_URL == '' || env.DATABASE_URL == null }}
+        id: plan
         run: |
           terraform plan \
           -no-color -input=false \
-          -var instance="${{ github.event.inputs.environment }}" \
+          -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
           -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
-      - name: Terraform Plan Status (Managed Database)
-        if: ${{ (env.DATABASE_URL == '' || env.DATABASE_URL == null) && steps.full-plan.outcome == 'failure' }}
-        run: exit 1
-      - name: Terraform Apply (Managed Database)
-        if: ${{ env.DATABASE_URL == '' || env.DATABASE_URL == null }}
+      # - name: Terraform Plan Status
+      #   if: ${{ (env.DATABASE_URL == '' || env.DATABASE_URL == null) && steps.plan.outcome == 'failure' }}
+      #   run: exit 1
+      # - name: Terraform Apply
+      #   run: |
+      #     terraform apply \
+      #     -auto-approve -input=false \
+      #     -var "instance=${{ github.event.inputs.environment }}" \
+      #     -var "region=${{ vars.GCP_REGION }}" \
+      #     -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+      #     -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
+      #     -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
+      #     -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
+
+  link-hydroserver-database:
+    needs: check-environment-variables
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    if: env.DATABASE_URL != '' && env.DATABASE_URL != null && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    defaults:
+      run:
+        working-directory: ./terraform/gcp/database/connection
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
         run: |
-          terraform apply \
-          -auto-approve -input=false \
-          -var instance="${{ github.event.inputs.environment }}" \
-          -var region="${{ vars.GCP_REGION }}" \
-          -var project_id="${{ vars.GCP_PROJECT_ID }}" \
-          -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-      - name: Terraform Plan (Existing Database)
-        id: target-plan
-        if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null }}
+          terraform init \
+          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
+      - name: Terraform Plan
+        id: plan
         run: |
           terraform plan \
           -no-color -input=false \
-          -target google_secret_manager_secret.hydroserver_db_connection \
-          -target google_secret_manager_secret_version.hydroserver_db_connection_version \
-          -var instance="${{ github.event.inputs.environment }}" \
+          -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
-          -var "database_url=${{ secrets.DATABASE_URL }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-      - name: Terraform Plan Status (Existing Database)
-        if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null && steps.target-plan.outcome == 'failure' }}
+        continue-on-error: true
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
         run: exit 1
-      - name: Terraform Apply (Existing Database)
-        if: ${{ env.DATABASE_URL != '' && env.DATABASE_URL != null }}
+      - name: Terraform Apply
         run: |
           terraform apply \
           -auto-approve -input=false \
-          -target google_secret_manager_secret.hydroserver_db_connection \
-          -target google_secret_manager_secret_version.hydroserver_db_connection_version \
-          -var instance="${{ github.event.inputs.environment }}" \
-          -var region="${{ vars.GCP_REGION }}" \
-          -var project_id="${{ vars.GCP_PROJECT_ID }}" \
-          -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
-          -var "database_url=${{ secrets.DATABASE_URL }}" \
+          -var "instance=${{ github.event.inputs.environment }}" \
+          -var "region=${{ vars.GCP_REGION }}" \
+          -var "database_url="${{ env.DATABASE_URL }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
