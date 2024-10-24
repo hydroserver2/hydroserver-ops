@@ -48,7 +48,7 @@ locals {
 data "google_client_config" "current" {}
 
 resource "google_secret_manager_secret" "hydroserver_db_connection" {
-  secret_id = "hydroserver-db-connection-${var.instance1}"
+  secret_id = "hydroserver-db-connection-${var.instance}"
   labels = {
     "${var.label_key}" = local.label_value
   }
