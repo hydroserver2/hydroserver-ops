@@ -88,7 +88,7 @@ jobs:
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
-      - name: Terraform Plan (Managed Database)
+      - name: Terraform Plan
         id: plan
         run: |
           terraform plan \
@@ -100,19 +100,19 @@ jobs:
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
-      # - name: Terraform Plan Status
-      #   if: ${{ (env.DATABASE_URL == '' || env.DATABASE_URL == null) && steps.plan.outcome == 'failure' }}
-      #   run: exit 1
-      # - name: Terraform Apply
-      #   run: |
-      #     terraform apply \
-      #     -auto-approve -input=false \
-      #     -var "instance=${{ github.event.inputs.environment }}" \
-      #     -var "region=${{ vars.GCP_REGION }}" \
-      #     -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-      #     -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
-      #     -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-      #     -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Apply
+        run: |
+          terraform apply \
+          -auto-approve -input=false \
+          -var "instance=${{ github.event.inputs.environment }}" \
+          -var "region=${{ vars.GCP_REGION }}" \
+          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var "vpc_name=${{ vars.GCP_VPC_NAME || format('projects/{}/global/networks/default', vars.GCP_PROJECT_ID) }}" \
+          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
+          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   link-hydroserver-database:
     needs: check-environment-variables
