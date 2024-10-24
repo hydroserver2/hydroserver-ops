@@ -52,6 +52,6 @@ resource "google_secret_manager_secret" "hydroserver_db_connection" {
 }
 
 resource "google_secret_manager_secret_version" "hydroserver_secret_key_secret_version" {
-  secret      = google_secret_manager_secret.hydroserver_secret_key.id
+  secret      = google_secret_manager_secret.hydroserver_db_connection.id
   secret_data = var.database_url != "" ? var.database_url : local.db_connection_url
 }
