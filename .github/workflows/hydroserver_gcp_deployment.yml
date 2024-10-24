@@ -116,7 +116,7 @@ jobs:
 
   link-hydroserver-database:
     needs: check-environment-variables
-    if: needs.check-environment-variables.outputs.database_url_exists == 'true' && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    if: needs.check-environment-variables.outputs.database_url_exists == 'true' && github.event.inputs.action == 'Initialize HydroServer Deployment'
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     env: 
