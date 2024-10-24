@@ -50,9 +50,11 @@ jobs:
 
   setup-hydroserver-database:
     needs: check-environment-variables
-    if: (secrets.DATABASE_URL == '' || secrets.DATABASE_URL == null) && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    if: (env.database_url == '' || env.database_url == null) && github.event.inputs.action == 'Initialize HydroServer Deployment'
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    env: 
+      database_url: ${{ secrets.DATABASE_URL }}
     defaults:
       run:
         working-directory: ./terraform/gcp/database
@@ -103,9 +105,11 @@ jobs:
 
   link-hydroserver-database:
     needs: check-environment-variables
-    if: secrets.DATABASE_URL != '' && secrets.DATABASE_URL != null && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
+    if: env.database_url != '' && env.database_url != null && github.event.inputs.action == 'Initialize HydroServer Deployment' }}
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
+    env: 
+      database_url: ${{ secrets.DATABASE_URL }}
     defaults:
       run:
         working-directory: ./terraform/gcp/database/connection
@@ -135,7 +139,7 @@ jobs:
           -no-color -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
-          -var "database_url="${{ secrets.DATABASE_URL }}" \
+          -var "database_url="${{ env.database_url }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
@@ -148,7 +152,7 @@ jobs:
           -auto-approve -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
-          -var "database_url="${{ secrets.DATABASE_URL }}" \
+          -var "database_url="${{ env.database_url }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
