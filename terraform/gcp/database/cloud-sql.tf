@@ -36,10 +36,6 @@ resource "google_sql_user" "hydroserver_db_user" {
   password = random_password.hydroserver_db_user_password.result
 }
 
-locals {
-  db_connection_url = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.ip_address[0].ip_address}/${google_sql_database.hydroserver_db.name}"
-}
-
 resource "google_secret_manager_secret" "hydroserver_db_connection" {
   secret_id = "hydroserver-db-connection-${var.instance}"
   replication {
@@ -53,5 +49,5 @@ resource "google_secret_manager_secret" "hydroserver_db_connection" {
 
 resource "google_secret_manager_secret_version" "hydroserver_db_connection_version" {
   secret      = google_secret_manager_secret.hydroserver_db_connection.id
-  secret_data = var.database_url != "" ? var.database_url : local.db_connection_url
+  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.ip_address[0].ip_address}/${google_sql_database.hydroserver_db.name}"
 }
