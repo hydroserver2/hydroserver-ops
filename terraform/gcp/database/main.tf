@@ -30,10 +30,9 @@ variable "region" {
   description = "The AWS region this HydroServer instance will be deployed in."
   type        = string
 }
-variable "hydroserver_version" {
-  description = "The version of HydroServer to deploy."
-  type        = string
-  default     = "latest"
+variable "database_url" {
+  type    = string
+  default = ""
 }
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
