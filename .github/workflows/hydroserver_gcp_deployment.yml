@@ -285,3 +285,22 @@ jobs:
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="prefix=state/hydroserver_application_${{ github.event.inputs.environment }}"
+      - name: Terraform Plan Destroy
+        id: plan_destroy
+        run: |
+          terraform plan -destroy -no-color -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var "vpc_name=default" \
+          -var region="${{ vars.GCP_REGION }}" \
+          -var project_id="${{ vars.GCP_PROJECT_ID }}"
+        continue-on-error: true
+      - name: Terraform Plan Destroy Status
+        if: steps.plan_destroy.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -auto-approve -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var "vpc_name=default" \
+          -var region="${{ vars.GCP_REGION }}" \
+          -var project_id="${{ vars.GCP_PROJECT_ID }}"
