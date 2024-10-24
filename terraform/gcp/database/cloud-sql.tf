@@ -26,8 +26,7 @@ resource "google_sql_database" "hydroserver_db" {
 
 resource "random_password" "hydroserver_db_user_password" {
   length  = 16
-  special = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special = false
 }
 
 resource "google_sql_user" "hydroserver_db_user" {
