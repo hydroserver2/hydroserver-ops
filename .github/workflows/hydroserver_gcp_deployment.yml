@@ -173,7 +173,7 @@ jobs:
     needs: [link-hydroserver-database, setup-hydroserver-database]
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: (needs.link-hydroserver-database.result == 'success' || needs.setup-hydroserver-database.result == 'success') && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    if: always() && (needs.link-hydroserver-database.result == 'success' || needs.setup-hydroserver-database.result == 'success') && github.event.inputs.action == 'Initialize HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/app
