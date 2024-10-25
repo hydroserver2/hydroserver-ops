@@ -9,14 +9,17 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
   template {
     containers {
       image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
+
       resources {
         limits = {
           memory = "512Mi"
         }
       }
+
       ports {
         container_port = 8000
       }
+
       env {
         name  = "DATABASE_URL"
         value_source {
@@ -26,6 +29,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
           }
         }
       }
+
       env {
         name  = "SECRET_KEY"
         value_source {
@@ -36,18 +40,21 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
         }
       }
     }
+
     service_account = google_service_account.cloud_run_service_account.email
+
     vpc_access{
-      connector = google_vpc_access_connector.hydroserver_vpc_connector.id
+      connector = "hydroserver-${var.instance}"
       egress = "ALL_TRAFFIC"
     }
+
     labels = {
       "${var.label_key}" = local.label_value
     }
   }
 
   traffic {
-    percent         = 100
+    percent = 100
   }
 }
 
