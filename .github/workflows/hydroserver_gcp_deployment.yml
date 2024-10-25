@@ -205,7 +205,6 @@ jobs:
         run: |
           terraform plan \
           -no-color -input=false \
-          -target=google_artifact_registry_repository.hydroserver_api_repository \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "vpc_name=default" \
@@ -240,6 +239,16 @@ jobs:
       - name: Push image to Google Artifact Registry
         run: |
           docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
+      - name: Terraform Apply
+        run: |
+          terraform apply \
+          -auto-approve -input=false \
+          -var "instance=${{ github.event.inputs.environment }}" \
+          -var "region=${{ vars.GCP_REGION }}" \
+          -var "vpc_name=default" \
+          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
+          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   deploy-hydroserver-api:
     needs: [check-environment-variables, setup-hydroserver-services]
