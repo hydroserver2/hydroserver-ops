@@ -12,8 +12,8 @@ resource "google_artifact_registry_repository" "hydroserver_api_repository" {
   lifecycle {
     prevent_destroy = false
     ignore_changes = [
-      "storage",
-      "labels"
+      storage,
+      labels
     ]
   }
 }
