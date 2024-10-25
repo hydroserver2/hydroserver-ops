@@ -38,7 +38,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
     }
     service_account = google_service_account.cloud_run_service_account.email
     vpc_access{
-      connector = var.vpc_name
+      connector = google_vpc_access_connector.hydroserver_vpc_connector.id
       egress = "ALL_TRAFFIC"
     }
     labels = {
