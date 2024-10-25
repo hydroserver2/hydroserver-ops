@@ -54,19 +54,3 @@ data "google_project" "gcp_project" {
   project_id = var.project_id
 }
 data "google_client_config" "current" {}
-
-
-
-
-resource "google_storage_bucket" "target_bucket" {
-  name     = "hydroserver-target-${var.instance}"
-  location = var.region
-}
-
-
-resource "google_storage_bucket" "general_bucket" {
-  name     = "hydroserver-general-${var.instance}"
-  location = var.region
-}
-
-
