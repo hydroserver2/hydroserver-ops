@@ -1,3 +1,7 @@
+# -------------------------------------------------- #
+# HydroServer GCP Artifact Registry                  #
+# -------------------------------------------------- #
+
 resource "google_artifact_registry_repository" "hydroserver_api_repository" {
   provider  = google
   project   = data.google_project.gcp_project.project_id
