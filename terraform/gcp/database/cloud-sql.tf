@@ -1,3 +1,7 @@
+# -------------------------------------------------- #
+# HydroServer GCP Cloud SQL Database                 #
+# -------------------------------------------------- #
+
 resource "google_sql_database_instance" "hydroserver_db_instance" {
   name             = "hydroserver-${var.instance}"
   database_version = "POSTGRES_15"
@@ -34,6 +38,10 @@ resource "google_sql_user" "hydroserver_db_user" {
   instance = google_sql_database_instance.hydroserver_db_instance.name
   password = random_password.hydroserver_db_user_password.result
 }
+
+# -------------------------------------------------- #
+# HydroServer GCP Cloud SQL Database Connection      #
+# -------------------------------------------------- #
 
 resource "google_secret_manager_secret" "hydroserver_db_connection" {
   secret_id = "hydroserver-db-connection-${var.instance}"
