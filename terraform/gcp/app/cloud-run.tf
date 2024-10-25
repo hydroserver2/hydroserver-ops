@@ -19,7 +19,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
       }
       env {
         name  = "DATABASE_URL"
-        value_from {
+        value_source {
           secret_key_ref {
             name = "hydroserver-db-connection-${var.instance}"
             key  = "latest"
@@ -28,7 +28,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
       }
       env {
         name  = "SECRET_KEY"
-        value_from {
+        value_source {
           secret_key_ref {
             name = "hydroserver-secret-key-${var.instance}"
             key  = "latest"
@@ -48,7 +48,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 
   traffic {
     percent         = 100
-    latest_revision = true
   }
 }
 
