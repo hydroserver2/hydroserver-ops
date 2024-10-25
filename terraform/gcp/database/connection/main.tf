@@ -65,3 +65,28 @@ resource "google_secret_manager_secret_version" "hydroserver_db_connection_versi
   secret      = google_secret_manager_secret.hydroserver_db_connection.id
   secret_data = var.database_url
 }
+
+resource "random_password" "hydroserver_api_secret_key" {
+  length           = 50
+  special          = true
+  upper            = true
+  lower            = true
+  number           = true
+  override_special = "!@#$%^&*()-_=+{}[]|:;\"'<>,.?/"
+}
+
+resource "google_secret_manager_secret" "hydroserver_api_secret_key" {
+  secret_id = "hydroserver-api-secret-key-${var.instance}"
+  replication {
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
+}
+
+resource "google_secret_manager_secret_version" "hydroserver_api_secret_key_version" {
+  secret      = google_secret_manager_secret.hydroserver_api_secret_key.id
+  secret_data = random_password.hydroserver_api_secret_key.result
+}
