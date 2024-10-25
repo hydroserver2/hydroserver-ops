@@ -22,17 +22,9 @@ variable "project_id" {
   description = "The project ID for this HydroServer instance."
   type        = string
 }
-variable "vpc_name" {
-  description = "The VPC that this HydroServer instance will run in."
-  type        = string
-}
 variable "region" {
   description = "The GCP region this HydroServer instance will be deployed in."
   type        = string
-}
-variable "database_url" {
-  type    = string
-  default = ""
 }
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
