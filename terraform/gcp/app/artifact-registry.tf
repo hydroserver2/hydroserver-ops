@@ -1,0 +1,19 @@
+resource "google_artifact_registry_repository" "hydroserver_api_repository" {
+  provider  = google
+  project   = data.google_project.gcp_project.project_id
+  location  = var.region
+  repository_id = "hydroserver-api-{var.instance}"
+  format    = "DOCKER"
+
+  labels = {
+    (var.label_key) = local.label_value
+  }
+
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes = [
+      "storage",
+      "labels"
+    ]
+  }
+}
