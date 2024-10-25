@@ -188,6 +188,10 @@ jobs:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Set up GCP SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Terraform Init
@@ -201,7 +205,7 @@ jobs:
         run: |
           terraform plan \
           -no-color -input=false \
-          -target=google_storage_bucket.target_bucket \
+          -target=google_artifact_registry_repository.hydroserver_api_repository \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "vpc_name=default" \
@@ -216,13 +220,26 @@ jobs:
         run: |
           terraform apply \
           -auto-approve -input=false \
-          -target=google_storage_bucket.target_bucket \
+          -target=google_artifact_registry_repository.hydroserver_api_repository \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "vpc_name=default" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
+      - name: Authenticate Docker to Google Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
+      - name: Pull image from GHCR
+        run: |
+          docker pull ghcr.io/hydroserver2/hydroserver-api-services:latest
+      - name: Tag image for Artifact Registry
+        run: |
+          docker tag ghcr.io/hydroserver2/hydroserver-api-services:latest \
+          ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ secrets.GCP_ARTIFACT_REPO }}/hydroserver-api-services:latest
+      - name: Push image to Google Artifact Registry
+        run: |
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
 
   deploy-hydroserver-api:
     needs: [check-environment-variables, setup-hydroserver-services]
