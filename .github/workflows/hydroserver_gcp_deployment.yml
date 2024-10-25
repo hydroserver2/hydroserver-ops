@@ -236,10 +236,10 @@ jobs:
       - name: Tag image for Artifact Registry
         run: |
           docker tag ghcr.io/hydroserver2/hydroserver-api-services:latest \
-          ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ secrets.GCP_ARTIFACT_REPO }}/hydroserver-api-services:latest
+          ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
       - name: Push image to Google Artifact Registry
         run: |
-          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
+          docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
 
   deploy-hydroserver-api:
     needs: [check-environment-variables, setup-hydroserver-services]
