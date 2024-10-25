@@ -10,7 +10,7 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled    = false
-      private_network = var.vpc_name
+      private_network = "projects/${data.google_project.gcp_project.project_id}/global/networks/${var.vpc_name}"
       require_ssl     = true
     }
     database_flags {
