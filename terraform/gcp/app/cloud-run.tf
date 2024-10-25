@@ -51,7 +51,7 @@ resource "google_cloud_run_service" "hydroserver_api" {
   }
 
   labels = {
-    var.label_key = local.label_value  
+    "${var.label_key}" = local.label_value  
   }
 }
 
