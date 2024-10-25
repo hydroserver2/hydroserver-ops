@@ -2,56 +2,53 @@
 # HydroServer GCP Cloud Run Service                  #
 # -------------------------------------------------- #
 
-resource "google_cloud_run_service" "hydroserver_api" {
+resource "google_cloud_run_v2_service" "hydroserver_api" {
   name     = "hydroserver-api-${var.instance}"
   location = var.region
 
   template {
-    spec {
-      service_account_name = google_service_account.cloud_run_service_account.email
-      containers {
-        image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
-        resources {
-          limits = {
-            memory = "512Mi"
+    containers {
+      image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
+      resources {
+        limits = {
+          memory = "512Mi"
+        }
+      }
+      ports {
+        container_port = 8000
+      }
+      env {
+        name  = "DATABASE_URL"
+        value_from {
+          secret_key_ref {
+            name = "hydroserver-db-connection-${var.instance}"
+            key  = "latest"
           }
         }
-        ports {
-          container_port = 8000
-        }
-        env {
-          name  = "DATABASE_URL"
-          value_from {
-            secret_key_ref {
-              name = "hydroserver-db-connection-${var.instance}"
-              key  = "latest"
-            }
-          }
-        }
-        env {
-          name  = "SECRET_KEY"
-          value_from {
-            secret_key_ref {
-              name = "hydroserver-secret-key-${var.instance}"
-              key  = "latest"
-            }
+      }
+      env {
+        name  = "SECRET_KEY"
+        value_from {
+          secret_key_ref {
+            name = "hydroserver-secret-key-${var.instance}"
+            key  = "latest"
           }
         }
       }
     }
-  }
-
-  vpc_access_connector {
-    name = var.vpc_name
+    service_account = google_service_account.cloud_run_service_account.email
+    vpc_access{
+      connector = var.vpc_name
+      egress = "ALL_TRAFFIC"
+    }
+    labels = {
+      "${var.label_key}" = local.label_value
+    }
   }
 
   traffic {
     percent         = 100
     latest_revision = true
-  }
-
-  labels = {
-    "${var.label_key}" = local.label_value  
   }
 }
 
