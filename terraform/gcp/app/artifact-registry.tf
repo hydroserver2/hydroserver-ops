@@ -6,6 +6,6 @@ resource "google_artifact_registry_repository" "hydroserver_api_repository" {
   format    = "DOCKER"
 
   labels = {
-    (var.label_key) = local.label_value
+    var.label_key = local.label_value
   }
 }
