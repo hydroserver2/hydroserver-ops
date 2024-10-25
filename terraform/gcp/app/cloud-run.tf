@@ -22,7 +22,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
         value_source {
           secret_key_ref {
             secret = "hydroserver-db-connection-${var.instance}"
-            key  = "latest"
+            version  = "latest"
           }
         }
       }
@@ -31,7 +31,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
         value_source {
           secret_key_ref {
             secret = "hydroserver-secret-key-${var.instance}"
-            key  = "latest"
+            version  = "latest"
           }
         }
       }
