@@ -54,6 +54,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
   }
 
   traffic {
+    latest_revision  = true
     percent = 100
   }
 }
