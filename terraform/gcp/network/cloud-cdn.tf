@@ -18,8 +18,6 @@ resource "google_compute_backend_service" "cloud_cdn_backend" {
 
   cdn_policy {
     cache_mode = "USE_ORIGIN_HEADERS"
-    default_ttl      = 3600
-    max_ttl          = 86400
     cache_key_policy {
       include_host          = true
       include_protocol      = true
