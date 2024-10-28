@@ -334,7 +334,7 @@ jobs:
     needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: success() && github.event.inputs.action == 'Teardown HydroServer Network Services'
+    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/network
@@ -379,7 +379,7 @@ jobs:
     needs: teardown-hydroserver-network
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: success() && github.event.inputs.action == 'Teardown HydroServer Apps Services'
+    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
     defaults:
       run:
         working-directory: ./terraform/gcp/app
