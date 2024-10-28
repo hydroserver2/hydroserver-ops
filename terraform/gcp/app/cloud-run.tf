@@ -80,16 +80,16 @@ resource "google_project_iam_member" "cloud_run_invoker" {
 # HydroServer GCP Cloud Run Service NEG              #
 # -------------------------------------------------- #
 
-# resource "google_compute_region_network_endpoint_group" "hydroserver_neg" {
-#   name                  = "hydroserver-api-neg-${var.instance}"
-#   region                = var.region
-#   network_endpoint_type = "SERVERLESS"
+resource "google_compute_region_network_endpoint_group" "hydroserver_neg" {
+  name                  = "hydroserver-api-neg-${var.instance}"
+  region                = var.region
+  network_endpoint_type = "SERVERLESS"
 
-#   cloud_run {
-#     service = google_cloud_run_service.hydroserver_api.name
-#   }
+  cloud_run {
+    service = google_cloud_run_service.hydroserver_api.name
+  }
 
-#   labels = {
-#     var.label_key = local.label_value  
-#   }
-# }
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
+}
