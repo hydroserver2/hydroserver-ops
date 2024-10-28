@@ -356,7 +356,7 @@ jobs:
           terraform init \
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_application_${{ github.event.inputs.environment }}"
+          -backend-config="prefix=state/hydroserver_network_${{ github.event.inputs.environment }}"
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
