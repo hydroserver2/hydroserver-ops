@@ -52,11 +52,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
       "${var.label_key}" = local.label_value
     }
   }
-
-  traffic {
-    latest_revision  = true
-    percent = 100
-  }
 }
 
 # -------------------------------------------------- #
