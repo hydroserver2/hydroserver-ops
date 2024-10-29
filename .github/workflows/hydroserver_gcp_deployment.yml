@@ -330,53 +330,9 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
-  teardown-hydroserver-network:
-    needs: check-environment-variables
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
-    defaults:
-      run:
-        working-directory: ./terraform/gcp/network
-    steps:
-      - name: Checkout Ops Repo
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Configure GCP Credentials
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Terraform Init
-        run: |
-          terraform init \
-          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
-          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_network_${{ github.event.inputs.environment }}"
-      - name: Terraform Plan Destroy
-        id: plan_destroy
-        run: |
-          terraform plan -destroy -no-color -input=false \
-          -var instance="${{ github.event.inputs.environment }}" \
-          -var region="${{ vars.GCP_REGION }}" \
-          -var project_id="${{ vars.GCP_PROJECT_ID }}"
-        continue-on-error: true
-      - name: Terraform Plan Destroy Status
-        if: steps.plan_destroy.outcome == 'failure'
-        run: exit 1
-      - name: Terraform Destroy
-        run: |
-          terraform destroy -auto-approve -input=false \
-          -var instance="${{ github.event.inputs.environment }}" \
-          -var region="${{ vars.GCP_REGION }}" \
-          -var project_id="${{ vars.GCP_PROJECT_ID }}"
 
   teardown-hydroserver-services:
-    needs: teardown-hydroserver-network
+    needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
@@ -402,6 +358,51 @@ jobs:
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="prefix=state/hydroserver_application_${{ github.event.inputs.environment }}"
+      - name: Terraform Plan Destroy
+        id: plan_destroy
+        run: |
+          terraform plan -destroy -no-color -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.GCP_REGION }}" \
+          -var project_id="${{ vars.GCP_PROJECT_ID }}"
+        continue-on-error: true
+      - name: Terraform Plan Destroy Status
+        if: steps.plan_destroy.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -auto-approve -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.GCP_REGION }}" \
+          -var project_id="${{ vars.GCP_PROJECT_ID }}"
+
+  teardown-hydroserver-network:
+    needs: teardown-hydroserver-services
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
+    defaults:
+      run:
+        working-directory: ./terraform/gcp/network
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure GCP Credentials
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: |
+          terraform init \
+          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="prefix=state/hydroserver_network_${{ github.event.inputs.environment }}"
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
