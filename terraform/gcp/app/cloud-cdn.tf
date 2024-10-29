@@ -1,52 +1,55 @@
-# # -------------------------------------------------- #
-# # Google Cloud CDN Configuration for Cloud Run       #
-# # -------------------------------------------------- #
+# -------------------------------------------------- #
+# Global Static IP Address                           #
+# -------------------------------------------------- #
 
-# resource "google_compute_global_address" "hydroserver_lb_ip" {
-#   name = "hydroserver-lb-ip-${var.instance}"
-# }
+resource "google_compute_global_address" "cdn_ip_address" {
+  name = "hydroserver-${var.instance}-cdn-ip"
+}
 
+# -------------------------------------------------- #
+# Cloud CDN Backend Service                          #
+# -------------------------------------------------- #
 
-# resource "google_compute_backend_service" "hydroserver_backend" {
-#   name                  = "hydroserver-backend-${var.instance}"
-#   load_balancing_scheme = "EXTERNAL"
-#   protocol              = "HTTP"
+resource "google_compute_backend_service" "cloud_cdn_backend" {
+  name                  = "hydroserver-${var.instance}-cdn-backend"
+  load_balancing_scheme = "EXTERNAL"
+  protocol              = "HTTP"
+  port_name             = "http"
 
-#   backend {
-#     group = google_compute_region_network_endpoint_group.hydroserver_neg.id
-#   }
+  cdn_policy {
+    cache_mode = "USE_ORIGIN_HEADERS"
+    cache_key_policy {
+      include_host          = true
+      include_protocol      = true
+    }
+  }
+}
 
-#   enable_cdn = true
+# -------------------------------------------------- #
+# URL Map                                            #
+# -------------------------------------------------- #
 
-#   cdn_policy {
-#     cache_mode        = "CACHE_ALL_STATIC"
-#     default_ttl      = 3600
-#     max_ttl          = 86400
-#     cache_key_policy {
-#       include_host          = true
-#       include_protocol      = true
-#     }
-#   }
-# }
+resource "google_compute_url_map" "cdn_url_map" {
+  name            = "hydroserver-${var.instance}-cdn-url-map"
+  default_service = google_compute_backend_service.cloud_cdn_backend.id
+}
 
-# resource "google_compute_url_map" "hydroserver_url_map" {
-#   name            = "hydroserver-url-map-${var.instance}"
-#   default_service = google_compute_backend_service.hydroserver_backend.id
-# }
+# -------------------------------------------------- #
+# HTTP(S) Proxy                                      #
+# -------------------------------------------------- #
 
-# resource "google_compute_target_http_proxy" "hydroserver_http_proxy" {
-#   name   = "hydroserver-http-proxy-${var.instance}"
-#   url_map = google_compute_url_map.hydroserver_url_map.id
-# }
+resource "google_compute_target_http_proxy" "cdn_http_proxy" {
+  name    = "hydroserver-${var.instance}-cdn-http-proxy"
+  url_map = google_compute_url_map.cdn_url_map.id
+}
 
-# resource "google_compute_global_forwarding_rule" "hydroserver_forwarding_rule" {
-#   name       = "hydroserver-forwarding-rule-${var.instance}"
-#   target     = google_compute_target_http_proxy.hydroserver_http_proxy.id
-#   port_range = "80"
-#   load_balancing_scheme = "EXTERNAL"
-#   ip_address = google_compute_global_address.hydroserver_ip.address
-# }
+# -------------------------------------------------- #
+# Global Forwarding Rule                             #
+# -------------------------------------------------- #
 
-# resource "google_compute_global_address" "hydroserver_ip" {
-#   name = "hydroserver-ip-${var.instance}"
-# }
+resource "google_compute_global_forwarding_rule" "cdn_forwarding_rule" {
+  name       = "hydroserver-${var.instance}-cdn-forwarding"
+  ip_address = google_compute_global_address.cdn_ip_address.id
+  target     = google_compute_target_http_proxy.cdn_http_proxy.id
+  port_range = "80"
+}
