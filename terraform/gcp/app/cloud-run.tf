@@ -64,13 +64,11 @@ resource "google_service_account" "cloud_run_service_account" {
   project      = data.google_project.gcp_project.project_id
 }
 
-variable "secret_ids" {
-  type    = list(string)
-  default = ["hydroserver-db-connection-${var.instance}", "hydroserver-api-secret-key-${var.instance}"]
-}
-
 resource "google_secret_manager_secret_iam_member" "secret_access" {
-  for_each = toset(var.secret_ids)
+  for_each = toset([
+    "hydroserver-db-connection-${var.instance}",
+    "hydroserver-api-secret-key-${var.instance}"
+  ])
   project   = data.google_project.gcp_project.project_id
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
