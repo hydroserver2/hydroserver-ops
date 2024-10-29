@@ -6,7 +6,7 @@ resource "google_compute_backend_service" "cloud_run_backend" {
   name        = "hydroserver-${var.instance}-cdn-backend"
   description = "Backend service for HydroServer API"
   backend {
-    group = google_cloud_run_v2_service.hydroserver_api.uri
+    group = google_compute_region_network_endpoint_group.hydroserver_neg.id
   }
   enable_cdn = true
 }
