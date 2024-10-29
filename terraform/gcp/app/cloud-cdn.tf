@@ -18,6 +18,10 @@ resource "google_compute_backend_service" "cloud_run_backend" {
 resource "google_compute_url_map" "cdn_url_map" {
   name            = "hydroserver-${var.instance}-cdn-url-map"
   default_service = google_compute_backend_service.cloud_run_backend.id
+  host_rule {
+    hosts        = ["*"]
+    path_matcher = "allpaths"
+  }
   path_matcher {
     name            = "allpaths"
     default_service = google_compute_backend_service.cloud_run_backend.self_link
