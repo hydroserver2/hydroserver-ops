@@ -1,28 +1,14 @@
 # -------------------------------------------------- #
-# Global Static IP Address                           #
-# -------------------------------------------------- #
-
-resource "google_compute_global_address" "cdn_ip_address" {
-  name = "hydroserver-${var.instance}-cdn-ip"
-}
-
-# -------------------------------------------------- #
 # Cloud CDN Backend Service                          #
 # -------------------------------------------------- #
 
-resource "google_compute_backend_service" "cloud_cdn_backend" {
-  name                  = "hydroserver-${var.instance}-cdn-backend"
-  load_balancing_scheme = "EXTERNAL"
-  protocol              = "HTTP"
-  port_name             = "http"
-
-  cdn_policy {
-    cache_mode = "USE_ORIGIN_HEADERS"
-    cache_key_policy {
-      include_host          = true
-      include_protocol      = true
-    }
+resource "google_compute_backend_service" "cloud_run_backend" {
+  name        = "hydroserver-${var.instance}-cdn-backend"
+  description = "Backend service for HydroServer API"
+  backend {
+    group = google_cloud_run_v2_service.hydroserver_api.uri
   }
+  enable_cdn = true
 }
 
 # -------------------------------------------------- #
@@ -31,7 +17,15 @@ resource "google_compute_backend_service" "cloud_cdn_backend" {
 
 resource "google_compute_url_map" "cdn_url_map" {
   name            = "hydroserver-${var.instance}-cdn-url-map"
-  default_service = google_compute_backend_service.cloud_cdn_backend.id
+  default_service = google_compute_backend_service.cloud_run_backend.id
+  path_matcher {
+    name            = "allpaths"
+    default_service = google_compute_backend_service.cloud_run_backend.self_link
+    path_rule {
+      paths   = ["/api/*", "/admin/*"]
+      service = google_compute_backend_service.cloud_run_backend.self_link
+    }
+  }
 }
 
 # -------------------------------------------------- #
@@ -44,6 +38,14 @@ resource "google_compute_target_http_proxy" "cdn_http_proxy" {
 }
 
 # -------------------------------------------------- #
+# Global Static IP Address                           #
+# -------------------------------------------------- #
+
+resource "google_compute_global_address" "cdn_ip_address" {
+  name = "hydroserver-${var.instance}-cdn-ip"
+}
+
+# -------------------------------------------------- #
 # Global Forwarding Rule                             #
 # -------------------------------------------------- #
 
@@ -52,4 +54,5 @@ resource "google_compute_global_forwarding_rule" "cdn_forwarding_rule" {
   ip_address = google_compute_global_address.cdn_ip_address.id
   target     = google_compute_target_http_proxy.cdn_http_proxy.id
   port_range = "80"
+  load_balancing_scheme = "EXTERNAL"
 }
