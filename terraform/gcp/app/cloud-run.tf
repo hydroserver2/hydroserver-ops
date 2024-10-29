@@ -92,7 +92,4 @@ resource "google_compute_region_network_endpoint_group" "hydroserver_neg" {
   cloud_run {
     service = google_cloud_run_v2_service.hydroserver_api.name
   }
-  labels = {
-    "${var.label_key}" = local.label_value
-  }
 }
