@@ -305,7 +305,7 @@ jobs:
           -var "accounts_email=${{ vars.ACCOUNTS_EMAIL || null }}" \
           -var "proxy_base_url=${{ vars.PROXY_BASE_URL || null }}" \
           -var "allowed_hosts=${{ vars.ALLOWED_HOSTS || null }}" \
-          -var "debug=${{ vars.DEBUG || True }}" \
+          -var "debug=${{ vars.DEBUG || null }}" \
           -var "oauth_google=${{ secrets.OAUTH_GOOGLE }}" \
           -var "oauth_orcid=${{ secrets.OAUTH_ORCID }}" \
           -var "oauth_hydroshare=${{ secrets.OAUTH_HYDROSHARE }}" \
