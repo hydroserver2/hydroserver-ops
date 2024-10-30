@@ -320,6 +320,10 @@ jobs:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Set up GCP SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
 
   deploy-hydroserver-data-mgmt-app:
     needs: [check-environment-variables, setup-hydroserver-services]
@@ -337,8 +341,35 @@ jobs:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-
-
+      - name: Authenticate Docker to Google Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
+      - name: Pull image from GHCR
+        run: |
+          docker pull ghcr.io/hydroserver2/hydroserver-api-services:${{ github.event.inputs.release }}
+      - name: Tag image for Artifact Registry
+        run: |
+          docker tag ghcr.io/hydroserver2/hydroserver-api-services:${{ github.event.inputs.release }} \
+          ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
+      - name: Push image to Google Artifact Registry
+        run: |
+          docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
+      - name: Update Cloud Run Service
+        run: |
+          gcloud run services update hydroserver-api-${{ github.event.inputs.environment }} \
+          --image gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest \
+          --region ${{ vars.GCP_REGION }} \
+          --update-env-vars PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }} \
+          --update-env-vars ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} \
+          --update-env-vars DEBUG=${{ vars.DEBUG }} \
+          --update-env-vars ACCOUNTS_EMAIL=${{ vars.ACCOUNTS_EMAIL }} \
+      - name: Update Cloud Run Secrets
+        run: |
+          echo -n "${{ secrets.SMTP_URL }}" | gcloud secrets versions add hydroserver-smtp-url-${{ github.event.inputs.environment }} --data-file=- && \
+          echo -n "${{ secrets.OAUTH_GOOGLE }}" | gcloud secrets versions add hydroserver-oauth-google-${{ github.event.inputs.environment }} --data-file=- && \
+          echo -n "${{ secrets.OAUTH_ORCID }}" | gcloud secrets versions add hydroserver-oauth-orcid-${{ github.event.inputs.environment }} --data-file=- && \
+          echo -n "${{ secrets.OAUTH_HYDROSHARE }}" | gcloud secrets versions add hydroserver-oauth-hydroshare-${{ github.event.inputs.environment }} --data-file=-
+  
   teardown-hydroserver-services:
     needs: check-environment-variables
     runs-on: ubuntu-latest
