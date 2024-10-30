@@ -190,7 +190,7 @@ resource "google_service_account" "cloud_run_service_account" {
 
 resource "google_secret_manager_secret_iam_member" "secret_access" {
   for_each = toset([
-    "hydroserver-db-connection-${var.instance}",
+    "hydroserver-database-url-${var.instance}",
     "hydroserver-api-secret-key-${var.instance}"
   ])
   project   = data.google_project.gcp_project.project_id
