@@ -53,8 +53,8 @@ variable "allowed_hosts" {
 }
 variable "debug" {
   description = "Toggles Django's debug mode."
-  type        = boolean
-  default     = true
+  type        = string
+  default     = "True"
 }
 variable "oauth_google" {
   description = "Google OAuth Credentials."
