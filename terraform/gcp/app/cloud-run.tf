@@ -39,82 +39,82 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
           }
         }
       }
-    }
 
-    env {
-      name  = "SMTP_URL"
-      value_source {
-        secret_key_ref {
-          secret  = google_secret_manager_secret.hydroserver_smtp_url.id
-          version = "latest"
+      env {
+        name  = "SMTP_URL"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.hydroserver_smtp_url.id
+            version = "latest"
+          }
         }
       }
-    }
-
-    env {
-      name  = "OAUTH_GOOGLE"
-      value_source {
-        secret_key_ref {
-          secret  = google_secret_manager_secret.hydroserver_oauth_google.id
-          version = "latest"
+  
+      env {
+        name  = "OAUTH_GOOGLE"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.hydroserver_oauth_google.id
+            version = "latest"
+          }
         }
       }
-    }
-
-    env {
-      name  = "OAUTH_ORCID"
-      value_source {
-        secret_key_ref {
-          secret  = google_secret_manager_secret.hydroserver_oauth_orcid.id
-          version = "latest"
+  
+      env {
+        name  = "OAUTH_ORCID"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.hydroserver_oauth_orcid.id
+            version = "latest"
+          }
         }
       }
-    }
-
-
-    env {
-      name  = "OAUTH_HYDROSHARE"
-      value_source {
-        secret_key_ref {
-          secret  = google_secret_manager_secret.hydroserver_oauth_hydroshare.id
-          version = "latest"
+  
+  
+      env {
+        name  = "OAUTH_HYDROSHARE"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.hydroserver_oauth_hydroshare.id
+            version = "latest"
+          }
         }
       }
-    }
-
-    env {
-      name  = "DEPLOYED"
-      value = "True"
-    }
-
-    env {
-      name  = "DEPLOYMENT_BACKEND"
-      value = "gcp"
-    }
-
-    env {
-      name  = "STORAGE_BUCKET"
-      value = google_storage_bucket.hydroserver_storage_bucket.name
-    }
-
-    env {
-      name  = "ACCOUNTS_EMAIL"
-      value = var.accounts_email
-    }
-
-    env {
-      name  = "PROXY_BASE_URL"
-      value = var.proxy_base_url
-    }
-
-    env {
-      name  = "ALLOWED_HOSTS"
-      value = var.allowed_hosts
-    }
-
-    env {
-      name  = "DEBUG"
-      value = var.debug
+  
+      env {
+        name  = "DEPLOYED"
+        value = "True"
+      }
+  
+      env {
+        name  = "DEPLOYMENT_BACKEND"
+        value = "gcp"
+      }
+  
+      env {
+        name  = "STORAGE_BUCKET"
+        value = google_storage_bucket.hydroserver_storage_bucket.name
+      }
+  
+      env {
+        name  = "ACCOUNTS_EMAIL"
+        value = var.accounts_email
+      }
+  
+      env {
+        name  = "PROXY_BASE_URL"
+        value = var.proxy_base_url
+      }
+  
+      env {
+        name  = "ALLOWED_HOSTS"
+        value = var.allowed_hosts
+      }
+  
+      env {
+        name  = "DEBUG"
+        value = var.debug
+      }
     }
 
     service_account = google_service_account.cloud_run_service_account.email
