@@ -34,7 +34,7 @@ variable "hydroserver_version" {
 variable "smtp_url" {
   description = "The SMTP connection URL HydroServer will use to send emails."
   type        = string
-  default     = null
+  default     = ""
 }
 variable "accounts_email" {
   description = "The email HydroServer will send emails from."
@@ -59,17 +59,17 @@ variable "debug" {
 variable "oauth_google" {
   description = "Google OAuth Credentials."
   type        = string
-  default     = null
+  default     = ""
 }
 variable "oauth_orcid" {
   description = "ORCID OAuth Credentials."
   type        = string
-  default     = null
+  default     = ""
 }
 variable "oauth_hydroshare" {
   description = "HydroShare OAuth Credentials."
   type        = string
-  default     = null
+  default     = ""
 }
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
