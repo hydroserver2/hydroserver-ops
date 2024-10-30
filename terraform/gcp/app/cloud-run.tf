@@ -94,7 +94,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 
     env {
       name  = "STORAGE_BUCKET"
-      value = ""
+      value = google_storage_bucket.hydroserver_storage_bucket.name
     }
 
     env {
@@ -223,6 +223,12 @@ resource "google_project_iam_member" "cloud_run_invoker" {
   project = data.google_project.gcp_project.project_id
   role    = "roles/run.invoker"
   member  = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
+}
+
+resource "google_storage_bucket_iam_member" "cloud_run_storage_bucket_access" {
+  bucket = google_storage_bucket.hydroserver_storage_bucket.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 
 # -------------------------------------------------- #
