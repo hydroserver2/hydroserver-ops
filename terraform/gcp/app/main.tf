@@ -31,6 +31,51 @@ variable "hydroserver_version" {
   type        = string
   default     = "latest"
 }
+variable "smtp_url" {
+  description = "The SMTP connection URL HydroServer will use to send emails."
+  type        = string
+  default     = null
+}
+variable "accounts_email" {
+  description = "The email HydroServer will send emails from."
+  type        = string
+  default     = null
+}
+variable "proxy_base_url" {
+  description = "The URL HydroServer will be served from."
+  type        = string
+  default     = null
+}
+variable "allowed_hosts" {
+  description = "Hosts HydroServer can be served from."
+  type        = string
+  default     = null
+}
+variable "debug" {
+  description = "Toggles Django's debug mode."
+  type        = boolean
+  default     = true
+}
+variable "debug" {
+  description = "Toggles Django's debug mode."
+  type        = boolean
+  default     = true
+}
+variable "oauth_google" {
+  description = "Google OAuth Credentials."
+  type        = string
+  default     = null
+}
+variable "oauth_orcid" {
+  description = "ORCID OAuth Credentials."
+  type        = string
+  default     = null
+}
+variable "oauth_hydroshare" {
+  description = "HydroShare OAuth Credentials."
+  type        = string
+  default     = null
+}
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
   type        = string
