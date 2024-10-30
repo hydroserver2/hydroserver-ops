@@ -98,22 +98,22 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
   
       env {
         name  = "ACCOUNTS_EMAIL"
-        value = var.accounts_email
+        value = ""
       }
   
       env {
         name  = "PROXY_BASE_URL"
-        value = var.proxy_base_url
+        value = ""
       }
   
       env {
         name  = "ALLOWED_HOSTS"
-        value = var.allowed_hosts
+        value = ""
       }
   
       env {
         name  = "DEBUG"
-        value = var.debug
+        value = ""
       }
     }
 
@@ -145,11 +145,6 @@ resource "google_secret_manager_secret" "hydroserver_smtp_url" {
   }
 }
 
-resource "google_secret_manager_secret_version" "hydroserver_smtp_url_version" {
-  secret      = google_secret_manager_secret.hydroserver_smtp_url.id
-  secret_data = var.smtp_url
-}
-
 resource "google_secret_manager_secret" "hydroserver_oauth_google" {
   secret_id = "hydroserver-oauth-google-${var.instance}"
   replication {
@@ -159,11 +154,6 @@ resource "google_secret_manager_secret" "hydroserver_oauth_google" {
       }
     }
   }
-}
-
-resource "google_secret_manager_secret_version" "hydroserver_oauth_google_version" {
-  secret      = google_secret_manager_secret.hydroserver_oauth_google.id
-  secret_data = var.oauth_google
 }
 
 resource "google_secret_manager_secret" "hydroserver_oauth_hydroshare" {
@@ -177,11 +167,6 @@ resource "google_secret_manager_secret" "hydroserver_oauth_hydroshare" {
   }
 }
 
-resource "google_secret_manager_secret_version" "hydroserver_oauth_hydroshare_version" {
-  secret      = google_secret_manager_secret.hydroserver_oauth_hydroshare.id
-  secret_data = var.oauth_hydroshare
-}
-
 resource "google_secret_manager_secret" "hydroserver_oauth_orcid" {
   secret_id = "hydroserver-oauth-orcid-${var.instance}"
   replication {
@@ -191,11 +176,6 @@ resource "google_secret_manager_secret" "hydroserver_oauth_orcid" {
       }
     }
   }
-}
-
-resource "google_secret_manager_secret_version" "hydroserver_oauth_orcid_version" {
-  secret      = google_secret_manager_secret.hydroserver_oauth_orcid.id
-  secret_data = var.oauth_orcid
 }
 
 # -------------------------------------------------- #
