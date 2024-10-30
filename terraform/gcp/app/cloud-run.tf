@@ -69,8 +69,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
           }
         }
       }
-  
-  
+
       env {
         name  = "OAUTH_HYDROSHARE"
         value_source {
