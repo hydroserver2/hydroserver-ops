@@ -56,11 +56,6 @@ variable "debug" {
   type        = boolean
   default     = true
 }
-variable "debug" {
-  description = "Toggles Django's debug mode."
-  type        = boolean
-  default     = true
-}
 variable "oauth_google" {
   description = "Google OAuth Credentials."
   type        = string
