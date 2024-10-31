@@ -39,77 +39,46 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
           }
         }
       }
-
-      env {
-        name  = "SMTP_URL"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.hydroserver_smtp_url.id
-            version = "latest"
-          }
-        }
-      }
-  
-      env {
-        name  = "OAUTH_GOOGLE"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.hydroserver_oauth_google.id
-            version = "latest"
-          }
-        }
-      }
-  
-      env {
-        name  = "OAUTH_ORCID"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.hydroserver_oauth_orcid.id
-            version = "latest"
-          }
-        }
-      }
-
-      env {
-        name  = "OAUTH_HYDROSHARE"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.hydroserver_oauth_hydroshare.id
-            version = "latest"
-          }
-        }
-      }
-  
       env {
         name  = "DEPLOYED"
         value = "True"
       }
-  
       env {
         name  = "DEPLOYMENT_BACKEND"
         value = "gcp"
       }
-  
       env {
         name  = "STORAGE_BUCKET"
         value = google_storage_bucket.hydroserver_storage_bucket.name
       }
-  
+      env {
+        name  = "SMTP_URL"
+        value = ""
+      }
       env {
         name  = "ACCOUNTS_EMAIL"
         value = ""
       }
-  
       env {
         name  = "PROXY_BASE_URL"
         value = ""
       }
-  
       env {
         name  = "ALLOWED_HOSTS"
         value = ""
       }
-  
+      env {
+        name  = "OAUTH_GOOGLE"
+        value = ""
+      }
+      env {
+        name  = "OAUTH_ORCID"
+        value = ""
+      }
+      env {
+        name  = "OAUTH_HYDROSHARE"
+        value = ""
+      }
       env {
         name  = "DEBUG"
         value = ""
@@ -191,10 +160,6 @@ resource "google_secret_manager_secret_iam_member" "secret_access" {
   for_each = toset([
     "hydroserver-database-url-${var.instance}",
     "hydroserver-api-secret-key-${var.instance}",
-    "hydroserver-smtp-url-${var.instance}",
-    "hydroserver-oauth-google-${var.instance}",
-    "hydroserver-oauth-orcid-${var.instance}",
-    "hydroserver-oauth-hydroshare-${var.instance}",
   ])
   project   = data.google_project.gcp_project.project_id
   secret_id = each.value
