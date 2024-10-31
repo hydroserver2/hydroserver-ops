@@ -344,14 +344,12 @@ jobs:
           --region ${{ vars.GCP_REGION }} \
           --update-env-vars PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }} \
           --update-env-vars ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} \
-          --update-env-vars DEBUG=${{ vars.DEBUG }} \
+          --update-env-vars SMTP_URL=${{ vars.SMTP_URL }} \
           --update-env-vars ACCOUNTS_EMAIL=${{ vars.ACCOUNTS_EMAIL }} \
-      - name: Update Cloud Run Secrets
-        run: |
-          echo -n "${{ secrets.SMTP_URL }}" | gcloud secrets versions add hydroserver-smtp-url-${{ github.event.inputs.environment }} --data-file=- && \
-          echo -n "${{ secrets.OAUTH_GOOGLE }}" | gcloud secrets versions add hydroserver-oauth-google-${{ github.event.inputs.environment }} --data-file=- && \
-          echo -n "${{ secrets.OAUTH_ORCID }}" | gcloud secrets versions add hydroserver-oauth-orcid-${{ github.event.inputs.environment }} --data-file=- && \
-          echo -n "${{ secrets.OAUTH_HYDROSHARE }}" | gcloud secrets versions add hydroserver-oauth-hydroshare-${{ github.event.inputs.environment }} --data-file=-
+          --update-env-vars OAUTH_GOOGLE=${{ vars.OAUTH_GOOGLE }} \
+          --update-env-vars OAUTH_ORCID=${{ vars.OAUTH_ORCID }} \
+          --update-env-vars OAUTH_HYDROSHARE=${{ vars.OAUTH_HYDROSHARE }} \
+          --update-env-vars DEBUG=${{ vars.DEBUG }} \
 
   deploy-hydroserver-data-mgmt-app:
     needs: [check-environment-variables, setup-hydroserver-services]
