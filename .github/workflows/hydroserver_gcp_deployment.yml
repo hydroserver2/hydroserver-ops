@@ -344,6 +344,7 @@ jobs:
           --region ${{ vars.GCP_REGION }} \
           --update-env-vars PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }} \
           --update-env-vars ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} \
+          --update-env-vars GS_PROJECT_ID=${{ vars.GCP_PROJECT_ID }} \
           --update-env-vars SMTP_URL=${{ vars.SMTP_URL }} \
           --update-env-vars ACCOUNTS_EMAIL=${{ vars.ACCOUNTS_EMAIL }} \
           --update-env-vars OAUTH_GOOGLE_CLIENT=${{ vars.OAUTH_GOOGLE_CLIENT }} \
