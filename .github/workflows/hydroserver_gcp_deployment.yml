@@ -346,9 +346,12 @@ jobs:
           --update-env-vars ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} \
           --update-env-vars SMTP_URL=${{ vars.SMTP_URL }} \
           --update-env-vars ACCOUNTS_EMAIL=${{ vars.ACCOUNTS_EMAIL }} \
-          --update-env-vars OAUTH_GOOGLE=${{ vars.OAUTH_GOOGLE }} \
-          --update-env-vars OAUTH_ORCID=${{ vars.OAUTH_ORCID }} \
-          --update-env-vars OAUTH_HYDROSHARE=${{ vars.OAUTH_HYDROSHARE }} \
+          --update-env-vars OAUTH_GOOGLE_CLIENT=${{ vars.OAUTH_GOOGLE_CLIENT }} \
+          --update-env-vars OAUTH_GOOGLE_SECRET=${{ vars.OAUTH_GOOGLE_SECRET }} \
+          --update-env-vars OAUTH_ORCID_CLIENT=${{ vars.OAUTH_ORCID_CLIENT }} \
+          --update-env-vars OAUTH_ORCID_SECRET=${{ vars.OAUTH_ORCID_SECRET }} \
+          --update-env-vars OAUTH_HYDROSHARE_CLIENT=${{ vars.OAUTH_HYDROSHARE_CLIENT }} \
+          --update-env-vars OAUTH_HYDROSHARE_SECRET=${{ vars.OAUTH_HYDROSHARE_SECRET }} \
           --update-env-vars DEBUG=${{ vars.DEBUG }} \
 
   deploy-hydroserver-data-mgmt-app:
