@@ -28,3 +28,27 @@ resource "google_storage_bucket" "hydroserver_data_mgmt_app_bucket" {
   }
 }
 
+# -------------------------------------------------- #
+# Placeholder index.html File                        #
+# -------------------------------------------------- #
+
+resource "google_storage_bucket_object" "hydroserver_data_mgmt_app_default_index" {
+  name   = "index.html"
+  bucket = google_storage_bucket.hydroserver_data_mgmt_app_bucket.name
+  content = <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placeholder Page</title>
+</head>
+<body>
+    <h1>Welcome to HydroServer</h1>
+    <p>This is a placeholder page served from Google Cloud Storage.</p>
+</body>
+</html>
+EOF
+
+  cache_control = "no-cache"
+}
