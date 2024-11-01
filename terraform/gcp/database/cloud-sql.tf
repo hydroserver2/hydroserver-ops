@@ -11,7 +11,7 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     ip_configuration {
       ipv4_enabled    = false
       private_network = "projects/${data.google_project.gcp_project.project_id}/global/networks/hydroserver-${var.instance}"
-      require_ssl     = true
+      require_ssl     = false
     }
     database_flags {
       name  = "max_connections"
