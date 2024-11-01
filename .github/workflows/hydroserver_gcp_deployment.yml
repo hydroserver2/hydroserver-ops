@@ -382,7 +382,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: hydroserver2/hydroserver-data-management-app
-          ref: refs/tags/${{ github.event.inputs.release || steps.get_latest_tag.outputs.tag }}
+          ref: refs/tags/${{ github.event.inputs.release == 'latest' && steps.get_latest_tag.outputs.tag || github.event.inputs.release }}
           path: data-mgmt
       - name: Setup Node 18.x
         uses: actions/setup-node@v3
