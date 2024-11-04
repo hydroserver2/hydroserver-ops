@@ -22,6 +22,16 @@ resource "google_compute_backend_bucket" "data_mgmt_bucket_backend" {
 }
 
 # -------------------------------------------------- #
+# Cloud CDN Backend Bucket - Static/Media Content    #
+# -------------------------------------------------- #
+
+resource "google_compute_backend_bucket" "storage_bucket_backend" {
+  name       = "hydroserver-${var.instance}-storage-bucket"
+  bucket_name = google_storage_bucket.hydroserver_storage_bucket.name
+  enable_cdn  = true
+}
+
+# -------------------------------------------------- #
 # URL Map                                            #
 # -------------------------------------------------- #
 
@@ -38,6 +48,10 @@ resource "google_compute_url_map" "cdn_url_map" {
     path_rule {
       paths   = ["/api/*", "/admin/*"]
       service = google_compute_backend_service.cloud_run_backend.self_link
+    }
+    path_rule {
+      paths   = ["/static/*", "/photos/*"]
+      service = google_compute_backend_bucket.storage_bucket_backend.self_link
     }
   }
 }
