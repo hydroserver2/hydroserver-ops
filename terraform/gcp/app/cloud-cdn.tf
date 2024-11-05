@@ -57,12 +57,22 @@ resource "google_compute_url_map" "cdn_url_map" {
 }
 
 # -------------------------------------------------- #
-# HTTP(S) Proxy                                      #
+# HTTPS Proxy                                        #
 # -------------------------------------------------- #
 
 resource "google_compute_target_http_proxy" "cdn_http_proxy" {
   name    = "hydroserver-${var.instance}-cdn-http-proxy"
   url_map = google_compute_url_map.cdn_url_map.id
+}
+
+resource "google_compute_target_https_proxy" "cdn_https_proxy" {
+  name    = "hydroserver-${var.instance}-cdn-https-proxy"
+  url_map = google_compute_url_map.cdn_url_map.id
+  ssl_certificates = []
+
+  lifecycle {
+    ignore_changes = [ssl_certificates]
+  }
 }
 
 # -------------------------------------------------- #
@@ -77,10 +87,10 @@ resource "google_compute_global_address" "cdn_ip_address" {
 # Global Forwarding Rule                             #
 # -------------------------------------------------- #
 
-resource "google_compute_global_forwarding_rule" "cdn_forwarding_rule" {
-  name       = "hydroserver-${var.instance}-cdn-forwarding"
-  ip_address = google_compute_global_address.cdn_ip_address.id
-  target     = google_compute_target_http_proxy.cdn_http_proxy.id
-  port_range = "80"
+resource "google_compute_global_forwarding_rule" "cdn_https_forwarding_rule" {
+  name                  = "hydroserver-${var.instance}-cdn-https-forwarding"
+  ip_address            = google_compute_global_address.cdn_ip_address.id
+  target                = google_compute_target_https_proxy.cdn_https_proxy.id
+  port_range            = "443"
   load_balancing_scheme = "EXTERNAL"
 }
