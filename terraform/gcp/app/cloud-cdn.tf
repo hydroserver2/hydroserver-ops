@@ -65,10 +65,17 @@ resource "google_compute_target_http_proxy" "cdn_http_proxy" {
   url_map = google_compute_url_map.cdn_url_map.id
 }
 
+resource "google_compute_managed_ssl_certificate" "temporary_ssl_cert" {
+  name = "temp-ssl-cert-${var.instance}"
+  managed {
+    domains = ["hydroserver.example.com"]
+  }
+}
+
 resource "google_compute_target_https_proxy" "cdn_https_proxy" {
   name    = "hydroserver-${var.instance}-cdn-https-proxy"
   url_map = google_compute_url_map.cdn_url_map.id
-  ssl_certificates = []
+  ssl_certificates = [google_compute_managed_ssl_certificate.temporary_ssl_cert.id]
 
   lifecycle {
     ignore_changes = [ssl_certificates]
