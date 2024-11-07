@@ -18,7 +18,7 @@ resource "aws_subnet" "hydroserver_subnet" {
   availability_zone = "${var.region}"
 
   tags = {
-    "${var.tag_key}" = var.tag_label
+    "${var.tag_key}" = var.tag_value
   }
 }
 
@@ -42,6 +42,6 @@ resource "aws_security_group" "hydroserver_vpc_sg" {
   }
 
   tags = {
-    "${var.tag_key}" = var.tag_label
+    "${var.tag_key}" = var.tag_value
   }
 }
