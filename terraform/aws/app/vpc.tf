@@ -24,6 +24,32 @@ resource "aws_subnet" "hydroserver_subnet" {
   }
 }
 
+resource "aws_subnet" "hydroserver_private_subnet_a" {
+  vpc_id            = aws_vpc.hydroserver_vpc.id
+  cidr_block        = "10.8.0.0/24"
+  availability_zone = "${var.region}a"
+
+  tags = {
+    Name             = "hydroserver-private-${var.instance}-a"
+    "${var.tag_key}" = var.tag_value
+  }
+}
+
+resource "aws_subnet" "hydroserver_private_subnet_b" {
+  vpc_id            = aws_vpc.hydroserver_vpc.id
+  cidr_block        = "10.8.1.0/24"
+  availability_zone = "${var.region}b"
+
+  tags = {
+    Name             = "hydroserver-private-${var.instance}-b"
+    "${var.tag_key}" = var.tag_value
+  }
+}
+
+# -------------------------------------------------- #
+# AWS HydroServer VPC Security Group                 #
+# -------------------------------------------------- #
+
 resource "aws_security_group" "hydroserver_vpc_sg" {
   name_prefix = "hydroserver-${var.instance}-sg"
   description = "Security group for HydroServer VPC"
