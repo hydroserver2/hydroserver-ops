@@ -8,6 +8,7 @@ resource "aws_vpc" "hydroserver_vpc" {
   enable_dns_hostnames = true
 
   tags = {
+    Name             = "hydroserver-${var.instance}"
     "${var.tag_key}" = var.tag_value
   }
 }
@@ -18,6 +19,7 @@ resource "aws_subnet" "hydroserver_subnet" {
   availability_zone = "${var.region}a"
 
   tags = {
+    Name             = "hydroserver-${var.instance}"
     "${var.tag_key}" = var.tag_value
   }
 }
@@ -42,6 +44,7 @@ resource "aws_security_group" "hydroserver_vpc_sg" {
   }
 
   tags = {
+    Name             = "hydroserver-${var.instance}"
     "${var.tag_key}" = var.tag_value
   }
 }
