@@ -15,7 +15,7 @@ resource "aws_vpc" "hydroserver_vpc" {
 resource "aws_subnet" "hydroserver_subnet" {
   vpc_id            = aws_vpc.hydroserver_vpc.id
   cidr_block        = "10.8.0.0/24"
-  availability_zone = "${var.region}"
+  availability_zone = "${var.region}a"
 
   tags = {
     "${var.tag_key}" = var.tag_value
@@ -29,14 +29,14 @@ resource "aws_security_group" "hydroserver_vpc_sg" {
 
   ingress {
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["10.8.0.0/16"]
   }
 
   egress {
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
