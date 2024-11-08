@@ -59,7 +59,7 @@ resource "aws_security_group" "hydroserver_vpc_sg" {
   }
 
   tags = {
-    Name             = "hydroserver-${var.instance}"
+    name             = "hydroserver-${var.instance}"
     "${var.tag_key}" = var.tag_value
   }
 }
