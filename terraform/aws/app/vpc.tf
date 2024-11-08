@@ -8,7 +8,7 @@ resource "aws_vpc" "hydroserver_vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name             = "hydroserver-${var.instance}"
+    name             = "hydroserver-${var.instance}"
     "${var.tag_key}" = var.tag_value
   }
 }
