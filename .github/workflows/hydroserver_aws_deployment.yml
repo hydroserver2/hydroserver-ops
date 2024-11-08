@@ -91,7 +91,8 @@ jobs:
           terraform plan \
           -no-color -input=false \
           -target=aws_vpc.hydroserver_vpc \
-          -target=aws_subnet.hydroserver_subnet \
+          -target=aws_subnet.hydroserver_private_subnet_a \
+          -target=aws_subnet.hydroserver_private_subnet_b \
           -target=aws_security_group.hydroserver_vpc_sg \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
@@ -106,7 +107,8 @@ jobs:
           terraform apply \
           -auto-approve -input=false \
           -target=aws_vpc.hydroserver_vpc \
-          -target=aws_subnet.hydroserver_subnet \
+          -target=aws_subnet.hydroserver_private_subnet_a \
+          -target=aws_subnet.hydroserver_private_subnet_b \
           -target=aws_security_group.hydroserver_vpc_sg \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
