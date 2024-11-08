@@ -11,7 +11,7 @@ resource "aws_db_instance" "hydroserver_db_instance" {
   storage_type            = "gp2"
   publicly_accessible     = false
   db_subnet_group_name    = aws_db_subnet_group.hydroserver_db_subnet_group.name
-  vpc_security_group_ids  = [aws_security_group.hydroserver_vpc_sg.id]
+  vpc_security_group_ids  = [data.aws_security_group.hydroserver_sg.id]
   max_allocated_storage   = 100
 
   username = "hsdbadmin"
@@ -48,6 +48,13 @@ resource "aws_db_subnet_group" "hydroserver_db_subnet_group" {
   }
 }
 
+data "aws_security_group" "hydroserver_sg" {
+  filter {
+    name   = "tag:name"
+    values = ["hydroserver-${var.instance}"]
+  }
+}
+
 resource "random_password" "hydroserver_db_user_password" {
   length  = 16
   special = false
@@ -75,7 +82,7 @@ resource "random_password" "hydroserver_api_secret_key" {
   special          = true
   upper            = true
   lower            = true
-  number           = true
+  numeric          = true
   override_special = "!@#$%^&*()-_=+{}[]|:;\"'<>,.?/"
 }
 
