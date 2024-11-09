@@ -84,7 +84,7 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/hydroserver_database_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
       - name: Terraform Plan
         id: plan
         run: |
@@ -192,7 +192,7 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/hydroserver_database_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
