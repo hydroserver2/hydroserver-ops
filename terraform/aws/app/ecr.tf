@@ -27,8 +27,8 @@ resource "aws_vpc_endpoint" "ecr_api_endpoint" {
   vpc_id            = aws_vpc.hydroserver_vpc.id
   service_name      = "com.amazonaws.${var.region}.ecr.api"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = [aws_subnet.hydroserver_subnet_a.id, aws_subnet.hydroserver_subnet_b.id]
-  security_group_ids = [aws_security_group.hydroserver_sg.id]
+  subnet_ids        = [aws_subnet.hydroserver_private_subnet_a.id, aws_subnet.hydroserver_private_subnet_b.id]
+  security_group_ids = [aws_security_group.hydroserver_vpc_sg.id]
 
   tags = {
     "${var.tag_key}" = var.tag_value
@@ -39,8 +39,8 @@ resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
   vpc_id            = aws_vpc.hydroserver_vpc.id
   service_name      = "com.amazonaws.${var.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
-  subnet_ids        = [aws_subnet.hydroserver_subnet_a.id, aws_subnet.hydroserver_subnet_b.id]
-  security_group_ids = [aws_security_group.hydroserver_sg.id]
+  subnet_ids        = [aws_subnet.hydroserver_private_subnet_a.id, aws_subnet.hydroserver_private_subnet_b.id]
+  security_group_ids = [aws_security_group.hydroserver_vpc_sg.id]
 
   tags = {
     "${var.tag_key}" = var.tag_value
