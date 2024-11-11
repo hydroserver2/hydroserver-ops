@@ -7,7 +7,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
   source_configuration {
     image_repository {
-      image_identifier = "${aws_ecr_repository.hydroserver_api_repo.repository_url}:latest"
+      image_identifier = "${aws_ecr_repository.hydroserver_api_repository.repository_url}:latest"
       image_repository_type = "ECR"
     }
 
