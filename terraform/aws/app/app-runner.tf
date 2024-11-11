@@ -61,3 +61,51 @@ resource "aws_apprunner_service" "hydroserver_api" {
     "${var.tag_key}" = var.tag_value
   }
 }
+
+# -------------------------------------------------- #
+# IAM Role for App Runner Service                   #
+# -------------------------------------------------- #
+
+resource "aws_iam_role" "app_runner_service_role" {
+  name = "hydroserver-api-service-role-${var.instance}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "build.apprunner.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "app_runner_policy_attachment" {
+  name       = "hydroserver-api-service-policy-attachment-${var.instance}"
+  policy_arn = aws_iam_policy.app_runner_service_policy.arn
+  roles      = [aws_iam_role.app_runner_service_role.name]
+}
+
+resource "aws_iam_policy" "app_runner_service_policy" {
+  name = "hydroserver-api-service-policy-${var.instance}"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = [
+          "secretsmanager:GetSecretValue",
+          "s3:GetObject"
+        ]
+        Effect   = "Allow"
+        Resource = [
+        ]
+      }
+    ]
+  })
+}
+
+
