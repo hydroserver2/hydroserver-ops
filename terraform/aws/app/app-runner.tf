@@ -14,22 +14,6 @@ resource "aws_apprunner_service" "hydroserver_api" {
     authentication_configuration {
       access_role_arn = aws_iam_role.app_runner_service_role.arn
     }
-
-    environment_variables {
-      DATABASE_URL         = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-database-url-${var.instance}"
-      SECRET_KEY           = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-api-secret-key-${var.instance}"
-      DEPLOYED             = "True"
-      DEPLOYMENT_BACKEND   = "aws"
-      # STORAGE_BUCKET       = aws_s3_bucket.hydroserver_storage_bucket.bucket
-      # SMTP_URL             = aws_secretsmanager_secret.hydroserver_smtp_url.arn
-      # ACCOUNTS_EMAIL       = aws_secretsmanager_secret.hydroserver_oauth_google.arn
-      PROXY_BASE_URL       = ""
-      ALLOWED_HOSTS        = ""
-      # OAUTH_GOOGLE         = aws_secretsmanager_secret.hydroserver_oauth_google.arn
-      # OAUTH_ORCID          = aws_secretsmanager_secret.hydroserver_oauth_orcid.arn
-      # OAUTH_HYDROSHARE     = aws_secretsmanager_secret.hydroserver_oauth_hydroshare.arn
-      DEBUG                = ""
-    }
   }
 
   vpc_configuration {
@@ -44,6 +28,27 @@ resource "aws_apprunner_service" "hydroserver_api" {
     interval_seconds = 30
     timeout_seconds = 5
     retries = 3
+  }
+
+  image_configuration {
+    runtime_environment_secrets {
+      DATABASE_URL         = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-database-url-${var.instance}"
+      SECRET_KEY           = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-api-secret-key-${var.instance}"
+    }
+
+    runtime_environment_variables {
+      DEPLOYED             = "True"
+      DEPLOYMENT_BACKEND   = "aws"
+      # STORAGE_BUCKET       = aws_s3_bucket.hydroserver_storage_bucket.bucket
+      # SMTP_URL             = aws_secretsmanager_secret.hydroserver_smtp_url.arn
+      # ACCOUNTS_EMAIL       = aws_secretsmanager_secret.hydroserver_oauth_google.arn
+      PROXY_BASE_URL       = ""
+      ALLOWED_HOSTS        = ""
+      # OAUTH_GOOGLE         = aws_secretsmanager_secret.hydroserver_oauth_google.arn
+      # OAUTH_ORCID          = aws_secretsmanager_secret.hydroserver_oauth_orcid.arn
+      # OAUTH_HYDROSHARE     = aws_secretsmanager_secret.hydroserver_oauth_hydroshare.arn
+      DEBUG                = ""
+    }
   }
 
   service_role = aws_iam_role.app_runner_service_role.arn
