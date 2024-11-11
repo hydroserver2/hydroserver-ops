@@ -36,7 +36,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
     vpc_configuration {
       vpc_id          = aws_vpc.hydroserver_vpc.id
       subnets         = [aws_subnet.hydroserver_private_subnet_a.id, aws_subnet.hydroserver_private_subnet_b.id]
-      security_group_ids = [aws_security_group.hydroserver_sg.id]
+      security_group_ids = [aws_security_group.hydroserver_vpc_sg.id]
     }
 
     health_check_configuration {
