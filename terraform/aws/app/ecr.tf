@@ -14,7 +14,7 @@ resource "aws_ecr_repository" "hydroserver_api_repository" {
   }
 
   tags = {
-    "${var.label_key}" = var.label_value
+    "${var.tag_key}" = var.tag_value
   }
 }
 
@@ -31,18 +31,18 @@ resource "aws_vpc_endpoint" "ecr_api_endpoint" {
   security_group_ids = [aws_security_group.hydroserver_sg.id]
 
   tags = {
-    "${var.label_key}" = var.label_value
+    "${var.tag_key}" = var.tag_value
   }
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
   vpc_id            = aws_vpc.hydroserver_vpc.id
-  service_name      = "com.amazonaws.${var.region}.ecr.dkr"  # Docker ECR endpoint
+  service_name      = "com.amazonaws.${var.region}.ecr.dkr"
   vpc_endpoint_type = "Interface"
   subnet_ids        = [aws_subnet.hydroserver_subnet_a.id, aws_subnet.hydroserver_subnet_b.id]
   security_group_ids = [aws_security_group.hydroserver_sg.id]
 
   tags = {
-    "${var.label_key}" = var.label_value
+    "${var.tag_key}" = var.tag_value
   }
 }
