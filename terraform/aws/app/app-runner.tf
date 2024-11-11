@@ -60,3 +60,4 @@ resource "aws_apprunner_service" "hydroserver_api" {
   tags = {
     "${var.tag_key}" = var.tag_value
   }
+}
