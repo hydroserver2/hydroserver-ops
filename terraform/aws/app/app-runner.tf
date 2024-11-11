@@ -10,12 +10,12 @@ resource "aws_apprunner_service" "hydroserver_api" {
       image_identifier = "${aws_ecr_repository.hydroserver_api_repository.repository_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
-        runtime_environment_secrets {
+        runtime_environment_secrets = {
           DATABASE_URL         = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-database-url-${var.instance}"
           SECRET_KEY           = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-api-secret-key-${var.instance}"
         }
     
-        runtime_environment_variables {
+        runtime_environment_variables = {
           DEPLOYED             = "True"
           DEPLOYMENT_BACKEND   = "aws"
           # STORAGE_BUCKET       = aws_s3_bucket.hydroserver_storage_bucket.bucket
