@@ -226,7 +226,7 @@ jobs:
     if: always() && (needs.link-hydroserver-database.result == 'success' || needs.setup-hydroserver-database.result == 'success') && github.event.inputs.action == 'Initialize HydroServer Deployment'
     defaults:
       run:
-        working-directory: ./terraform/gcp/app
+        working-directory: ./terraform/aws/app
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
