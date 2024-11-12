@@ -97,10 +97,11 @@ resource "aws_iam_policy" "app_runner_service_policy" {
       {
         Action   = [
           "secretsmanager:GetSecretValue",
-          "s3:GetObject"
         ]
         Effect   = "Allow"
         Resource = [
+          "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-database-url-${var.instance}",
+          "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-api-secret-key-${var.instance}"
         ]
       }
     ]
