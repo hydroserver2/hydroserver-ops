@@ -283,6 +283,14 @@ jobs:
       - name: Push Docker Image to AWS ECR
         run: |
           docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest
+      - name: Terraform Apply
+        run: |
+          terraform apply \
+          -auto-approve -input=false \
+          -var "instance=${{ github.event.inputs.environment }}" \
+          -var "region=${{ vars.AWS_REGION }}" \
+          -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
+          -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
 
   teardown-hydroserver-services:
     needs: check-environment-variables
