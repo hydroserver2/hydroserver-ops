@@ -10,7 +10,7 @@ resource "aws_ecr_repository" "hydroserver_api_repository" {
   }
 
   encryption_configuration {
-    encryption_type = "AES256"
+    encryption_type = "NONE"
   }
 
   tags = {
