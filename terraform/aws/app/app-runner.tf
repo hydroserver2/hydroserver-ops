@@ -3,7 +3,11 @@
 # -------------------------------------------------- #
 
 resource "aws_apprunner_service" "hydroserver_api" {
-  service_name = "hydroserver-api-${var.instance}"
+  service_name      = "hydroserver-api-${var.instance}"
+  
+  instance_configuration {
+    instance_role_arn = aws_iam_role.app_runner_service_role.arn
+  }
 
   source_configuration {
     image_repository {
