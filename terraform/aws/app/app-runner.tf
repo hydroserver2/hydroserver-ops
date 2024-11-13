@@ -63,8 +63,8 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
 resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
   vpc_connector_name = "hydroserver-api-vpc-connector-${var.instance}"
-  subnet_ids         = [aws_subnet.hydroserver_private_subnet_a.id, aws_subnet.hydroserver_private_subnet_b.id]
-  security_group_ids = [aws_security_group.hydroserver_vpc_sg.id]
+  subnets         = [aws_subnet.hydroserver_private_subnet_a.id, aws_subnet.hydroserver_private_subnet_b.id]
+  security_groups = [aws_security_group.hydroserver_vpc_sg.id]
 }
 
 # -------------------------------------------------- #
