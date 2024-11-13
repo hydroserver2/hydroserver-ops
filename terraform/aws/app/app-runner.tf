@@ -45,7 +45,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
     egress_configuration {
       egress_type       = "VPC"
-      vpc_connector_arn = aws_vpc.hydroserver_vpc.arn
+      vpc_connector_arn = aws_apprunner_vpc_connector.hydroserver_vpc_connector.arn
     }
   }
 
@@ -59,6 +59,12 @@ resource "aws_apprunner_service" "hydroserver_api" {
   tags = {
     "${var.tag_key}" = var.tag_value
   }
+}
+
+resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
+  vpc_connector_name = "hydroserver-api-vpc-connector-${var.instance}"
+  subnet_ids         = [aws_subnet.hydroserver_private_subnet_a.id, aws_subnet.hydroserver_private_subnet_b.id]
+  security_group_ids = [aws_security_group.hydroserver_vpc_sg.id]
 }
 
 # -------------------------------------------------- #
