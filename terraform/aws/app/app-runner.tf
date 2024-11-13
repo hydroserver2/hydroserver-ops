@@ -126,7 +126,7 @@ resource "aws_iam_role" "app_runner_access_role" {
         Action    = "sts:AssumeRole"
         Effect    = "Allow"
         Principal = {
-          Service = "apprunner.amazonaws.com"
+          Service = "tasks.apprunner.amazonaws.com"
         }
       }
     ]
@@ -145,9 +145,10 @@ resource "aws_iam_policy" "app_runner_ecr_access_policy" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability",
-          "ecr:GetAuthorizationToken"
+          "ecr:GetAuthorizationToken",
+          "ecr:DescribeImages"
         ]
-        Resource = "arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository:hydroserver-api-*"
+        Resource = "*"
       }
     ]
   })
