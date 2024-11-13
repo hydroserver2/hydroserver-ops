@@ -9,10 +9,6 @@ resource "aws_ecr_repository" "hydroserver_api_repository" {
     scan_on_push = true
   }
 
-  encryption_configuration {
-    encryption_type = "NONE"
-  }
-
   tags = {
     "${var.tag_key}" = var.tag_value
   }
