@@ -118,6 +118,7 @@ resource "aws_iam_policy_attachment" "app_runner_service_policy_attachment" {
 
 resource "aws_iam_role" "app_runner_access_role" {
   name = "hydroserver-api-access-role-${var.instance}"
+  path = "/service-role/"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -126,7 +127,7 @@ resource "aws_iam_role" "app_runner_access_role" {
         Action    = "sts:AssumeRole"
         Effect    = "Allow"
         Principal = {
-          Service = "tasks.apprunner.amazonaws.com"
+          Service = "build.apprunner.amazonaws.com"
         }
       }
     ]
