@@ -9,6 +9,7 @@ resource "google_compute_backend_service" "cloud_run_backend" {
     group = google_compute_region_network_endpoint_group.hydroserver_neg.id
   }
   enable_cdn = true
+  security_policy = google_compute_security_policy.cdn_security_policy.id
 }
 
 # -------------------------------------------------- #
@@ -19,6 +20,7 @@ resource "google_compute_backend_bucket" "data_mgmt_bucket_backend" {
   name       = "hydroserver-${var.instance}-data-mgmt-bucket"
   bucket_name = google_storage_bucket.hydroserver_data_mgmt_app_bucket.name
   enable_cdn  = true
+  security_policy = google_compute_security_policy.cdn_security_policy.id
 }
 
 # -------------------------------------------------- #
@@ -29,6 +31,7 @@ resource "google_compute_backend_bucket" "storage_bucket_backend" {
   name       = "hydroserver-${var.instance}-storage-bucket"
   bucket_name = google_storage_bucket.hydroserver_storage_bucket.name
   enable_cdn  = true
+  security_policy = google_compute_security_policy.cdn_security_policy.id
 }
 
 # -------------------------------------------------- #
