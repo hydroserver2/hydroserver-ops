@@ -58,20 +58,8 @@ resource "google_compute_url_map" "cdn_url_map" {
 }
 
 # -------------------------------------------------- #
-# HTTPS Proxy                                        #
+# HTTPS Proxy for HTTPS Traffic                     #
 # -------------------------------------------------- #
-
-resource "google_compute_target_http_proxy" "cdn_http_proxy" {
-  name    = "hydroserver-${var.instance}-cdn-http-proxy"
-  url_map = google_compute_url_map.cdn_url_map.id
-}
-
-resource "google_compute_managed_ssl_certificate" "temporary_ssl_cert" {
-  name = "temp-ssl-cert-${var.instance}"
-  managed {
-    domains = ["hydroserver.example.com"]
-  }
-}
 
 resource "google_compute_target_https_proxy" "cdn_https_proxy" {
   name    = "hydroserver-${var.instance}-cdn-https-proxy"
@@ -83,16 +71,15 @@ resource "google_compute_target_https_proxy" "cdn_https_proxy" {
   }
 }
 
-# -------------------------------------------------- #
-# Global Static IP Address                           #
-# -------------------------------------------------- #
-
-resource "google_compute_global_address" "cdn_ip_address" {
-  name = "hydroserver-${var.instance}-cdn-ip"
+resource "google_compute_managed_ssl_certificate" "temporary_ssl_cert" {
+  name = "temp-ssl-cert-${var.instance}"
+  managed {
+    domains = ["hydroserver.example.com"]
+  }
 }
 
 # -------------------------------------------------- #
-# Global Forwarding Rule                             #
+# Global Forwarding Rule for HTTPS Traffic           #
 # -------------------------------------------------- #
 
 resource "google_compute_global_forwarding_rule" "cdn_https_forwarding_rule" {
@@ -101,4 +88,50 @@ resource "google_compute_global_forwarding_rule" "cdn_https_forwarding_rule" {
   target                = google_compute_target_https_proxy.cdn_https_proxy.id
   port_range            = "443"
   load_balancing_scheme = "EXTERNAL"
+}
+
+# -------------------------------------------------- #
+# URL Map for HTTP Redirect to HTTPS                 #
+# -------------------------------------------------- #
+
+resource "google_compute_url_map" "http_redirect_url_map" {
+  name            = "hydroserver-${var.instance}-http-redirect-url-map"
+  default_service = google_compute_backend_service.cloud_run_backend.id
+
+  default_route_action {
+    redirect_action {
+      https_redirect = true
+      strip_query    = false
+      status_code    = "MOVED_PERMANENTLY"
+    }
+  }
+}
+
+# -------------------------------------------------- #
+# HTTP Proxy for HTTP to HTTPS Redirect              #
+# -------------------------------------------------- #
+
+resource "google_compute_target_http_proxy" "cdn_http_proxy" {
+  name    = "hydroserver-${var.instance}-cdn-http-proxy"
+  url_map = google_compute_url_map.http_redirect_url_map.id
+}
+
+# -------------------------------------------------- #
+# Global Forwarding Rule for HTTP Traffic (Redirect) #
+# -------------------------------------------------- #
+
+resource "google_compute_global_forwarding_rule" "cdn_http_forwarding_rule" {
+  name                  = "hydroserver-${var.instance}-cdn-http-forwarding"
+  ip_address            = google_compute_global_address.cdn_ip_address.id
+  target                = google_compute_target_http_proxy.cdn_http_proxy.id
+  port_range            = "80"
+  load_balancing_scheme = "EXTERNAL"
+}
+
+# -------------------------------------------------- #
+# Global Static IP Address                           #
+# -------------------------------------------------- #
+
+resource "google_compute_global_address" "cdn_ip_address" {
+  name = "hydroserver-${var.instance}-cdn-ip"
 }
