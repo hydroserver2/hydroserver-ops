@@ -46,6 +46,7 @@ resource "google_compute_url_map" "cdn_url_map" {
   path_matcher {
     name            = "allpaths"
     default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.self_link
+
     path_rule {
       paths   = ["/api/*", "/admin/*"]
       service = google_compute_backend_service.cloud_run_backend.self_link
@@ -95,15 +96,12 @@ resource "google_compute_global_forwarding_rule" "cdn_https_forwarding_rule" {
 # -------------------------------------------------- #
 
 resource "google_compute_url_map" "http_redirect_url_map" {
-  name            = "hydroserver-${var.instance}-http-redirect-url-map"
-  default_service = google_compute_backend_service.cloud_run_backend.id
+  name = "hydroserver-${var.instance}-http-redirect-url-map"
 
-  default_route_action {
-    redirect_action {
-      https_redirect = true
-      strip_query    = false
-      status_code    = "MOVED_PERMANENTLY"
-    }
+  default_url_redirect {
+    redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+    strip_query            = false
+    https_redirect         = true
   }
 }
 
@@ -113,7 +111,7 @@ resource "google_compute_url_map" "http_redirect_url_map" {
 
 resource "google_compute_target_http_proxy" "cdn_http_proxy" {
   name    = "hydroserver-${var.instance}-cdn-http-proxy"
-  url_map = google_compute_url_map.http_redirect_url_map.id
+  url_map = google_compute_url_map.http_redirect_url_map.self_link
 }
 
 # -------------------------------------------------- #
@@ -121,11 +119,10 @@ resource "google_compute_target_http_proxy" "cdn_http_proxy" {
 # -------------------------------------------------- #
 
 resource "google_compute_global_forwarding_rule" "cdn_http_forwarding_rule" {
-  name                  = "hydroserver-${var.instance}-cdn-http-forwarding"
-  ip_address            = google_compute_global_address.cdn_ip_address.id
-  target                = google_compute_target_http_proxy.cdn_http_proxy.id
-  port_range            = "80"
-  load_balancing_scheme = "EXTERNAL"
+  name       = "hydroserver-${var.instance}-cdn-http-forwarding"
+  target     = google_compute_target_http_proxy.cdn_http_proxy.self_link
+  ip_address = google_compute_global_address.cdn_ip_address.address
+  port_range = "80"
 }
 
 # -------------------------------------------------- #
