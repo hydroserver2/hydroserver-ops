@@ -1,4 +1,4 @@
-# -------------------------------------------------- #
+er# -------------------------------------------------- #
 # AWS HydroServer RDS PostgreSQL Database            #
 # -------------------------------------------------- #
 
@@ -146,7 +146,7 @@ resource "aws_secretsmanager_secret" "hydroserver_database_url" {
 
 resource "aws_secretsmanager_secret_version" "hydroserver_database_url_version" {
   secret_id     = aws_secretsmanager_secret.hydroserver_database_url.id
-  secret_string = "postgresql://${aws_db_instance.hydroserver_db_instance.username}:${random_password.hydroserver_db_user_password.result}@${aws_db_instance.hydroserver_db_instance.endpoint}/${aws_db_instance.hydroserver_db_instance.db_name}?sslmode=disable"
+  secret_string = "postgresql://${aws_db_instance.hydroserver_db_instance.username}:${random_password.hydroserver_db_user_password.result}@${aws_db_instance.hydroserver_db_instance.endpoint}/hydroserver?sslmode=disable"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
