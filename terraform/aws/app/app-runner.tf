@@ -15,10 +15,10 @@ resource "aws_apprunner_service" "hydroserver_api" {
       image_repository_type = "ECR"
       image_configuration {
         runtime_environment_secrets = {
-          DATABASE_URL         = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-database-url-${var.instance}"
-          SECRET_KEY           = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-api-secret-key-${var.instance}"
+          DATABASE_URL         = data.aws_secretsmanager_secret.database_url.arn
+          SECRET_KEY           = data.aws_secretsmanager_secret.secret_key.arn
         }
-    
+
         runtime_environment_variables = {
           DEPLOYED             = "True"
           DEPLOYMENT_BACKEND   = "aws"
@@ -71,6 +71,14 @@ resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
   security_groups = [aws_security_group.hydroserver_vpc_sg.id]
 }
 
+data "aws_secretsmanager_secret" "database_url" {
+  name = "hydroserver-database-url-${var.instance}"
+}
+
+data "aws_secretsmanager_secret" "secret_key" {
+  name = "hydroserver-api-secret-key-${var.instance}"
+}
+
 # -------------------------------------------------- #
 # IAM Roles for App Runner Service                   #
 # -------------------------------------------------- #
@@ -90,14 +98,6 @@ resource "aws_iam_role" "app_runner_service_role" {
       }
     ]
   })
-}
-
-data "aws_secretsmanager_secret" "database_url" {
-  name = "hydroserver-database-url-${var.instance}"
-}
-
-data "aws_secretsmanager_secret" "secret_key" {
-  name = "hydroserver-api-secret-key-${var.instance}"
 }
 
 resource "aws_iam_policy" "app_runner_service_policy" {
