@@ -8,6 +8,7 @@ resource "aws_db_instance" "hydroserver_db_instance" {
   identifier            = "hydroserver-${var.instance}"
   engine                = "postgres"
   engine_version        = "15"
+  db_name               = "hydroserver"
   instance_class        = "db.t4g.micro"
   allocated_storage     = 20
   max_allocated_storage = 100
@@ -52,19 +53,6 @@ resource "aws_db_instance" "hydroserver_db_instance" {
       allocated_storage,
       max_allocated_storage
     ]
-  }
-}
-
-resource "null_resource" "create_hydroserver_db" {
-  depends_on = [aws_db_instance.hydroserver_db_instance]
-
-  provisioner "local-exec" {
-    command = <<EOT
-      PGPASSWORD="${random_password.hydroserver_db_user_password.result}" \
-      psql -h ${aws_db_instance.hydroserver_db_instance.address} \
-           -U hsdbadmin \
-           -c "CREATE DATABASE hydroserver;"
-    EOT
   }
 }
 
