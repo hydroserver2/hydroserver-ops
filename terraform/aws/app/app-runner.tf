@@ -14,23 +14,23 @@ resource "aws_apprunner_service" "hydroserver_api" {
       image_identifier = "${aws_ecr_repository.hydroserver_api_repository.repository_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
+        port = "8000"
         runtime_environment_secrets = {
           DATABASE_URL         = data.aws_secretsmanager_secret.database_url.arn
           SECRET_KEY           = data.aws_secretsmanager_secret.secret_key.arn
         }
-
         runtime_environment_variables = {
           DEPLOYED             = "True"
           DEPLOYMENT_BACKEND   = "aws"
           # STORAGE_BUCKET       = aws_s3_bucket.hydroserver_storage_bucket.bucket
           # SMTP_URL             = aws_secretsmanager_secret.hydroserver_smtp_url.arn
           # ACCOUNTS_EMAIL       = aws_secretsmanager_secret.hydroserver_oauth_google.arn
-          PROXY_BASE_URL       = ""
-          ALLOWED_HOSTS        = ""
+          PROXY_BASE_URL       = "https://www.example.com"
+          # ALLOWED_HOSTS        = ""
           # OAUTH_GOOGLE         = aws_secretsmanager_secret.hydroserver_oauth_google.arn
           # OAUTH_ORCID          = aws_secretsmanager_secret.hydroserver_oauth_orcid.arn
           # OAUTH_HYDROSHARE     = aws_secretsmanager_secret.hydroserver_oauth_hydroshare.arn
-          DEBUG                = ""
+          # DEBUG                = ""
         }
       }
     }
