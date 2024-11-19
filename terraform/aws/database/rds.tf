@@ -55,6 +55,19 @@ resource "aws_db_instance" "hydroserver_db_instance" {
   }
 }
 
+resource "null_resource" "create_hydroserver_db" {
+  depends_on = [aws_db_instance.hydroserver_db_instance]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      PGPASSWORD="${random_password.hydroserver_db_user_password.result}" \
+      psql -h ${aws_db_instance.hydroserver_db_instance.address} \
+           -U hsdbadmin \
+           -c "CREATE DATABASE hydroserver;"
+    EOT
+  }
+}
+
 data "aws_subnet" "hydroserver_subnet_a" {
   filter {
     name   = "tag:name"
