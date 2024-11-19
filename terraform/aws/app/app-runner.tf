@@ -92,6 +92,14 @@ resource "aws_iam_role" "app_runner_service_role" {
   })
 }
 
+data "aws_secretsmanager_secret" "database_url" {
+  name = "hydroserver-database-url-${var.instance}"
+}
+
+data "aws_secretsmanager_secret" "secret_key" {
+  name = "hydroserver-api-secret-key-${var.instance}"
+}
+
 resource "aws_iam_policy" "app_runner_service_policy" {
   name = "hydroserver-api-secrets-access-policy-${var.instance}"
 
@@ -102,8 +110,8 @@ resource "aws_iam_policy" "app_runner_service_policy" {
         Effect   = "Allow"
         Action   = "secretsmanager:GetSecretValue"
         Resource = [
-          "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-database-url-${var.instance}",
-          "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:hydroserver-api-secret-key-${var.instance}"
+          data.aws_secretsmanager_secret.database_url.arn,
+          data.aws_secretsmanager_secret.secret_key.arn
         ]
       }
     ]
