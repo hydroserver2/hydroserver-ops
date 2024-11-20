@@ -17,7 +17,7 @@ resource "aws_db_instance" "hydroserver_db_instance" {
 
   # Networking Configuration
   db_subnet_group_name   = aws_db_subnet_group.hydroserver_db_subnet_group.name
-  vpc_security_group_ids = [data.aws_security_group.hydroserver_sg.id]
+  vpc_security_group_ids = [aws_security_group.hydroserver_rds_sg.id]
 
   # High Availability
   multi_az = true
@@ -56,42 +56,58 @@ resource "aws_db_instance" "hydroserver_db_instance" {
   }
 }
 
-data "aws_subnet" "hydroserver_subnet_a" {
+resource "random_password" "hydroserver_db_user_password" {
+  length  = 16
+  special = false
+}
+
+# -------------------------------------------------- #
+# AWS HydroServer RDS Security Group                 #
+# -------------------------------------------------- #
+
+data "aws_vpc" "hydroserver_vpc" {
   filter {
-    name   = "tag:name"
-    values = ["hydroserver-private-${var.instance}-a"]
+    name   = "tag:Name"
+    values = ["hydroserver-${var.instance}"]
   }
 }
 
-data "aws_subnet" "hydroserver_subnet_b" {
-  filter {
-    name   = "tag:name"
-    values = ["hydroserver-private-${var.instance}-b"]
-  }
+data "aws_subnet_ids" "hydroserver_private_subnets" {
+  vpc_id = data.aws_vpc.hydroserver_vpc.id
 }
 
 resource "aws_db_subnet_group" "hydroserver_db_subnet_group" {
-  name       = "hydroserver-db-subnet-group"
-  subnet_ids = [
-    data.aws_subnet.hydroserver_subnet_a.id,
-    data.aws_subnet.hydroserver_subnet_b.id
-  ]
+  name       = "hydroserver-rds-subnet-group-${var.instance}"
+  subnet_ids = data.aws_subnet_ids.hydroserver_private_subnets.ids
 
   tags = {
     "${var.tag_key}" = var.tag_value
   }
 }
 
-data "aws_security_group" "hydroserver_sg" {
-  filter {
-    name   = "tag:name"
-    values = ["hydroserver-${var.instance}"]
-  }
-}
+resource "aws_security_group" "hydroserver_rds_sg" {
+  name        = "hydroserver-rds-sg-${var.instance}"
+  description = "Security group for RDS to allow only internal VPC traffic."
 
-resource "random_password" "hydroserver_db_user_password" {
-  length  = 16
-  special = false
+  vpc_id = data.aws_vpc.hydroserver_vpc.id
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.hydroserver_vpc.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.hydroserver_vpc.cidr_block]
+  }
+
+  tags = {
+    "${var.tag_key}" = var.tag_value
+  }
 }
 
 # -------------------------------------------------- #
@@ -134,7 +150,7 @@ resource "aws_secretsmanager_secret" "hydroserver_database_url" {
 
 resource "aws_secretsmanager_secret_version" "hydroserver_database_url_version" {
   secret_id     = aws_secretsmanager_secret.hydroserver_database_url.id
-  secret_string = "postgresql://${aws_db_instance.hydroserver_db_instance.username}:${random_password.hydroserver_db_user_password.result}@${aws_db_instance.hydroserver_db_instance.endpoint}/hydroserver?sslmode=disable"
+  secret_string = "postgresql://${aws_db_instance.hydroserver_db_instance.username}:${random_password.hydroserver_db_user_password.result}@${aws_db_instance.hydroserver_db_instance.endpoint}/hydroserver?sslmode=require"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
