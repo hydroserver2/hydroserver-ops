@@ -19,17 +19,6 @@ resource "aws_ecr_repository" "hydroserver_api_repository" {
 # VPC Endpoints for ECR                              #
 # -------------------------------------------------- #
 
-data "aws_vpc" "hydroserver_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-${var.instance}"]
-  }
-}
-
-data "aws_subnet_ids" "hydroserver_private_subnets" {
-  vpc_id = data.aws_vpc.hydroserver_vpc.id
-}
-
 resource "aws_vpc_endpoint" "ecr_api_endpoint" {
   vpc_id             = data.aws_vpc.hydroserver_vpc.id
   service_name       = "com.amazonaws.${var.region}.ecr.api"
