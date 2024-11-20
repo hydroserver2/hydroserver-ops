@@ -65,7 +65,7 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     defaults:
       run:
-        working-directory: ./terraform/aws/app
+        working-directory: ./terraform/aws/network
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -84,16 +84,12 @@ jobs:
           terraform init \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
-          -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
+          -backend-config="key=state/hydroserver_network_${{ github.event.inputs.environment }}"
       - name: Terraform Plan
         id: plan
         run: |
           terraform plan \
           -no-color -input=false \
-          -target=aws_vpc.hydroserver_vpc \
-          -target=aws_subnet.hydroserver_private_subnet_a \
-          -target=aws_subnet.hydroserver_private_subnet_b \
-          -target=aws_security_group.hydroserver_vpc_sg \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
@@ -106,10 +102,6 @@ jobs:
         run: |
           terraform apply \
           -auto-approve -input=false \
-          -target=aws_vpc.hydroserver_vpc \
-          -target=aws_subnet.hydroserver_private_subnet_a \
-          -target=aws_subnet.hydroserver_private_subnet_b \
-          -target=aws_security_group.hydroserver_vpc_sg \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
