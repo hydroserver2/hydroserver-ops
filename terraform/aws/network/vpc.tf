@@ -34,3 +34,7 @@ resource "aws_subnet" "hydroserver_private_subnet_b" {
     "${var.tag_key}" = var.tag_value
   }
 }
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
