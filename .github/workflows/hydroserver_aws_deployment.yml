@@ -284,7 +284,7 @@ jobs:
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
 
-  teardown-hydroserver-services:
+  teardown-hydroserver-application:
     needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
@@ -311,6 +311,92 @@ jobs:
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="region=${{ vars.AWS_REGION }}" \
           -backend-config="key=state/hydroserver_application_${{ github.event.inputs.environment }}"
+      - name: Terraform Plan Destroy
+        id: plan_destroy
+        run: |
+          terraform plan -destroy -no-color -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.AWS_REGION }}"
+        continue-on-error: true
+      - name: Terraform Plan Destroy Status
+        if: steps.plan_destroy.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -auto-approve -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.AWS_REGION }}"  
+
+  teardown-hydroserver-database:
+    needs: teardown-hydroserver-application
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
+    defaults:
+      run:
+        working-directory: ./terraform/aws/database
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_IAM_ROLE }}
+          role-session-name: create-hydroserver-resources
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: |
+          terraform init \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="region=${{ vars.AWS_REGION }}" \
+          -backend-config="key=state/hydroserver_database_${{ github.event.inputs.environment }}"
+      - name: Terraform Plan Destroy
+        id: plan_destroy
+        run: |
+          terraform plan -destroy -no-color -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.AWS_REGION }}"
+        continue-on-error: true
+      - name: Terraform Plan Destroy Status
+        if: steps.plan_destroy.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -auto-approve -input=false \
+          -var instance="${{ github.event.inputs.environment }}" \
+          -var region="${{ vars.AWS_REGION }}"
+
+  teardown-hydroserver-network:
+    needs: teardown-hydroserver-database
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
+    defaults:
+      run:
+        working-directory: ./terraform/aws/network
+    steps:
+      - name: Checkout Ops Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ vars.AWS_IAM_ROLE }}
+          role-session-name: create-hydroserver-resources
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: |
+          terraform init \
+          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+          -backend-config="region=${{ vars.AWS_REGION }}" \
+          -backend-config="key=state/hydroserver_network_${{ github.event.inputs.environment }}"
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
