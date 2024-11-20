@@ -42,3 +42,15 @@ locals {
 }
 
 data "aws_caller_identity" "current" {}
+
+data "aws_vpc" "hydroserver_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["hydroserver-${var.instance}"]
+  }
+}
+
+data "aws_subnet_ids" "hydroserver_private_subnets" {
+  vpc_id = data.aws_vpc.hydroserver_vpc.id
+}
+
