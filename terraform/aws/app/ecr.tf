@@ -3,7 +3,8 @@
 # -------------------------------------------------- #
 
 resource "aws_ecr_repository" "hydroserver_api_repository" {
-  name = "hydroserver-api-${var.instance}"
+  name         = "hydroserver-api-${var.instance}"
+  force_delete = true
 
   image_scanning_configuration {
     scan_on_push = true
