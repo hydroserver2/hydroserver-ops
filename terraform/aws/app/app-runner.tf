@@ -65,17 +65,6 @@ resource "aws_apprunner_service" "hydroserver_api" {
   }
 }
 
-data "aws_vpc" "hydroserver_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-${var.instance}"]
-  }
-}
-
-data "aws_subnet_ids" "hydroserver_private_subnets" {
-  vpc_id = data.aws_vpc.hydroserver_vpc.id
-}
-
 resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
   vpc_connector_name = "hydroserver-api-vpc-connector-${var.instance}"
   subnets         = data.aws_subnet_ids.hydroserver_private_subnets.ids
