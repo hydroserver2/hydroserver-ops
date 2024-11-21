@@ -76,7 +76,7 @@ data "aws_subnet_ids" "hydroserver_db_subnets" {
   vpc_id = data.aws_vpc.hydroserver_vpc.id
   filter {
     name   = "tag:Name"
-    values = ["hydroserver-db-${var.instance}-*"]
+    values = ["hydroserver-private-db-${var.instance}-*"]
   }
 }
 
