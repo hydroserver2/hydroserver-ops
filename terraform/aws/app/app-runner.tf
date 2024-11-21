@@ -22,15 +22,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
         runtime_environment_variables = {
           DEPLOYED             = "True"
           DEPLOYMENT_BACKEND   = "aws"
-          # STORAGE_BUCKET       = aws_s3_bucket.hydroserver_storage_bucket.bucket
-          # SMTP_URL             = aws_secretsmanager_secret.hydroserver_smtp_url.arn
-          # ACCOUNTS_EMAIL       = aws_secretsmanager_secret.hydroserver_oauth_google.arn
           PROXY_BASE_URL       = "https://www.example.com"
-          # ALLOWED_HOSTS        = ""
-          # OAUTH_GOOGLE         = aws_secretsmanager_secret.hydroserver_oauth_google.arn
-          # OAUTH_ORCID          = aws_secretsmanager_secret.hydroserver_oauth_orcid.arn
-          # OAUTH_HYDROSHARE     = aws_secretsmanager_secret.hydroserver_oauth_hydroshare.arn
-          # DEBUG                = ""
         }
       }
     }
@@ -67,7 +59,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
 resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
   vpc_connector_name = "hydroserver-api-vpc-connector-${var.instance}"
-  subnets         = data.aws_subnet_ids.hydroserver_private_subnets.ids
+  subnets            = data.aws_subnets.hydroserver_app_subnets.ids
 }
 
 data "aws_secretsmanager_secret" "database_url" {
