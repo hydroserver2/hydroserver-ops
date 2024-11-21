@@ -23,6 +23,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
           DEPLOYED             = "True"
           DEPLOYMENT_BACKEND   = "aws"
           PROXY_BASE_URL       = "https://www.example.com"
+          STORAGE_BUCKET       = "hydroserver-storage-${var.instance}-${data.aws_caller_identity.current.account_id}"
         }
       }
     }
