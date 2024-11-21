@@ -72,13 +72,17 @@ data "aws_vpc" "hydroserver_vpc" {
   }
 }
 
-data "aws_subnet_ids" "hydroserver_private_subnets" {
+data "aws_subnet_ids" "hydroserver_db_subnets" {
   vpc_id = data.aws_vpc.hydroserver_vpc.id
+  filter {
+    name   = "tag:Name"
+    values = ["hydroserver-db-${var.instance}-*"]
+  }
 }
 
 resource "aws_db_subnet_group" "hydroserver_db_subnet_group" {
   name       = "hydroserver-rds-subnet-group-${var.instance}"
-  subnet_ids = data.aws_subnet_ids.hydroserver_private_subnets.ids
+  subnet_ids = data.aws_subnet_ids.hydroserver_db_subnets.ids
 
   tags = {
     "${var.tag_key}" = var.tag_value
