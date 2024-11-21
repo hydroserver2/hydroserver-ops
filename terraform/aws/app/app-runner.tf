@@ -4,6 +4,10 @@
 
 resource "aws_apprunner_service" "hydroserver_api" {
   service_name      = "hydroserver-api-${var.instance}"
+
+  depends_on = [
+    aws_s3_bucket.hydroserver_storage_bucket
+  ]
   
   instance_configuration {
     instance_role_arn = aws_iam_role.app_runner_service_role.arn
