@@ -51,7 +51,10 @@ data "aws_vpc" "hydroserver_vpc" {
 }
 
 data "aws_subnets" "hydroserver_app_subnets" {
-  vpc_id = data.aws_vpc.hydroserver_vpc.id
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.hydroserver_vpc.id]
+  }
   filter {
     name   = "tag:Name"
     values = ["hydroserver-private-app-${var.instance}-*"]
