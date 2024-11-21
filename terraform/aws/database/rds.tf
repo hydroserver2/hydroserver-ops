@@ -15,6 +15,8 @@ resource "aws_db_instance" "hydroserver_db_instance" {
   storage_type          = "gp2"
   publicly_accessible   = false
 
+  skip_final_snapshot   = true
+
   # Networking Configuration
   db_subnet_group_name   = aws_db_subnet_group.hydroserver_db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.hydroserver_rds_sg.id]
