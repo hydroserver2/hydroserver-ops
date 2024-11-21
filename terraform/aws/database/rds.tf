@@ -14,8 +14,7 @@ resource "aws_db_instance" "hydroserver_db_instance" {
   max_allocated_storage = 100
   storage_type          = "gp2"
   publicly_accessible   = false
-
-  skip_final_snapshot   = true
+  final_snapshot_identifier = "hydroserver-final-snapshot-${var.instance}-${timestamp()}"
 
   # Networking Configuration
   db_subnet_group_name   = aws_db_subnet_group.hydroserver_db_subnet_group.name
