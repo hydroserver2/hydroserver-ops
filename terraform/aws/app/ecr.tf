@@ -49,20 +49,20 @@ resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
 
 resource "aws_security_group" "ecr_sg" {
   name        = "hydroserver-ecr-sg-${var.instance}"
-  description = "Security group for ECR to allow only internal VPC traffic."
+  description = "Security group for ECR to allow VPC traffic."
   vpc_id      = data.aws_vpc.hydroserver_vpc.id
 
   ingress {
     from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = [data.aws_vpc.hydroserver_vpc.cidr_block]
   }
 
   egress {
     from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
