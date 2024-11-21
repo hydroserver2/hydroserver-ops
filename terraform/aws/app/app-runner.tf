@@ -42,7 +42,6 @@ resource "aws_apprunner_service" "hydroserver_api" {
     egress_configuration {
       egress_type       = "VPC"
       vpc_connector_arn = aws_apprunner_vpc_connector.hydroserver_vpc_connector.arn
-      security_groups   = [aws_security_group.hydroserver_api_vpc_connector_sg.id]
     }
   }
 
@@ -61,6 +60,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
 resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
   vpc_connector_name = "hydroserver-api-vpc-connector-${var.instance}"
   subnets            = data.aws_subnets.hydroserver_app_subnets.ids
+  security_groups    = [aws_security_group.hydroserver_api_vpc_connector_sg.id]
 }
 
 data "aws_secretsmanager_secret" "database_url" {
@@ -78,7 +78,7 @@ data "aws_secretsmanager_secret" "secret_key" {
 resource "aws_security_group" "hydroserver_api_vpc_connector_sg" {
   name        = "hydroserver-api-vpc-connector-sg-${var.instance}"
   description = "Security group for App Runner VPC Connector."
-  vpc_id      = aws_vpc.hydroserver_vpc.id
+  vpc_id      = data.aws_vpc.hydroserver_vpc.id
 
   egress {
     from_port   = 0
