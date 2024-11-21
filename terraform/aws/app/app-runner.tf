@@ -71,6 +71,34 @@ data "aws_secretsmanager_secret" "secret_key" {
 }
 
 # -------------------------------------------------- #
+# Security Group for App Runner Service              #
+# -------------------------------------------------- #
+
+resource "aws_security_group" "hydroserver_api_vpc_connector_sg" {
+  name        = "hydroserver-api-vpc-connector-sg-${var.instance}"
+  description = "Security group for App Runner VPC Connector."
+  vpc_id      = aws_vpc.hydroserver_vpc.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [data.aws_vpc.hydroserver_vpc.cidr_block]
+  }
+
+  tags = {
+    "${var.tag_key}" = var.tag_value
+  }
+}
+
+# -------------------------------------------------- #
 # IAM Roles for App Runner Service                   #
 # -------------------------------------------------- #
 
