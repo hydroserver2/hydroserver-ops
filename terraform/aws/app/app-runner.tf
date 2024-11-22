@@ -18,7 +18,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
       image_identifier = "${aws_ecr_repository.hydroserver_api_repository.repository_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
-        port = "80"
+        port = "8000"
         runtime_environment_secrets = {
           DATABASE_URL         = data.aws_secretsmanager_secret.database_url.arn
           SECRET_KEY           = data.aws_secretsmanager_secret.secret_key.arn
@@ -52,7 +52,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
   health_check_configuration {
     protocol = "HTTP"
-    path     = "/health-check/"
+    path     = "/health-check"
     interval = 5
     timeout  = 2
   }
