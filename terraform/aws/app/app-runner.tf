@@ -53,8 +53,8 @@ resource "aws_apprunner_service" "hydroserver_api" {
   health_check_configuration {
     protocol = "HTTP"
     path     = "/health-check"
-    interval = 5
-    timeout  = 2
+    interval = 20
+    timeout  = 18
   }
 
   tags = {
