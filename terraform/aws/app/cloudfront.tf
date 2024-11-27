@@ -17,7 +17,7 @@ resource "aws_cloudfront_distribution" "hydroserver_distribution" {
 
   origin {
     origin_id   = "hydroserver-api"
-    domain_name = aws_apprunner_service.hydroserver_api_service.service_url
+    domain_name = aws_apprunner_service.hydroserver_api.service_url
 
     custom_origin_config {
       origin_protocol_policy = "https-only"
