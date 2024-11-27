@@ -41,7 +41,7 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
   network_configuration {
     ingress_configuration {
-      is_publicly_accessible = false
+      is_publicly_accessible = true
     }
 
     egress_configuration {
