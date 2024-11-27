@@ -50,7 +50,7 @@ data "aws_vpc" "hydroserver_vpc" {
   }
 }
 
-data "aws_subnets" "hydroserver_app_subnets" {
+data "aws_subnets" "hydroserver_app_private_subnets" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.hydroserver_vpc.id]
@@ -58,5 +58,16 @@ data "aws_subnets" "hydroserver_app_subnets" {
   filter {
     name   = "tag:Name"
     values = ["hydroserver-private-app-${var.instance}-*"]
+  }
+}
+
+data "aws_subnets" "hydroserver_app_public_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.hydroserver_vpc.id]
+  }
+  filter {
+    name   = "tag:Name"
+    values = ["hydroserver-public-app-${var.instance}-*"]
   }
 }
