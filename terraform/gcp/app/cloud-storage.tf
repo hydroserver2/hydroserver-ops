@@ -9,15 +9,12 @@ resource "google_storage_bucket" "hydroserver_storage_bucket" {
   force_destroy = false
   uniform_bucket_level_access = true
   public_access_prevention = "unspecified"
+}
 
-  iam_policy {
-    binding {
-      role = "roles/storage.objectViewer"
-      members = [
-        "allUsers"
-      ]
-    }
-  }
+resource "google_storage_bucket_iam_member" "storage_bucket_public_access" {
+  bucket = google_storage_bucket.hydroserver_storage_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
 }
 
 # -------------------------------------------------- #
@@ -35,15 +32,12 @@ resource "google_storage_bucket" "hydroserver_data_mgmt_app_bucket" {
   website {
     main_page_suffix = "index.html"
   }
+}
 
-  iam_policy {
-    binding {
-      role = "roles/storage.objectViewer"
-      members = [
-        "allUsers"
-      ]
-    }
-  }
+resource "google_storage_bucket_iam_member" "data_mgmt_app_bucket_public_access" {
+  bucket = google_storage_bucket.hydroserver_data_mgmt_app_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
 }
 
 # -------------------------------------------------- #
