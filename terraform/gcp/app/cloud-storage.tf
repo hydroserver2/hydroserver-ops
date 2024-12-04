@@ -8,7 +8,16 @@ resource "google_storage_bucket" "hydroserver_storage_bucket" {
   project       = var.project_id
   force_destroy = false
   uniform_bucket_level_access = true
-  public_access_prevention = "enforced"
+  public_access_prevention = "unspecified"
+
+  iam_policy {
+    binding {
+      role = "roles/storage.objectViewer"
+      members = [
+        "allUsers"
+      ]
+    }
+  }
 }
 
 # -------------------------------------------------- #
@@ -21,10 +30,19 @@ resource "google_storage_bucket" "hydroserver_data_mgmt_app_bucket" {
   project       = var.project_id
   force_destroy = true
   uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
+  public_access_prevention    = "unspecified"
 
   website {
     main_page_suffix = "index.html"
+  }
+
+  iam_policy {
+    binding {
+      role = "roles/storage.objectViewer"
+      members = [
+        "allUsers"
+      ]
+    }
   }
 }
 
