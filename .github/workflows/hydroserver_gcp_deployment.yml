@@ -411,7 +411,7 @@ jobs:
       - name: Deploy to Cloud Storage
         working-directory: ./data-mgmt
         run: |
-          gsutil -m rsync -d ./dist gs://hydroserver-data-mgmt-app-${{ github.event.inputs.environment }}-${{ vars.GCP_PROJECT_ID }}/
+          gsutil -m rsync -r -d ./dist gs://hydroserver-data-mgmt-app-${{ github.event.inputs.environment }}-${{ vars.GCP_PROJECT_ID }}/
       # - name: Invalidate CloudFront Distribution Cache
       #   run: |
       #     aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_ID }} --paths "/*"
