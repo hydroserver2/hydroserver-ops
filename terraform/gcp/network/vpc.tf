@@ -34,7 +34,9 @@ resource "google_compute_subnetwork" "hydroserver_private_db_subnet_a" {
   network       = google_compute_network.hydroserver_vpc_network.id
   private_ip_google_access = true
   log_config {
-    enable = true
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
@@ -49,7 +51,9 @@ resource "google_compute_subnetwork" "hydroserver_private_app_subnet_a" {
   network       = google_compute_network.hydroserver_vpc_network.id
   private_ip_google_access = true
   log_config {
-    enable = true
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
   }
 }
 
