@@ -5,10 +5,6 @@
 resource "google_compute_network" "hydroserver_vpc_network" {
   name                    = "hydroserver-${var.instance}"
   auto_create_subnetworks = false
-
-  labels = {
-    "${var.label_key}" = local.label_value
-  }
 }
 
 resource "google_compute_global_address" "hydroserver_private_service_ip_range" {
