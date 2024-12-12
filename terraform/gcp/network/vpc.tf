@@ -33,10 +33,6 @@ resource "google_compute_subnetwork" "hydroserver_private_db_subnet_a" {
   region        = var.region
   network       = google_compute_network.hydroserver_vpc_network.id
   private_ip_google_access = true
-
-  labels = {
-    "${var.label_key}" = local.label_value
-  }
 }
 
 # -------------------------------------------------- #
@@ -49,10 +45,6 @@ resource "google_compute_subnetwork" "hydroserver_private_app_subnet_a" {
   region        = var.region
   network       = google_compute_network.hydroserver_vpc_network.id
   private_ip_google_access = true
-
-  labels = {
-    "${var.label_key}" = local.label_value
-  }
 }
 
 # -------------------------------------------------- #
@@ -83,8 +75,4 @@ resource "google_compute_firewall" "hydroserver_vpc_allow_egress_internet" {
 
   direction = "EGRESS"
   destination_ranges = ["0.0.0.0/0"]
-
-  labels = {
-    "${var.label_key}" = local.label_value
-  }
 }
