@@ -33,6 +33,9 @@ resource "google_compute_subnetwork" "hydroserver_private_db_subnet_a" {
   region        = var.region
   network       = google_compute_network.hydroserver_vpc_network.id
   private_ip_google_access = true
+  log_config {
+    enable = true
+  }
 }
 
 # -------------------------------------------------- #
@@ -45,6 +48,9 @@ resource "google_compute_subnetwork" "hydroserver_private_app_subnet_a" {
   region        = var.region
   network       = google_compute_network.hydroserver_vpc_network.id
   private_ip_google_access = true
+  log_config {
+    enable = true
+  }
 }
 
 # -------------------------------------------------- #
