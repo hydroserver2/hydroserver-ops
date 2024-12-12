@@ -11,6 +11,26 @@ resource "google_compute_network" "hydroserver_vpc_network" {
   }
 }
 
+resource "google_compute_global_address" "hydroserver_private_service_ip_range" {
+  name          = "hydroserver-private-service-range-${var.instance}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.hydroserver_vpc_network.id
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
+}
+
+resource "google_service_networking_connection" "hydroserver_private_service_connection" {
+  network = google_compute_network.hydroserver_vpc_network.id
+  service = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [
+    google_compute_global_address.hydroserver_private_service_ip_range.name
+  ]
+}
+
 # -------------------------------------------------- #
 # Private Subnets for Database                       #
 # -------------------------------------------------- #
