@@ -17,7 +17,7 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     password_validation_policy {
       enable_password_policy = true
       min_length             = 12
-      complexity             = "MEDIUM"
+      complexity             = "COMPLEXITY_DEFAULT"
     }
     database_flags {
       name  = "max_connections"
