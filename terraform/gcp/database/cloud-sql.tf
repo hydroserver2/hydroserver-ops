@@ -23,10 +23,6 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
       name  = "max_connections"
       value = "100"
     }
-    database_flags {
-      name  = "cloudsql.iam_authentication"
-      value = "on"
-    }
     user_labels = {
       "${var.label_key}" = local.label_value
     }
@@ -70,7 +66,7 @@ resource "google_secret_manager_secret" "hydroserver_database_url" {
 
 resource "google_secret_manager_secret_version" "hydroserver_database_url_version" {
   secret      = google_secret_manager_secret.hydroserver_database_url.id
-  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.connection_name}/${google_sql_database.hydroserver_db.name}?sslmode=require"
+  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.private_ip_address}/${google_sql_database.hydroserver_db.name}?sslmode=require"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
