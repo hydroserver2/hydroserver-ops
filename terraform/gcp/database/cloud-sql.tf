@@ -10,9 +10,9 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled       = false
-      private_network    = data.google_compute_network.hydroserver_vpc_network.self_link
+      private_network    = data.google_compute_subnetwork.hydroserver_private_db_subnet_a.self_link
       # require_ssl        = false
-      allocated_ip_range = data.google_compute_subnetwork.hydroserver_private_db_subnet_a.ip_cidr_range
+      # allocated_ip_range = data.google_compute_subnetwork.hydroserver_private_db_subnet_a.ip_cidr_range
       # enable_private_path_for_google_cloud_services = true
     }
     database_flags {
@@ -27,10 +27,6 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
       "${var.label_key}" = local.label_value
     }
   }
-}
-
-data "google_compute_network" "hydroserver_vpc_network" {
-  name = "hydroserver-${var.instance}"
 }
 
 data "google_compute_subnetwork" "hydroserver_private_db_subnet_a" {
