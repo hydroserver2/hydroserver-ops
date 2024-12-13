@@ -87,7 +87,13 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 
     service_account = google_service_account.cloud_run_service_account.email
 
-    vpc_access{
+    metadata {
+      annotations {
+        "run.googleapis.com/ingress" = "internal-and-cloud-load-balancing"
+      }
+    }
+
+    vpc_access {
       connector = "projects/${data.google_project.gcp_project.project_id}/locations/${var.region}/connectors/hs-vpc-conn-${var.instance}"
     }
 
@@ -105,54 +111,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 #   role   = "roles/run.invoker"
 #   member = "projectViewer:${data.google_project.gcp_project.project_id}"
 # }
-
-# -------------------------------------------------- #
-# HydroServer GCP Cloud Run Environment Secrets      #
-# -------------------------------------------------- #
-
-resource "google_secret_manager_secret" "hydroserver_smtp_url" {
-  secret_id = "hydroserver-smtp-url-${var.instance}"
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-}
-
-resource "google_secret_manager_secret" "hydroserver_oauth_google" {
-  secret_id = "hydroserver-oauth-google-${var.instance}"
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-}
-
-resource "google_secret_manager_secret" "hydroserver_oauth_hydroshare" {
-  secret_id = "hydroserver-oauth-hydroshare-${var.instance}"
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-}
-
-resource "google_secret_manager_secret" "hydroserver_oauth_orcid" {
-  secret_id = "hydroserver-oauth-orcid-${var.instance}"
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
-      }
-    }
-  }
-}
 
 # -------------------------------------------------- #
 # HydroServer GCP Cloud Run Service Account          #
