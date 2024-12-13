@@ -20,7 +20,7 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
       value = "100"
     }
     database_flags {
-      name  = "cloudsql_iam_authentication"
+      name  = "cloudsql.iam_authentication"
       value = "on"
     }
     user_labels = {
