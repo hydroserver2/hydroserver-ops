@@ -20,6 +20,11 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
         container_port = 8000
       }
 
+      volume_mounts {
+        name      = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
       env {
         name  = "DATABASE_URL"
         value_source {
@@ -93,6 +98,13 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
       }
     }
 
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [data.google_sql_database_instance.hydroserver_db_instance.connection_name]
+      }
+    }
+
     vpc_access {
       connector = "projects/${data.google_project.gcp_project.project_id}/locations/${var.region}/connectors/hs-vpc-conn-${var.instance}"
     }
@@ -101,6 +113,10 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
       "${var.label_key}" = local.label_value
     }
   }
+}
+
+data "google_sql_database_instance" "hydroserver_db_instance" {
+  name = "hydroserver-${var.instance}"
 }
 
 # resource "google_cloud_run_service_iam_member" "public_access" {
