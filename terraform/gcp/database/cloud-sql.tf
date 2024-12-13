@@ -9,18 +9,33 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
   settings {
     tier = "db-f1-micro"
     ip_configuration {
-      ipv4_enabled    = false
-      private_network = "projects/${data.google_project.gcp_project.project_id}/global/networks/hydroserver-${var.instance}"
-      require_ssl     = false
+      ipv4_enabled       = false
+      private_network    = data.google_compute_network.hydroserver_vpc_network.self_link
+      # require_ssl        = false
+      allocated_ip_range = data.google_compute_subnetwork.hydroserver_private_db_subnet_a.ip_cidr_range
+      # enable_private_path_for_google_cloud_services = true
     }
     database_flags {
       name  = "max_connections"
       value = "100"
     }
+    database_flags {
+      name  = "cloudsql_iam_authentication"
+      value = "on"
+    }
     user_labels = {
       "${var.label_key}" = local.label_value
     }
   }
+}
+
+data "google_compute_network" "hydroserver_vpc_network" {
+  name = "hydroserver-${var.instance}"
+}
+
+data "google_compute_subnetwork" "hydroserver_private_db_subnet_a" {
+  name   = "hydroserver-private-db-${var.instance}-a"
+  region = var.region
 }
 
 resource "google_sql_database" "hydroserver_db" {
@@ -56,7 +71,7 @@ resource "google_secret_manager_secret" "hydroserver_database_url" {
 
 resource "google_secret_manager_secret_version" "hydroserver_database_url_version" {
   secret      = google_secret_manager_secret.hydroserver_database_url.id
-  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.ip_address[0].ip_address}/${google_sql_database.hydroserver_db.name}?sslmode=disable"
+  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@${google_sql_database_instance.hydroserver_db_instance.connection_name}/${google_sql_database.hydroserver_db.name}?sslmode=require"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
