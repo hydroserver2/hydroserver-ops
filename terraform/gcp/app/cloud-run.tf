@@ -87,10 +87,10 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 
     service_account = google_service_account.cloud_run_service_account.email
 
-    vpc_access{
-      connector = "projects/${data.google_project.gcp_project.project_id}/locations/${var.region}/connectors/hydroserver-${var.instance}"
-      egress = "ALL_TRAFFIC"
-    }
+    # vpc_access{
+    #   connector = "projects/${data.google_project.gcp_project.project_id}/locations/${var.region}/connectors/hydroserver-${var.instance}"
+    #   egress = "ALL_TRAFFIC"
+    # }
 
     labels = {
       "${var.label_key}" = local.label_value
