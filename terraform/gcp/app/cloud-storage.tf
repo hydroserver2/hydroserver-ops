@@ -10,11 +10,11 @@ resource "google_storage_bucket" "hydroserver_storage_bucket" {
   uniform_bucket_level_access = true
 }
 
-resource "google_storage_bucket_iam_member" "storage_bucket_public_access" {
-  bucket = google_storage_bucket.hydroserver_storage_bucket.name
-  role   = "roles/storage.objectViewer"
-  member = "allAuthenticatedUsers"
-}
+# resource "google_storage_bucket_iam_member" "storage_bucket_public_access" {
+#   bucket = google_storage_bucket.hydroserver_storage_bucket.name
+#   role   = "roles/storage.objectViewer"
+#   member = "allAuthenticatedUsers"
+# }
 
 # -------------------------------------------------- #
 # HydroServer Data Management App Bucket             #
@@ -32,11 +32,11 @@ resource "google_storage_bucket" "hydroserver_data_mgmt_app_bucket" {
   }
 }
 
-resource "google_storage_bucket_iam_member" "data_mgmt_app_bucket_public_access" {
-  bucket = google_storage_bucket.hydroserver_data_mgmt_app_bucket.name
-  role   = "roles/storage.objectViewer"
-  member = "allAuthenticatedUsers"
-}
+# resource "google_storage_bucket_iam_member" "data_mgmt_app_bucket_public_access" {
+#   bucket = google_storage_bucket.hydroserver_data_mgmt_app_bucket.name
+#   role   = "roles/storage.objectViewer"
+#   member = "allAuthenticatedUsers"
+# }
 
 # -------------------------------------------------- #
 # Placeholder index.html File                        #
