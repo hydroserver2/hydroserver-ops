@@ -94,7 +94,7 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 
     metadata {
       annotations {
-        "run.googleapis.com/ingress" = "internal-and-cloud-load-balancing"
+        run.googleapis.com/ingress = "internal-and-cloud-load-balancing"
       }
     }
 
