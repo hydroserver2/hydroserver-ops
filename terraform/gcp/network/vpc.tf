@@ -26,7 +26,7 @@ resource "google_service_networking_connection" "hydroserver_private_service_con
 resource "google_vpc_access_connector" "hydroserver_vpc_connector" {
   name   = "hydroserver-vpc-connector-${var.instance}"
   region = var.region
-  network = data.google_compute_network.hydroserver_vpc_network.self_link
+  network = google_compute_network.hydroserver_vpc_network.self_link
 
   ip_cidr_range = "10.8.0.0/28"
 }
