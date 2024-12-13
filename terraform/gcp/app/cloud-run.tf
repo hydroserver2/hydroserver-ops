@@ -98,14 +98,14 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
   }
 }
 
-resource "google_cloud_run_service_iam_member" "public_access" {
-  location = var.region
-  project  = data.google_project.gcp_project.project_id
-  service  = google_cloud_run_v2_service.hydroserver_api.name
+# resource "google_cloud_run_service_iam_member" "public_access" {
+#   location = var.region
+#   project  = data.google_project.gcp_project.project_id
+#   service  = google_cloud_run_v2_service.hydroserver_api.name
 
-  role   = "roles/run.invoker"
-  member = "projectViewer:${data.google_project.gcp_project.project_id}"
-}
+#   role   = "roles/run.invoker"
+#   member = "projectViewer:${data.google_project.gcp_project.project_id}"
+# }
 
 # -------------------------------------------------- #
 # HydroServer GCP Cloud Run Environment Secrets      #
