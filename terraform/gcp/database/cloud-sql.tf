@@ -66,7 +66,7 @@ resource "google_secret_manager_secret" "hydroserver_database_url" {
 
 resource "google_secret_manager_secret_version" "hydroserver_database_url_version" {
   secret      = google_secret_manager_secret.hydroserver_database_url.id
-  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@/cloudsql/${google_sql_database_instance.hydroserver_db_instance.connection_name}/${google_sql_database.hydroserver_db.name}?sslmode=require"
+  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@localhost:5432/${google_sql_database.hydroserver_db.name}?host=/cloudsql/${google_sql_database_instance.hydroserver_db_instance.connection_name}&sslmode=require"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
