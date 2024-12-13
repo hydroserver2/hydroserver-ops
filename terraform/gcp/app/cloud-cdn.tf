@@ -8,7 +8,7 @@ resource "google_compute_backend_service" "cloud_run_backend" {
   backend {
     group = google_compute_region_network_endpoint_group.hydroserver_neg.id
   }
-  enable_cdn = true
+  enable_cdn = false
   security_policy = google_compute_security_policy.cdn_security_policy.id
 }
 
