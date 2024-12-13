@@ -5,6 +5,7 @@
 resource "google_cloud_run_v2_service" "hydroserver_api" {
   name     = "hydroserver-api-${var.instance}"
   location = var.region
+  ingress = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
 
   template {
     containers {
@@ -91,12 +92,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
     }
 
     service_account = google_service_account.cloud_run_service_account.email
-
-    metadata {
-      annotations {
-        run.googleapis.com/ingress = "internal-and-cloud-load-balancing"
-      }
-    }
 
     volumes {
       name = "cloudsql"
