@@ -54,6 +54,10 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
         value = "gcp"
       }
       env {
+        name  = "USE_CLOUD_SQL_AUTH_PROXY"
+        value = "true"
+      }
+      env {
         name  = "STORAGE_BUCKET"
         value = google_storage_bucket.hydroserver_storage_bucket.name
       }
