@@ -6,7 +6,6 @@ resource "google_compute_backend_service" "cloud_run_backend" {
   name        = "hydroserver-${var.instance}-cdn-backend"
   description = "Backend service for HydroServer API"
   enable_cdn = false
-  security_policy = google_compute_security_policy.cdn_security_policy.id
 }
 
 # -------------------------------------------------- #
