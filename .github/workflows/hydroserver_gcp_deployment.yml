@@ -164,7 +164,7 @@ jobs:
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   link-hydroserver-database:
-    needs: setup-hydroserver-network
+    needs: check-environment-variables
     if: needs.check-environment-variables.outputs.database_url_exists == 'true' && github.event.inputs.action == 'Initialize HydroServer Deployment'
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
