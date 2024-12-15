@@ -7,12 +7,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
   location = var.region
   ingress = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
 
-  metadata {
-    annotations = {
-      "run.googleapis.com/cloudsql-instances" = data.google_sql_database_instance.hydroserver_db_instance.connection_name
-    }
-  }
-
   template {
     containers {
       image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
