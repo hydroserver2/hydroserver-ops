@@ -10,9 +10,8 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     tier = "db-f1-micro"
     availability_type = "REGIONAL"
     ip_configuration {
-      ipv4_enabled       = false
-      private_network    = data.google_compute_network.hydroserver_vpc_network.self_link
-      require_ssl        = true
+      ipv4_enabled        = true
+      authorized_networks = []
     }
     password_validation_policy {
       enable_password_policy = true
@@ -27,10 +26,6 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
       "${var.label_key}" = local.label_value
     }
   }
-}
-
-data "google_compute_network" "hydroserver_vpc_network" {
-  name = "hydroserver-${var.instance}"
 }
 
 resource "google_sql_database" "hydroserver_db" {
