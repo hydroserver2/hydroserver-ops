@@ -59,59 +59,59 @@ jobs:
             echo "::set-output name=database_url_exists::true"
           fi
 
-  setup-hydroserver-network:
-    needs: check-environment-variables
-    if: github.event.inputs.action == 'Initialize HydroServer Deployment'
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    defaults:
-      run:
-        working-directory: ./terraform/gcp/network
-    steps:
-      - name: Checkout Ops Repo
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Configure GCP Credentials
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Terraform Init
-        run: |
-          terraform init \
-          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
-          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_network_${{ github.event.inputs.environment }}"
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform plan \
-          -no-color -input=false \
-          -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-        continue-on-error: true
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-      - name: Terraform Apply
-        run: |
-          terraform apply \
-          -auto-approve -input=false \
-          -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
+  # setup-hydroserver-network:
+  #   needs: check-environment-variables
+  #   if: github.event.inputs.action == 'Initialize HydroServer Deployment'
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ github.event.inputs.environment }}
+  #   defaults:
+  #     run:
+  #       working-directory: ./terraform/gcp/network
+  #   steps:
+  #     - name: Checkout Ops Repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: main
+  #     - name: Configure GCP Credentials
+  #       uses: google-github-actions/auth@v2
+  #       with:
+  #         project_id: ${{ vars.GCP_PROJECT_ID }}
+  #         workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
+  #         service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
+  #     - name: Terraform Init
+  #       run: |
+  #         terraform init \
+  #         -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
+  #         -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
+  #         -backend-config="prefix=state/hydroserver_network_${{ github.event.inputs.environment }}"
+  #     - name: Terraform Plan
+  #       id: plan
+  #       run: |
+  #         terraform plan \
+  #         -no-color -input=false \
+  #         -var "instance=${{ github.event.inputs.environment }}" \
+  #         -var "region=${{ vars.GCP_REGION }}" \
+  #         -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+  #         -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
+  #         -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
+  #       continue-on-error: true
+  #     - name: Terraform Plan Status
+  #       if: steps.plan.outcome == 'failure'
+  #       run: exit 1
+  #     - name: Terraform Apply
+  #       run: |
+  #         terraform apply \
+  #         -auto-approve -input=false \
+  #         -var "instance=${{ github.event.inputs.environment }}" \
+  #         -var "region=${{ vars.GCP_REGION }}" \
+  #         -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+  #         -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
+  #         -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   setup-hydroserver-database:
-    needs: setup-hydroserver-network
+    needs: check-environment-variables
     if: needs.check-environment-variables.outputs.database_url_exists == 'false' && github.event.inputs.action == 'Initialize HydroServer Deployment'
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
