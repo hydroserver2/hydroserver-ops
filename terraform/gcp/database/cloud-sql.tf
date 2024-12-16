@@ -21,6 +21,18 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
       name  = "max_connections"
       value = "100"
     }
+    database_flags {
+      name  = "log_statement"
+      value = "all"
+    }
+    database_flags {
+      name  = "log_duration"
+      value = "on"
+    }
+    database_flags {
+      name  = "log_line_prefix"
+      value = "%m [%p] %l %u %d %r %a %t %v %c"
+    }
     user_labels = {
       "${var.label_key}" = local.label_value
     }
@@ -33,18 +45,26 @@ resource "google_sql_database" "hydroserver_db" {
 }
 
 resource "random_password" "hydroserver_db_user_password" {
-  length  = 16
-  special          = true
+  length           = 15
   upper            = true
   lower            = true
   numeric          = true
-  override_special = "-_+~."
+  special          = true
+  override_special = "-_~."
+}
+
+resource "random_string" "hydroserver_db_user_password_prefix" {
+  length           = 1
+  upper            = true
+  lower            = true
+  numeric          = false
+  special          = false
 }
 
 resource "google_sql_user" "hydroserver_db_user" {
   name     = "hsdbadmin"
   instance = google_sql_database_instance.hydroserver_db_instance.name
-  password = random_password.hydroserver_db_user_password.result
+  password = "${random_string.hydroserver_db_user_password_prefix.result}${random_password.hydroserver_db_user_password.result}"
 }
 
 # -------------------------------------------------- #
@@ -64,7 +84,7 @@ resource "google_secret_manager_secret" "hydroserver_database_url" {
 
 resource "google_secret_manager_secret_version" "hydroserver_database_url_version" {
   secret      = google_secret_manager_secret.hydroserver_database_url.id
-  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@127.0.0.1:5432/${google_sql_database.hydroserver_db.name}?host=/cloudsql/${google_sql_database_instance.hydroserver_db_instance.connection_name}&sslmode=require"
+  secret_data = "postgresql://${google_sql_user.hydroserver_db_user.name}:${google_sql_user.hydroserver_db_user.password}@/${google_sql_database.hydroserver_db.name}?host=/cloudsql/${google_sql_database_instance.hydroserver_db_instance.connection_name}"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
