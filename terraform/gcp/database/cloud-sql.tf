@@ -47,9 +47,13 @@ resource "google_sql_database" "hydroserver_db" {
 resource "random_password" "hydroserver_db_user_password" {
   length           = 15
   upper            = true
+  min_upper        = 1
   lower            = true
+  min_lower        = 1
   numeric          = true
+  min_numeric      = 1
   special          = true
+  min_special      = 1
   override_special = "-_~."
 }
 
