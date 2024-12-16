@@ -104,10 +104,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
       }
     }
 
-    # vpc_access {
-    #   connector = "projects/${data.google_project.gcp_project.project_id}/locations/${var.region}/connectors/hs-vpc-conn-${var.instance}"
-    # }
-
     labels = {
       "${var.label_key}" = local.label_value
     }
@@ -117,15 +113,6 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
 data "google_sql_database_instance" "hydroserver_db_instance" {
   name = "hydroserver-${var.instance}"
 }
-
-# resource "google_cloud_run_service_iam_member" "public_access" {
-#   location = var.region
-#   project  = data.google_project.gcp_project.project_id
-#   service  = google_cloud_run_v2_service.hydroserver_api.name
-
-#   role   = "roles/run.invoker"
-#   member = "projectViewer:${data.google_project.gcp_project.project_id}"
-# }
 
 # -------------------------------------------------- #
 # HydroServer GCP Cloud Run Service Account          #
@@ -165,16 +152,3 @@ resource "google_storage_bucket_iam_member" "cloud_run_storage_bucket_access" {
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
-
-# -------------------------------------------------- #
-# HydroServer GCP Cloud Run Service NEG              #
-# -------------------------------------------------- #
-
-# resource "google_compute_region_network_endpoint_group" "hydroserver_neg" {
-#   name                  = "hydroserver-api-neg-${var.instance}"
-#   region                = var.region
-#   network_endpoint_type = "SERVERLESS"
-#   cloud_run {
-#     service = google_cloud_run_v2_service.hydroserver_api.name
-#   }
-# }
