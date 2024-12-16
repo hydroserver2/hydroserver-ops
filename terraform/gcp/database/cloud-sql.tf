@@ -31,7 +31,7 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     }
     database_flags {
       name  = "log_line_prefix"
-      value = "%m [%p] %l %u %d %r %a %t %v %c"
+      value = "%m [%p] %l %u %d %r %a %t %v %c "
     }
     user_labels = {
       "${var.label_key}" = local.label_value
