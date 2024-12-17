@@ -36,8 +36,8 @@ resource "google_compute_backend_bucket" "storage_bucket_backend" {
 # URL Map                                            #
 # -------------------------------------------------- #
 
-resource "google_compute_url_map" "cdn_url_map" {
-  name            = "hydroserver-${var.instance}-cdn-url-map"
+resource "google_compute_url_map" "hydroserver_url_map" {
+  name            = "hydroserver-api-url-map-${var.instance}"
   default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.id
   host_rule {
     hosts        = ["*"]
@@ -62,9 +62,9 @@ resource "google_compute_url_map" "cdn_url_map" {
 # HTTPS Proxy for HTTPS Traffic                     #
 # -------------------------------------------------- #
 
-resource "google_compute_target_https_proxy" "cdn_https_proxy" {
-  name    = "hydroserver-${var.instance}-cdn-https-proxy"
-  url_map = google_compute_url_map.cdn_url_map.id
+resource "google_compute_target_https_proxy" "https_proxy" {
+  name    = "hydroserver-https-proxy-${var.instance}"
+  url_map = google_compute_url_map.hydroserver_url_map.id
   ssl_certificates = [google_compute_managed_ssl_certificate.temporary_ssl_cert.id]
 
   lifecycle {
@@ -83,12 +83,12 @@ resource "google_compute_managed_ssl_certificate" "temporary_ssl_cert" {
 # Global Forwarding Rule for HTTPS Traffic           #
 # -------------------------------------------------- #
 
-resource "google_compute_global_forwarding_rule" "cdn_https_forwarding_rule" {
-  name                  = "hydroserver-${var.instance}-cdn-https-forwarding"
-  ip_address            = google_compute_global_address.cdn_ip_address.id
-  target                = google_compute_target_https_proxy.cdn_https_proxy.id
+resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
+  name                  = "hydroserver-api-https-forwarding-${var.instance}"
+  ip_address            = google_compute_global_address.hydroserver_ip_address.id
+  target                = google_compute_target_https_proxy.https_proxy.id
   port_range            = "443"
-  load_balancing_scheme = "EXTERNAL"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 }
 
 # -------------------------------------------------- #
@@ -96,7 +96,7 @@ resource "google_compute_global_forwarding_rule" "cdn_https_forwarding_rule" {
 # -------------------------------------------------- #
 
 resource "google_compute_url_map" "http_redirect_url_map" {
-  name = "hydroserver-${var.instance}-http-redirect-url-map"
+  name = "hydroserver-http-redirect-url-map-${var.instance}"
 
   default_url_redirect {
     redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
@@ -109,8 +109,8 @@ resource "google_compute_url_map" "http_redirect_url_map" {
 # HTTP Proxy for HTTP to HTTPS Redirect              #
 # -------------------------------------------------- #
 
-resource "google_compute_target_http_proxy" "cdn_http_proxy" {
-  name    = "hydroserver-${var.instance}-cdn-http-proxy"
+resource "google_compute_target_http_proxy" "http_proxy" {
+  name    = "hydroserver-http-proxy-${var.instance}"
   url_map = google_compute_url_map.http_redirect_url_map.self_link
 }
 
@@ -118,10 +118,10 @@ resource "google_compute_target_http_proxy" "cdn_http_proxy" {
 # Global Forwarding Rule for HTTP Traffic (Redirect) #
 # -------------------------------------------------- #
 
-resource "google_compute_global_forwarding_rule" "cdn_http_forwarding_rule" {
-  name       = "hydroserver-${var.instance}-cdn-http-forwarding"
-  target     = google_compute_target_http_proxy.cdn_http_proxy.self_link
-  ip_address = google_compute_global_address.cdn_ip_address.address
+resource "google_compute_global_forwarding_rule" "http_forwarding_rule" {
+  name       = "hydroserver-api-http-forwarding-${var.instance}"
+  target     = google_compute_target_http_proxy.http_proxy.self_link
+  ip_address = google_compute_global_address.hydroserver_ip_address.address
   port_range = "80"
 }
 
@@ -129,6 +129,6 @@ resource "google_compute_global_forwarding_rule" "cdn_http_forwarding_rule" {
 # Global Static IP Address                           #
 # -------------------------------------------------- #
 
-resource "google_compute_global_address" "cdn_ip_address" {
+resource "google_compute_global_address" "hydroserver_ip_address" {
   name = "hydroserver-${var.instance}-cdn-ip"
 }
