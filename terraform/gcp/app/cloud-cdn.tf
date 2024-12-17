@@ -2,10 +2,14 @@
 # Cloud CDN Backend Service                          #
 # -------------------------------------------------- #
 
-resource "google_compute_backend_service" "cloud_run_backend" {
-  name        = "hydroserver-${var.instance}-cdn-backend"
-  description = "Backend service for HydroServer API"
-  enable_cdn = false
+resource "google_compute_backend_service" "cloudrun_backend" {
+  name        = "hydroserver-api-backend-${var.instance}"
+  protocol    = "HTTP"
+  timeout_sec = 30
+
+  backend {
+    group = google_compute_region_network_endpoint_group.hydroserver_api_neg.id
+  }
 }
 
 # -------------------------------------------------- #
@@ -45,7 +49,7 @@ resource "google_compute_url_map" "cdn_url_map" {
 
     path_rule {
       paths   = ["/api/*", "/admin/*"]
-      service = google_compute_backend_service.cloud_run_backend.self_link
+      service = google_compute_backend_service.cloudrun_backend.self_link
     }
     path_rule {
       paths   = ["/static/*", "/photos/*"]
