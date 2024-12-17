@@ -110,6 +110,16 @@ resource "google_cloud_run_v2_service" "hydroserver_api" {
   }
 }
 
+resource "google_compute_region_network_endpoint_group" "hydroserver_api_neg" {
+  name                  = "hydroserver-api-neg"
+  region                = var.region
+  network_endpoint_type = "SERVERLESS"
+
+  cloud_run {
+    service = google_cloud_run_v2_service.hydroserver_api.name
+  }
+}
+
 data "google_sql_database_instance" "hydroserver_db_instance" {
   name = "hydroserver-${var.instance}"
 }
