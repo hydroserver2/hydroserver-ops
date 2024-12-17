@@ -163,9 +163,9 @@ resource "google_storage_bucket_iam_member" "cloud_run_storage_bucket_access" {
   member = "serviceAccount:${google_service_account.cloud_run_service_account.email}"
 }
 
-resource "google_cloud_run_service_iam_member" "cloud_run_lb_neg_invoker" {
-  service  = google_cloud_run_v2_service.hydroserver_api.name
-  location = var.region
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:service-${data.google_project.gcp_project.number}@gcp-sa-loadbalancer.iam.gserviceaccount.com"
-}
+# resource "google_cloud_run_service_iam_member" "cloud_run_lb_neg_invoker" {
+#   service  = google_cloud_run_v2_service.hydroserver_api.name
+#   location = var.region
+#   role     = "roles/run.invoker"
+#   member   = "serviceAccount:service-${data.google_project.gcp_project.number}@gcp-sa-loadbalancer.iam.gserviceaccount.com"
+# }
