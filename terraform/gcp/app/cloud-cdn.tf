@@ -130,5 +130,5 @@ resource "google_compute_global_forwarding_rule" "http_forwarding_rule" {
 # -------------------------------------------------- #
 
 resource "google_compute_global_address" "hydroserver_ip_address" {
-  name = "hydroserver-${var.instance}-cdn-ip"
+  name = "hydroserver-ip-${var.instance}"
 }
