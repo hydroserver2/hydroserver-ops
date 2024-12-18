@@ -3,14 +3,16 @@
 # -------------------------------------------------- #
 
 resource "google_sql_database_instance" "hydroserver_db_instance" {
-  name             = "hydroserver-${var.instance}"
-  database_version = "POSTGRES_15"
-  region           = var.region
+  name                = "hydroserver-${var.instance}"
+  database_version    = "POSTGRES_15"
+  region              = var.region
+  deletion_protection = true
   settings {
     tier = "db-f1-micro"
     availability_type = "REGIONAL"
     ip_configuration {
       ipv4_enabled        = true
+      ssl_mode            = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
     password_validation_policy {
       enable_password_policy = true
