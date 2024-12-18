@@ -6,6 +6,7 @@ resource "google_compute_backend_service" "cloudrun_backend" {
   name        = "hydroserver-api-backend-${var.instance}"
   protocol    = "HTTP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
+  security_policy       = google_compute_security_policy.hydroserver_security_policy.id
   timeout_sec = 30
 
   backend {
