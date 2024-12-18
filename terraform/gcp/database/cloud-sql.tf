@@ -12,7 +12,7 @@ resource "google_sql_database_instance" "hydroserver_db_instance" {
     availability_type = "REGIONAL"
     ip_configuration {
       ipv4_enabled        = true
-      ssl_mode            = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
+      ssl_mode            = "ENCRYPTED_ONLY"
     }
     password_validation_policy {
       enable_password_policy = true
