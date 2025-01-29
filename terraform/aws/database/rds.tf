@@ -1,122 +1,111 @@
-# -------------------------------------------------- #
-# AWS HydroServer RDS PostgreSQL Database            #
-# -------------------------------------------------- #
+# ---------------------------------
+# RDS PostgreSQL Database
+# ---------------------------------
 
-resource "aws_db_instance" "hydroserver_db_instance" {
+resource "aws_db_instance" "rds_db_instance" {
+  identifier                 = "hydroserver-${var.instance}"
+  engine                     = "postgres"
+  engine_version             = "15"
+  instance_class             = "db.t4g.micro"
 
-  # Basic Configuration
-  identifier            = "hydroserver-${var.instance}"
-  engine                = "postgres"
-  engine_version        = "15"
-  db_name               = "hydroserver"
-  instance_class        = "db.t4g.micro"
-  allocated_storage     = 20
-  max_allocated_storage = 100
-  storage_type          = "gp2"
-  publicly_accessible   = false
+  storage_type               = "gp2"
+  storage_encrypted          = true
+  allocated_storage          = 20
+  max_allocated_storage      = 100
 
-  # Networking Configuration
-  db_subnet_group_name   = aws_db_subnet_group.hydroserver_db_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.hydroserver_rds_sg.id]
+  publicly_accessible        = false
+  multi_az                   = true
 
-  # High Availability
-  multi_az = true
+  parameter_group_name       = aws_db_parameter_group.rds_db_params.name
+  deletion_protection        = true
+  apply_immediately          = true
+  auto_minor_version_upgrade = true
 
-  # Encryption
-  storage_encrypted = true
-
-  # Backup Configuration
   backup_retention_period = 7
   backup_window           = "03:00-04:00"
 
-  # Performance Insights
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
-  # Enhanced Monitoring
   monitoring_interval = 60
   monitoring_role_arn = aws_iam_role.enhanced_monitoring_role.arn
 
-  # Database Credentials
+  db_name  = "hydroserver"
   username = "hsdbadmin"
-  password = random_password.hydroserver_db_user_password.result
+  password = "${random_string.rds_db_user_password_prefix.result}${random_password.rds_db_user_password.result}"
 
-  # Tags for resource tracking
   tags = {
-    "${var.tag_key}" = var.tag_value
+    "${var.label_key}" = local.label_value
   }
 
-  # Lifecycle settings
   lifecycle {
     ignore_changes = [
       instance_class,
+      storage_type,
       allocated_storage,
-      max_allocated_storage
+      max_allocated_storage,
+      backup_retention_period,
+      backup_window,
+      performance_insights_enabled,
+      performance_insights_retention_period,
+      monitoring_interval
     ]
   }
 }
 
-resource "random_password" "hydroserver_db_user_password" {
-  length  = 16
-  special = false
-}
+resource "aws_db_parameter_group" "rds_db_params" {
+  name   = "hydroserver-${var.instance}"
+  family = "postgres15"
 
-# -------------------------------------------------- #
-# AWS HydroServer RDS Security Group                 #
-# -------------------------------------------------- #
+  parameter {
+    name  = "max_connections"
+    value = "100"
+  }
+  parameter {
+    name  = "log_statement"
+    value = "all"
+  }
+  parameter {
+    name  = "log_duration"
+    value = "on"
+  }
+  parameter {
+    name  = "log_line_prefix"
+    value = "%m [%p] %l %u %d %r %a %t %v %c "
+  }
 
-data "aws_vpc" "hydroserver_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-${var.instance}"]
+  lifecycle {
+    ignore_changes = [
+      parameter
+    ]
   }
 }
 
-data "aws_subnet_ids" "hydroserver_db_subnets" {
-  vpc_id = data.aws_vpc.hydroserver_vpc.id
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-private-db-${var.instance}-*"]
-  }
+resource "random_password" "rds_db_user_password" {
+  length           = 15
+  upper            = true
+  min_upper        = 1
+  lower            = true
+  min_lower        = 1
+  numeric          = true
+  min_numeric      = 1
+  special          = true
+  min_special      = 1
+  override_special = "-_~."
 }
 
-resource "aws_db_subnet_group" "hydroserver_db_subnet_group" {
-  name       = "hydroserver-rds-subnet-group-${var.instance}"
-  subnet_ids = data.aws_subnet_ids.hydroserver_db_subnets.ids
-
-  tags = {
-    "${var.tag_key}" = var.tag_value
-  }
+resource "random_string" "rds_db_user_password_prefix" {
+  length           = 1
+  upper            = true
+  lower            = true
+  numeric          = false
+  special          = false
 }
 
-resource "aws_security_group" "hydroserver_rds_sg" {
-  name        = "hydroserver-rds-sg-${var.instance}"
-  description = "Security group for RDS to allow only internal VPC traffic."
 
-  vpc_id = data.aws_vpc.hydroserver_vpc.id
-
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.hydroserver_vpc.cidr_block]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.hydroserver_vpc.cidr_block]
-  }
-
-  tags = {
-    "${var.tag_key}" = var.tag_value
-  }
-}
-
-# -------------------------------------------------- #
-# IAM Role for RDS Enhanced Monitoring               #
-# -------------------------------------------------- #
+# ---------------------------------
+# IAM Role for RDS Monitoring
+# ---------------------------------
 
 resource "aws_iam_role" "enhanced_monitoring_role" {
   name = "hydroserver-enhanced-monitoring-role-${var.instance}"
@@ -140,11 +129,12 @@ resource "aws_iam_role_policy_attachment" "enhanced_monitoring_role_attachment" 
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
-# -------------------------------------------------- #
-# AWS Secrets Manager for Database Credentials       #
-# -------------------------------------------------- #
 
-resource "aws_secretsmanager_secret" "hydroserver_database_url" {
+# ---------------------------------
+# AWS Secrets Manager
+# ---------------------------------
+
+resource "aws_secretsmanager_secret" "rds_database_url" {
   name = "hydroserver-database-url-${var.instance}"
 
   tags = {
@@ -153,8 +143,8 @@ resource "aws_secretsmanager_secret" "hydroserver_database_url" {
 }
 
 resource "aws_secretsmanager_secret_version" "hydroserver_database_url_version" {
-  secret_id     = aws_secretsmanager_secret.hydroserver_database_url.id
-  secret_string = "postgresql://${aws_db_instance.hydroserver_db_instance.username}:${random_password.hydroserver_db_user_password.result}@${aws_db_instance.hydroserver_db_instance.endpoint}/hydroserver?sslmode=require"
+  secret_id     = aws_secretsmanager_secret.rds_database_url.id
+  secret_string = "postgresql://${aws_db_instance.rds_db_instance.username}:${random_password.rds_db_user_password.result}@${aws_db_instance.rds_db_instance.endpoint}/hydroserver?sslmode=require"
 }
 
 resource "random_password" "hydroserver_api_secret_key" {
@@ -167,7 +157,7 @@ resource "random_password" "hydroserver_api_secret_key" {
 }
 
 resource "aws_secretsmanager_secret" "hydroserver_api_secret_key" {
-  name = "hydroserver-api-secret-key-${var.instance}"
+  name = "hydroserver-${var.instance}-api-secret-key"
 
   tags = {
     "${var.tag_key}" = var.tag_value
