@@ -56,6 +56,7 @@ resource "aws_db_instance" "rds_db_instance" {
 resource "aws_db_parameter_group" "rds_db_params" {
   name   = "hydroserver-${var.instance}"
   family = "postgres15"
+  apply_immediately = false
 
   parameter {
     name  = "max_connections"
