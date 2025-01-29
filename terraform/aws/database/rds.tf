@@ -16,7 +16,6 @@ resource "aws_db_instance" "rds_db_instance" {
   publicly_accessible        = false
   multi_az                   = true
 
-  parameter_group_name       = aws_db_parameter_group.rds_db_params.name
   deletion_protection        = true
   apply_immediately          = true
   auto_minor_version_upgrade = true
@@ -49,31 +48,6 @@ resource "aws_db_instance" "rds_db_instance" {
       performance_insights_enabled,
       performance_insights_retention_period,
       monitoring_interval
-    ]
-  }
-}
-
-resource "aws_db_parameter_group" "rds_db_params" {
-  name   = "hydroserver-${var.instance}"
-  family = "postgres15"
-  apply_immediately = false
-
-  parameter {
-    name  = "max_connections"
-    value = "100"
-  }
-  parameter {
-    name  = "log_statement"
-    value = "all"
-  }
-  parameter {
-    name  = "log_duration"
-    value = "on"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      parameter
     ]
   }
 }
