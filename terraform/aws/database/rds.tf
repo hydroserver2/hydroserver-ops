@@ -69,10 +69,6 @@ resource "aws_db_parameter_group" "rds_db_params" {
     name  = "log_duration"
     value = "on"
   }
-  parameter {
-    name  = "log_line_prefix"
-    value = "%m [%p] %l %u %d %r %a %t %v %c "
-  }
 
   lifecycle {
     ignore_changes = [
