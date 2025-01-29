@@ -8,6 +8,7 @@ resource "aws_vpc" "rds_vpc" {
   enable_dns_hostnames = true
 
   tags = {
+    Name = "hydroserver-${var.instance}"
     "${var.tag_key}" = local.tag_value
   }
 }
@@ -24,6 +25,7 @@ resource "aws_subnet" "rds_subnet_a" {
   map_public_ip_on_launch = false
 
   tags = {
+    Name = "hydroserver-${var.instance}-subnet-1"
     "${var.tag_key}" = local.tag_value
   }
 }
@@ -35,7 +37,22 @@ resource "aws_subnet" "rds_subnet_b" {
   map_public_ip_on_launch = false
 
   tags = {
+    Name = "hydroserver-${var.instance}-subnet-2"
     "${var.tag_key}" = local.tag_value
+  }
+}
+
+
+# ---------------------------------
+# RDS Subnet Group
+# ---------------------------------
+
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "hydroserver-${var.instance}-db-subnet-group"
+  subnet_ids = [aws_subnet.rds_subnet_a.id, aws_subnet.rds_subnet_b.id]
+
+  tags = {
+    "${var.label_key}" = local.label_value
   }
 }
 
@@ -79,6 +96,7 @@ resource "aws_vpc_endpoint" "rds_endpoint" {
   security_group_ids = [aws_security_group.rds_sg.id]
 
   tags = {
+    Name = "hydroserver-${var.instance}-vpc-endpoint"
     "${var.tag_key}" = local.tag_value
   }
 }

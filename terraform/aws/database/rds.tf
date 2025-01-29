@@ -16,6 +16,8 @@ resource "aws_db_instance" "rds_db_instance" {
   publicly_accessible        = false
   multi_az                   = true
 
+  db_subnet_group_name       = aws_db_subnet_group.rds_subnet_group.name
+
   deletion_protection        = true
   apply_immediately          = true
   auto_minor_version_upgrade = true
