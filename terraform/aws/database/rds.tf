@@ -64,7 +64,7 @@ resource "random_password" "rds_db_user_password" {
   min_numeric      = 1
   special          = true
   min_special      = 1
-  override_special = "-_~."
+  override_special = "-_~*"
 }
 
 resource "random_string" "rds_db_user_password_prefix" {
