@@ -35,7 +35,7 @@ resource "aws_db_instance" "rds_db_instance" {
   password = "${random_string.rds_db_user_password_prefix.result}${random_password.rds_db_user_password.result}"
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 
   lifecycle {
@@ -122,6 +122,10 @@ resource "aws_iam_role" "enhanced_monitoring_role" {
       }
     ]
   })
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "enhanced_monitoring_role_attachment" {
@@ -138,7 +142,7 @@ resource "aws_secretsmanager_secret" "rds_database_url" {
   name = "hydroserver-database-url-${var.instance}"
 
   tags = {
-    "${var.tag_key}" = var.tag_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
@@ -160,7 +164,7 @@ resource "aws_secretsmanager_secret" "hydroserver_api_secret_key" {
   name = "hydroserver-${var.instance}-api-secret-key"
 
   tags = {
-    "${var.tag_key}" = var.tag_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 

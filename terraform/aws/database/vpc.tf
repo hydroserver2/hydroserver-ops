@@ -8,7 +8,7 @@ resource "aws_vpc" "rds_vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_subnet" "rds_subnet_a" {
   map_public_ip_on_launch = false
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
@@ -35,7 +35,7 @@ resource "aws_subnet" "rds_subnet_b" {
   map_public_ip_on_launch = false
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
@@ -62,7 +62,7 @@ resource "aws_security_group" "rds_sg" {
   }
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
@@ -79,7 +79,7 @@ resource "aws_vpc_endpoint" "rds_endpoint" {
   security_group_ids = [aws_security_group.rds_sg.id]
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
@@ -94,6 +94,6 @@ resource "aws_apprunner_vpc_connector" "app_runner_vpc_connector" {
   security_groups    = [aws_security_group.rds_sg.id]
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
