@@ -52,7 +52,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
   subnet_ids = [aws_subnet.rds_subnet_a.id, aws_subnet.rds_subnet_b.id]
 
   tags = {
-    "${var.label_key}" = local.label_value
+    "${var.tag_key}" = local.tag_value
   }
 }
 
