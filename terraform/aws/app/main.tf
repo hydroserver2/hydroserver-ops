@@ -43,31 +43,53 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
-data "aws_vpc" "hydroserver_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-${var.instance}"]
-  }
+data "aws_vpc" "default_vpc" {
+  default = true
 }
 
-data "aws_subnets" "hydroserver_app_private_subnets" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.hydroserver_vpc.id]
-  }
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-private-app-${var.instance}-*"]
-  }
+data "aws_db_instance" "rds_db_instance" {
+  db_instance_identifier = "hydroserver-${var.instance}"
 }
 
-data "aws_subnets" "hydroserver_app_public_subnets" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.hydroserver_vpc.id]
-  }
-  filter {
-    name   = "tag:Name"
-    values = ["hydroserver-public-app-${var.instance}-*"]
-  }
+data "aws_secretsmanager_secret" "rds_database_url" {
+  name = "hydroserver-${var.instance}-database-url"
 }
+
+data "aws_secretsmanager_secret" "api_secret_key" {
+  name = "hydroserver-${var.instance}-api-secret-key"
+}
+
+
+
+
+
+
+
+# data "aws_vpc" "hydroserver_vpc" {
+#   filter {
+#     name   = "tag:Name"
+#     values = ["hydroserver-${var.instance}"]
+#   }
+# }
+
+# data "aws_subnets" "hydroserver_app_private_subnets" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.hydroserver_vpc.id]
+#   }
+#   filter {
+#     name   = "tag:Name"
+#     values = ["hydroserver-private-app-${var.instance}-*"]
+#   }
+# }
+
+# data "aws_subnets" "hydroserver_app_public_subnets" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.hydroserver_vpc.id]
+#   }
+#   filter {
+#     name   = "tag:Name"
+#     values = ["hydroserver-public-app-${var.instance}-*"]
+#   }
+# }

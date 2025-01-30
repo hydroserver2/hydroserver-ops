@@ -1,12 +1,13 @@
-# -------------------------------------------------- #
-# HydroServer AWS App Runner Service                 #
-# -------------------------------------------------- #
+# ---------------------------------
+# AWS App Runner Service
+# ---------------------------------
 
-resource "aws_apprunner_service" "hydroserver_api" {
+resource "aws_apprunner_service" "app_runner_api" {
   service_name      = "hydroserver-api-${var.instance}"
 
   depends_on = [
-    aws_s3_bucket.hydroserver_storage_bucket
+    aws_s3_bucket.static_bucket
+    aws_s3_bucket.media_bucket
   ]
   
   instance_configuration {
@@ -15,19 +16,20 @@ resource "aws_apprunner_service" "hydroserver_api" {
 
   source_configuration {
     image_repository {
-      image_identifier = "${aws_ecr_repository.hydroserver_api_repository.repository_url}:latest"
+      image_identifier = "${aws_ecr_repository.api_repository.repository_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
         port = "8000"
         runtime_environment_secrets = {
-          DATABASE_URL         = data.aws_secretsmanager_secret.database_url.arn
-          SECRET_KEY           = data.aws_secretsmanager_secret.secret_key.arn
+          DATABASE_URL         = data.aws_secretsmanager_secret.rds_database_url.arn
+          SECRET_KEY           = data.aws_secretsmanager_secret.api_secret_key.arn
         }
         runtime_environment_variables = {
           DEPLOYED             = "True"
           DEPLOYMENT_BACKEND   = "aws"
           PROXY_BASE_URL       = "https://www.example.com"
-          STORAGE_BUCKET       = "hydroserver-storage-${var.instance}-${data.aws_caller_identity.current.account_id}"
+          STATIC_BUCKET_NAME   = aws_s3_bucket.static_bucket.bucket
+          MEDIA_BUCKET_NAME    = aws_s3_bucket.media_bucket.bucket
         }
       }
     }
@@ -39,27 +41,62 @@ resource "aws_apprunner_service" "hydroserver_api" {
     }
   }
 
-  network_configuration {
-    ingress_configuration {
-      is_publicly_accessible = true
-    }
-
-    egress_configuration {
-      egress_type       = "VPC"
-      vpc_connector_arn = aws_apprunner_vpc_connector.hydroserver_vpc_connector.arn
-    }
-  }
-
   health_check_configuration {
-    protocol = "TCP"
+    protocol = "HTTP"
     interval = 20
     timeout  = 18
   }
 
+  vpc_connector {
+    vpc_connector_arn = data.aws_vpc_connector.app_runner_connector.arn
+  }
+
   tags = {
-    "${var.tag_key}" = var.tag_value
+    "${var.tag_key}" = local.tag_value
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 resource "aws_apprunner_vpc_connector" "hydroserver_vpc_connector" {
   vpc_connector_name = "hydroserver-api-vpc-connector-${var.instance}"
@@ -74,6 +111,36 @@ data "aws_secretsmanager_secret" "database_url" {
 data "aws_secretsmanager_secret" "secret_key" {
   name = "hydroserver-api-secret-key-${var.instance}"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # -------------------------------------------------- #
 # Security Group for App Runner Service              #
