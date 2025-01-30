@@ -121,7 +121,7 @@ jobs:
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}" 
 
-  teardown-hydroserver-application:
+  teardown-hydroserver:
     needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}

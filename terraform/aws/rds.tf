@@ -30,11 +30,11 @@ resource "aws_db_instance" "rds_db_instance" {
   performance_insights_retention_period = 7
 
   monitoring_interval = 60
-  monitoring_role_arn = aws_iam_role.enhanced_monitoring_role.arn
+  monitoring_role_arn = aws_iam_role.enhanced_monitoring_role[0].arn
 
   db_name  = "hydroserver"
   username = "hsdbadmin"
-  password = "${random_string.rds_db_user_password_prefix.result}${random_password.rds_db_user_password.result}"
+  password = "${random_string.rds_db_user_password_prefix[0].result}${random_password.rds_db_user_password[0].result}"
 
   tags = {
     "${var.tag_key}" = local.tag_value
@@ -107,7 +107,7 @@ resource "aws_iam_role" "enhanced_monitoring_role" {
 
 resource "aws_iam_role_policy_attachment" "enhanced_monitoring_role_attachment" {
   count      = var.database_url == "" ? 1 : 0
-  role       = aws_iam_role.enhanced_monitoring_role.name
+  role       = aws_iam_role.enhanced_monitoring_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
