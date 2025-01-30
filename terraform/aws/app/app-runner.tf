@@ -6,7 +6,7 @@ resource "aws_apprunner_service" "app_runner_api" {
   service_name      = "hydroserver-api-${var.instance}"
 
   depends_on = [
-    aws_s3_bucket.static_bucket
+    aws_s3_bucket.static_bucket,
     aws_s3_bucket.media_bucket
   ]
   
