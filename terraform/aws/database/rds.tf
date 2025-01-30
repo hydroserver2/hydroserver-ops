@@ -17,7 +17,7 @@ resource "aws_db_instance" "rds_db_instance" {
   multi_az                   = true
 
   db_subnet_group_name       = aws_db_subnet_group.rds_subnet_group.name
-  parameter_group_name       = aws_db_parameter_group.rds_params.name
+  iam_database_authentication_enabled = true
 
   deletion_protection        = true
   apply_immediately          = true
@@ -52,25 +52,6 @@ resource "aws_db_instance" "rds_db_instance" {
       performance_insights_retention_period,
       monitoring_interval
     ]
-  }
-}
-
-resource "aws_db_parameter_group" "rds_params" {
-  name   = "hydroserver-${var.instance}-pg"
-  family = "postgres15"
-
-  parameter {
-    name  = "rds.iam_authentication"
-    value = "1"
-  }
-
-  parameter {
-    name  = "rds.force_ssl"
-    value = "1"
-  }
-
-  tags = {
-    "${var.tag_key}" = local.tag_value
   }
 }
 
