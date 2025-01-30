@@ -84,7 +84,7 @@ resource "random_string" "rds_db_user_password_prefix" {
 # ---------------------------------
 
 resource "aws_iam_role" "enhanced_monitoring_role" {
-  name  = "hydroserver-enhanced-monitoring-role-${var.instance}"
+  name  = "hydroserver-${var.instance}-enhanced-monitoring-role"
   count = var.database_url == "" ? 1 : 0
 
   assume_role_policy = jsonencode({
