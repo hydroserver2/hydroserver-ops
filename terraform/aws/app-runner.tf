@@ -67,6 +67,7 @@ resource "aws_apprunner_service" "api" {
 resource "aws_security_group" "app_runner_sg" {
   name        = "hydroserver-app-runner-sg-${var.instance}"
   description = "Allow App Runner to connect to RDS, the Internet, and be reachable from the public internet"
+  vpc_id      = aws_vpc.rds_vpc.id
 
   ingress {
     from_port   = 80
