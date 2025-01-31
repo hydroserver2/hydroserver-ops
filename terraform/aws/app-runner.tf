@@ -48,12 +48,12 @@ resource "aws_apprunner_service" "api" {
     unhealthy_threshold = 2
   }
 
-  network_configuration {
-    egress_configuration {
-      egress_type = "VPC"
-      vpc_connector_arn = aws_apprunner_vpc_connector.rds_connector.arn
-    }
-  }
+  # network_configuration {
+  #   egress_configuration {
+  #     egress_type = "VPC"
+  #     vpc_connector_arn = aws_apprunner_vpc_connector.rds_connector.arn
+  #   }
+  # }
 
   tags = {
     "${var.tag_key}" = local.tag_value
