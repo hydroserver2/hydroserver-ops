@@ -4,6 +4,11 @@
 
 resource "aws_s3_bucket" "static_bucket" {
   bucket = "hydroserver-static-${var.instance}-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "static_bucket" {
@@ -35,6 +40,11 @@ resource "aws_s3_object" "static_folder" {
 
 resource "aws_s3_bucket" "media_bucket" {
   bucket = "hydroserver-media-${var.instance}-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "media_bucket" {
