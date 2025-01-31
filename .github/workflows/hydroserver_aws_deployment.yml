@@ -128,7 +128,7 @@ jobs:
     if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
     defaults:
       run:
-        working-directory: ./terraform/aws/app
+        working-directory: ./terraform/aws
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
