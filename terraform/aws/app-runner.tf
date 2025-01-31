@@ -61,12 +61,13 @@ resource "aws_apprunner_service" "api" {
 
 
 # ---------------------------------
-# App Runner RDS VPC Connector
+# App Runner VPC Connector for RDS
 # ---------------------------------
 
 resource "aws_apprunner_vpc_connector" "rds_connector" {
   vpc_connector_name = "hydroserver-${var.instance}"
-  subnet_ids = [
+  security_groups = []
+  subnets = [
     aws_subnet.rds_subnet_a.id,
     aws_subnet.rds_subnet_b.id
   ]
@@ -74,4 +75,107 @@ resource "aws_apprunner_vpc_connector" "rds_connector" {
   tags = {
     "${var.tag_key}" = local.tag_value
   }
+}
+
+
+# ---------------------------------
+# App Runner Instance Role
+# ---------------------------------
+
+resource "aws_iam_role" "app_runner_service_role" {
+  name = "hydroserver-${var.instance}"-app-runner-instance-role
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "tasks.apprunner.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "app_runner_service_policy" {
+  name  = "hydroserver-${var.instance}-app-runner-secrets-access-policy"
+  count = var.database_url == "" ? 1 : 0
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "secretsmanager:GetSecretValue"
+        Resource = [
+          aws_secretsmanager_secret.rds_database_url.arn,
+          aws_secretsmanager_secret.api_secret_key.arn
+        ]
+      },
+      {
+        Action = "rds-db:connect"
+        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance.resource_id}/hsdbadmin"
+        Effect   = "Allow"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "app_runner_service_policy_attachment" {
+  name       = "hydroserver-${var.instance}-app-runner-secrets-access-policy-attachment"
+  count      = var.database_url == "" ? 1 : 0
+  policy_arn = aws_iam_policy.app_runner_service_policy.arn
+  roles      = [aws_iam_role.app_runner_service_role.name]
+}
+
+
+# ---------------------------------
+# App Runner Access Role
+# ---------------------------------
+
+resource "aws_iam_role" "app_runner_access_role" {
+  name = "hydroserver-${var.instance}-app-runner-access-role"
+  path = "/service-role/"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "build.apprunner.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "app_runner_ecr_access_policy" {
+  name = "hydroserver-${var.instance}-app-runner-ecr-access-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetAuthorizationToken",
+          "ecr:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "app_runner_ecr_access_policy_attachment" {
+  name       = "hydroserver-${var.instance}-app-runner-ecr-access-policy-attachment"
+  policy_arn = aws_iam_policy.app_runner_ecr_access_policy.arn
+  roles      = [aws_iam_role.app_runner_access_role.name]
 }
