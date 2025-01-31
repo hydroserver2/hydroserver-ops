@@ -83,7 +83,7 @@ resource "aws_apprunner_vpc_connector" "rds_connector" {
 # ---------------------------------
 
 resource "aws_iam_role" "app_runner_service_role" {
-  name = "hydroserver-${var.instance}"-app-runner-instance-role
+  name = "hydroserver-${var.instance}-app-runner-instance-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -116,7 +116,7 @@ resource "aws_iam_policy" "app_runner_service_policy" {
       },
       {
         Action = "rds-db:connect"
-        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance.resource_id}/hsdbadmin"
+        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance[0].resource_id}/hsdbadmin"
         Effect   = "Allow"
       }
     ]
