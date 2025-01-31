@@ -61,12 +61,54 @@ resource "aws_apprunner_service" "api" {
 
 
 # ---------------------------------
+# App Runner Security Group
+# ---------------------------------
+
+resource "aws_security_group" "app_runner_sg" {
+  name        = "hydroserver-app-runner-sg-${var.instance}"
+  description = "Allow App Runner to connect to RDS, the Internet, and be reachable from the public internet"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.rds_vpc.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+
+# ---------------------------------
 # App Runner VPC Connector for RDS
 # ---------------------------------
 
 resource "aws_apprunner_vpc_connector" "rds_connector" {
   vpc_connector_name = "hydroserver-${var.instance}"
-  security_groups = []
+  security_groups = [aws_security_group.app_runner_sg.id]
   subnets = [
     aws_subnet.rds_subnet_a.id,
     aws_subnet.rds_subnet_b.id
