@@ -15,7 +15,7 @@ resource "aws_db_instance" "rds_db_instance" {
   allocated_storage          = 20
   max_allocated_storage      = 100
 
-  publicly_accessible                 = false
+  publicly_accessible                 = true  # TODO false
   db_subnet_group_name                = aws_db_subnet_group.rds_subnet_group.name
   iam_database_authentication_enabled = true
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
@@ -92,7 +92,8 @@ resource "aws_security_group" "rds_sg" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.app_runner_sg.id]
+    cidr_blocks = ["0.0.0.0/0"]  # TODO remove
+    # security_groups = [aws_security_group.app_runner_sg.id]
   }
 
   egress {

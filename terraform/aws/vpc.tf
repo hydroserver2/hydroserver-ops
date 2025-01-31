@@ -1,5 +1,5 @@
 # ---------------------------------
-# Private VPC for RDS
+# VPC for RDS
 # ---------------------------------
 
 resource "aws_vpc" "rds_vpc" {
@@ -22,7 +22,7 @@ resource "aws_subnet" "rds_subnet_a" {
   vpc_id                  = aws_vpc.rds_vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.region}a"
-  map_public_ip_on_launch = false
+  map_public_ip_on_launch = true  # TODO false
 
   tags = {
     Name = "hydroserver-${var.instance}-subnet-1"
@@ -34,7 +34,7 @@ resource "aws_subnet" "rds_subnet_b" {
   vpc_id                  = aws_vpc.rds_vpc.id
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "${var.region}b"
-  map_public_ip_on_launch = false
+  map_public_ip_on_launch = true  # TODO false
 
   tags = {
     Name = "hydroserver-${var.instance}-subnet-2"
