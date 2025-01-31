@@ -23,7 +23,6 @@ resource "aws_db_instance" "rds_db_instance" {
   deletion_protection        = true
   apply_immediately          = true
   auto_minor_version_upgrade = true
-  skip_final_snapshot        = true
 
   backup_retention_period = 7
   backup_window           = "03:00-04:00"
