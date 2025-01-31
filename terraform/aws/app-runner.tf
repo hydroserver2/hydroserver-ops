@@ -143,7 +143,7 @@ resource "aws_iam_role" "app_runner_service_role" {
   })
 }
 
-resource "aws_iam_policy" "app_runner_service_policy" {
+resource "aws_iam_policy" "app_runner_secrets_policy" {
   name  = "hydroserver-${var.instance}-app-runner-secrets-access-policy"
   count = var.database_url == "" ? 1 : 0
 
@@ -160,18 +160,50 @@ resource "aws_iam_policy" "app_runner_service_policy" {
       },
       {
         Action = "rds-db:connect"
-        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance[0].resource_id}/hsdbadmin"
+        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance[0].id}/hsdbadmin"
         Effect   = "Allow"
       }
     ]
   })
 }
 
-resource "aws_iam_policy_attachment" "app_runner_service_policy_attachment" {
+resource "aws_iam_policy_attachment" "app_runner_secrets_policy_attachment" {
   name       = "hydroserver-${var.instance}-app-runner-secrets-access-policy-attachment"
   count      = var.database_url == "" ? 1 : 0
   policy_arn = aws_iam_policy.app_runner_service_policy[0].arn
   roles      = [aws_iam_role.app_runner_service_role.name]
+}
+
+resource "aws_iam_policy" "app_runner_s3_policy" {
+  name        = "hydroserver-${var.instance}-app-runner-s3-access-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.static_bucket.id}",
+          "arn:aws:s3:::${aws_s3_bucket.media_bucket.id}"
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.static_bucket.id}/*",
+          "arn:aws:s3:::${aws_s3_bucket.media_bucket.id}/*"
+        ]
+      }
+    ]
+  })
 }
 
 
