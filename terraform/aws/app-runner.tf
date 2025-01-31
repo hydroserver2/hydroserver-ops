@@ -67,14 +67,13 @@ resource "aws_apprunner_service" "api" {
 
 resource "aws_security_group" "app_runner_sg" {
   name        = "hydroserver-${var.instance}-app-runner-sg"
-  description = "Allow App Runner to connect to RDS"
   vpc_id      = aws_vpc.rds_vpc.id
 
-  egress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    security_groups = [aws_security_group.rds_sg.id]
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -88,44 +87,6 @@ resource "aws_security_group" "app_runner_sg" {
     "${var.tag_key}" = local.tag_value
   }
 }
-
-# resource "aws_security_group" "app_runner_sg" {
-#   name        = "hydroserver-app-runner-sg-${var.instance}"
-#   description = "Allow App Runner to connect to RDS, the Internet, and be reachable from the public internet"
-#   vpc_id      = aws_vpc.rds_vpc.id
-
-#   ingress {
-#     from_port   = 80
-#     to_port     = 80
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-#   ingress {
-#     from_port   = 443
-#     to_port     = 443
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-#   ingress {
-#     from_port   = 5432
-#     to_port     = 5432
-#     protocol    = "tcp"
-#     cidr_blocks = [aws_vpc.rds_vpc.cidr_block]
-#   }
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-#   tags = {
-#     "${var.tag_key}" = local.tag_value
-#   }
-# }
 
 
 # ---------------------------------
