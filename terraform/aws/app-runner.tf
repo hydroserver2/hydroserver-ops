@@ -42,9 +42,10 @@ resource "aws_apprunner_service" "api" {
   }
 
   health_check_configuration {
-    protocol = "HTTP"
-    interval = 20
-    timeout  = 18
+    protocol = "TCP"
+    interval = 5
+    timeout  = 2
+    unhealthy_threshold = 2
   }
 
   network_configuration {
