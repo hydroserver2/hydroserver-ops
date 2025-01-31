@@ -24,7 +24,6 @@ resource "aws_db_instance" "rds_db_instance" {
   apply_immediately          = true
   auto_minor_version_upgrade = true
   skip_final_snapshot        = true
-  retain_automated_backups   = false
 
   backup_retention_period = 7
   backup_window           = "03:00-04:00"
