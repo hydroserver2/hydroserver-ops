@@ -82,36 +82,3 @@ resource "aws_security_group" "rds_sg" {
     "${var.tag_key}" = local.tag_value
   }
 }
-
-
-# ---------------------------------
-# VPC Endpoint
-# ---------------------------------
-
-resource "aws_vpc_endpoint" "rds_endpoint" {
-  vpc_id            = aws_vpc.rds_vpc.id
-  service_name      = "com.amazonaws.${var.region}.rds"
-  vpc_endpoint_type = "Interface"
-  subnet_ids        = [aws_subnet.rds_subnet_a.id]
-  security_group_ids = [aws_security_group.rds_sg.id]
-
-  tags = {
-    Name = "hydroserver-${var.instance}-vpc-endpoint"
-    "${var.tag_key}" = local.tag_value
-  }
-}
-
-
-# ---------------------------------
-# App Runner VPC Connector
-# ---------------------------------
-
-resource "aws_apprunner_vpc_connector" "app_runner_vpc_connector" {
-  vpc_connector_name = "hydroserver-${var.instance}"
-  subnets            = [aws_subnet.rds_subnet_a.id, aws_subnet.rds_subnet_b.id]
-  security_groups    = [aws_security_group.rds_sg.id]
-
-  tags = {
-    "${var.tag_key}" = local.tag_value
-  }
-}
