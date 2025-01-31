@@ -21,8 +21,8 @@ resource "aws_apprunner_service" "api" {
       image_configuration {
         port = "8000"
         runtime_environment_secrets = {
-          DATABASE_URL         = data.aws_secretsmanager_secret.rds_database_url.arn
-          SECRET_KEY           = data.aws_secretsmanager_secret.api_secret_key.arn
+          DATABASE_URL         = aws_secretsmanager_secret.rds_database_url.arn
+          SECRET_KEY           = aws_secretsmanager_secret.api_secret_key.arn
         }
         runtime_environment_variables = {
           DEPLOYED             = "True"
@@ -126,7 +126,7 @@ resource "aws_iam_policy" "app_runner_service_policy" {
 resource "aws_iam_policy_attachment" "app_runner_service_policy_attachment" {
   name       = "hydroserver-${var.instance}-app-runner-secrets-access-policy-attachment"
   count      = var.database_url == "" ? 1 : 0
-  policy_arn = aws_iam_policy.app_runner_service_policy.arn
+  policy_arn = aws_iam_policy.app_runner_service_policy[0].arn
   roles      = [aws_iam_role.app_runner_service_role.name]
 }
 
