@@ -16,9 +16,9 @@ resource "aws_db_instance" "rds_db_instance" {
   max_allocated_storage      = 100
 
   publicly_accessible                 = true  # TODO false
-  db_subnet_group_name                = aws_db_subnet_group.rds_subnet_group.name
+  # db_subnet_group_name                = aws_db_subnet_group.rds_subnet_group.name
   iam_database_authentication_enabled = true
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  # vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
   deletion_protection        = true
   apply_immediately          = true
