@@ -138,9 +138,31 @@ resource "aws_iam_role" "app_runner_service_role" {
   })
 }
 
+resource "aws_iam_policy" "app_runner_rds_policy" {
+  name  = "hydroserver-${var.instance}-app-runner-rds-access-policy"
+  count = var.database_url == "" ? 1 : 0
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "rds-db:connect"
+        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance[0].id}/hsdbadmin"
+        Effect   = "Allow"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "app_runner_rds_policy_attachment" {
+  name       = "hydroserver-${var.instance}-app-runner-rds-access-policy-attachment"
+  count      = var.database_url == "" ? 1 : 0
+  policy_arn = aws_iam_policy.app_runner_secrets_policy[0].arn
+  roles      = [aws_iam_role.app_runner_service_role.name]
+}
+
 resource "aws_iam_policy" "app_runner_secrets_policy" {
   name  = "hydroserver-${var.instance}-app-runner-secrets-access-policy"
-  count = var.database_url == "" ? 1 : 0
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -152,11 +174,6 @@ resource "aws_iam_policy" "app_runner_secrets_policy" {
           aws_secretsmanager_secret.rds_database_url.arn,
           aws_secretsmanager_secret.api_secret_key.arn
         ]
-      },
-      {
-        Action = "rds-db:connect"
-        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_db_instance.rds_db_instance[0].id}/hsdbadmin"
-        Effect   = "Allow"
       }
     ]
   })
@@ -164,7 +181,6 @@ resource "aws_iam_policy" "app_runner_secrets_policy" {
 
 resource "aws_iam_policy_attachment" "app_runner_secrets_policy_attachment" {
   name       = "hydroserver-${var.instance}-app-runner-secrets-access-policy-attachment"
-  count      = var.database_url == "" ? 1 : 0
   policy_arn = aws_iam_policy.app_runner_secrets_policy[0].arn
   roles      = [aws_iam_role.app_runner_service_role.name]
 }
