@@ -157,7 +157,7 @@ resource "aws_iam_policy" "app_runner_rds_policy" {
 resource "aws_iam_policy_attachment" "app_runner_rds_policy_attachment" {
   name       = "hydroserver-${var.instance}-app-runner-rds-access-policy-attachment"
   count      = var.database_url == "" ? 1 : 0
-  policy_arn = aws_iam_policy.app_runner_secrets_policy[0].arn
+  policy_arn = aws_iam_policy.app_runner_rds_policy[0].arn
   roles      = [aws_iam_role.app_runner_service_role.name]
 }
 
