@@ -62,7 +62,7 @@ resource "aws_apprunner_service" "api" {
 }
 
 resource "null_resource" "db_wait" {
-  count = aws_db_instance.rds_db_instance.count == 1 ? 1 : 0
+  count = length(aws_db_instance.rds_db_instance) == 1 ? 1 : 0
 
   triggers = {
     wait_for_rds = "true"
