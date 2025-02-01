@@ -7,7 +7,8 @@ resource "aws_apprunner_service" "api" {
 
   depends_on = [
     aws_s3_bucket.static_bucket,
-    aws_s3_bucket.media_bucket
+    aws_s3_bucket.media_bucket,
+    null_resource.db_wait
   ]
   
   instance_configuration {
@@ -57,6 +58,14 @@ resource "aws_apprunner_service" "api" {
 
   tags = {
     "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "null_resource" "db_wait" {
+  count = aws_db_instance.rds_db_instance.count == 1 ? 1 : 0
+
+  triggers = {
+    wait_for_rds = "true"
   }
 }
 
