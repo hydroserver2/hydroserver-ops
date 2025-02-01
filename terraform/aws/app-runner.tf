@@ -69,7 +69,7 @@ resource "null_resource" "db_wait" {
   }
 }
 
-# TODO AWS indicates this setup should allow App Runner to be reachable while RDS is not, but it isn't working. App Runner is unreachable.
+# TODO AWS indicates this setup should allow App Runner to be reachable while RDS is not, but it isn't working. App Runner is unreachable with VPC connector attached.
 
 # # ---------------------------------
 # # App Runner Security Group
