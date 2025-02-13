@@ -108,7 +108,7 @@ resource "aws_security_group" "app_runner_sg" {
 # App Runner VPC Connector for RDS
 # ---------------------------------
 
-resource "aws_apprunner_vpc_connector" "rds_connector" {
+resource "aws_apprunner_vpc_connector" "vpc_connector" {
   vpc_connector_name = "hydroserver-${var.instance}"
   security_groups = [aws_security_group.app_runner_sg.id]
   subnets = [
