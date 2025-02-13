@@ -30,8 +30,6 @@ resource "aws_apprunner_service" "api" {
           DEPLOYMENT_BACKEND         = "aws"
           STATIC_BUCKET_NAME         = aws_s3_bucket.static_bucket.bucket
           MEDIA_BUCKET_NAME          = aws_s3_bucket.media_bucket.bucket
-          DEFAULT_SUPERUSER_EMAIL    = var.default_superuser_email
-          DEFAULT_SUPERUSER_PASSWORD = var.default_superuser_password
         }
       }
     }
@@ -50,12 +48,12 @@ resource "aws_apprunner_service" "api" {
     unhealthy_threshold = 2
   }
 
-  # network_configuration {
-  #   egress_configuration {
-  #     egress_type = "VPC"
-  #     vpc_connector_arn = aws_apprunner_vpc_connector.rds_connector.arn
-  #   }
-  # }
+  network_configuration {
+    egress_configuration {
+      egress_type = "VPC"
+      vpc_connector_arn = aws_apprunner_vpc_connector.vpc_connector.arn
+    }
+  }
 
   tags = {
     "${var.tag_key}" = local.tag_value
@@ -70,52 +68,57 @@ resource "null_resource" "db_wait" {
   }
 }
 
-# TODO AWS indicates this setup should allow App Runner to be reachable while RDS is not, but it isn't working. App Runner is unreachable with VPC connector attached.
 
-# # ---------------------------------
-# # App Runner Security Group
-# # ---------------------------------
+# ---------------------------------
+# App Runner Security Group
+# ---------------------------------
 
-# resource "aws_security_group" "app_runner_sg" {
-#   name        = "hydroserver-${var.instance}-app-runner-sg"
-#   vpc_id      = aws_vpc.rds_vpc.id
+resource "aws_security_group" "app_runner_sg" {
+  name        = "hydroserver-${var.instance}-app-runner-sg"
+  vpc_id      = aws_vpc.vpc.id
 
-#   ingress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-#   tags = {
-#     "${var.tag_key}" = local.tag_value
-#   }
-# }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
 
 
-# # ---------------------------------
-# # App Runner VPC Connector for RDS
-# # ---------------------------------
+# ---------------------------------
+# App Runner VPC Connector for RDS
+# ---------------------------------
 
-# resource "aws_apprunner_vpc_connector" "rds_connector" {
-#   vpc_connector_name = "hydroserver-${var.instance}"
-#   security_groups = [aws_security_group.app_runner_sg.id]
-#   subnets = [
-#     aws_subnet.rds_subnet_a.id,
-#     aws_subnet.rds_subnet_b.id
-#   ]
+resource "aws_apprunner_vpc_connector" "rds_connector" {
+  vpc_connector_name = "hydroserver-${var.instance}"
+  security_groups = [aws_security_group.app_runner_sg.id]
+  subnets = [
+    aws_subnet.private_subnet.id
+  ]
 
-#   tags = {
-#     "${var.tag_key}" = local.tag_value
-#   }
-# }
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
 
 
 # ---------------------------------

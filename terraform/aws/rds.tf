@@ -15,10 +15,10 @@ resource "aws_db_instance" "rds_db_instance" {
   allocated_storage          = 20
   max_allocated_storage      = 100
 
-  publicly_accessible                 = true  # TODO false
-  # db_subnet_group_name                = aws_db_subnet_group.rds_subnet_group.name
+  publicly_accessible                 = false
+  db_subnet_group_name                = aws_db_subnet_group.private_subnet_group.name
   iam_database_authentication_enabled = true
-  # vpc_security_group_ids              = [aws_security_group.rds_sg.id]  # TODO
+  vpc_security_group_ids              = [aws_security_group.rds_sg.id]
 
   deletion_protection        = true
   apply_immediately          = true
@@ -80,33 +80,34 @@ resource "random_string" "rds_db_user_password_prefix" {
 }
 
 
-# # ---------------------------------
-# # RDS Security Group
-# # ---------------------------------
+# ---------------------------------
+# RDS Security Group
+# ---------------------------------
 
-# resource "aws_security_group" "rds_sg" {
-#   name        = "hydroserver-${var.instance}-rds-sg"
-#   vpc_id      = aws_vpc.rds_vpc.id
+resource "aws_security_group" "rds_sg" {
+  name        = "hydroserver-${var.instance}-rds-sg"
+  vpc_id      = aws_vpc.vpc.id
 
-#   ingress {
-#     from_port       = 5432
-#     to_port         = 5432
-#     protocol        = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]  # TODO remove
-#     # security_groups = [aws_security_group.app_runner_sg.id]
-#   }
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    cidr_blocks     = ["10.0.0.0/16"]
+    # cidr_blocks     = ["0.0.0.0/0"]  # TODO remove
+    # security_groups = [aws_security_group.app_runner_sg.id]
+  }
 
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-#   tags = {
-#     "${var.tag_key}" = local.tag_value
-#   }
-# }
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
 
 
 # ---------------------------------
