@@ -53,6 +53,9 @@ resource "aws_apprunner_service" "api" {
       egress_type = "VPC"
       vpc_connector_arn = aws_apprunner_vpc_connector.vpc_connector.arn
     }
+    ingress_configuration {
+      is_publicly_accessible = true
+    }
   }
 
   tags = {
@@ -112,7 +115,8 @@ resource "aws_apprunner_vpc_connector" "vpc_connector" {
   vpc_connector_name = "hydroserver-${var.instance}"
   security_groups = [aws_security_group.app_runner_sg.id]
   subnets = [
-    aws_subnet.private_subnet.id
+    aws_subnet.private_subnet_az1.id,
+    aws_subnet.private_subnet_az2.id
   ]
 
   tags = {
