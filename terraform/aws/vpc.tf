@@ -75,7 +75,7 @@ resource "aws_subnet" "public_subnet_az2" {
   }
 }
 
-resource "aws_db_subnet_group" "private_subnet_group" {
+resource "aws_db_subnet_group" "public_subnet_group" {
   name        = "hydroserver-${var.instance}-private-subnet-group"
   subnet_ids  = [aws_subnet.public_subnet_az1.id, aws_subnet.public_subnet_az2.id]
 }
