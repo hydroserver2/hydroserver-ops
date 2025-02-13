@@ -32,6 +32,16 @@ variable "database_url" {
   sensitive   = true
   default     = ""
 }
+variable "default_superuser_email" {
+  type        = string
+  sensitive   = true
+  default     = "admin@hydroserver.org"
+}
+variable "default_superuser_password" {
+  type        = string
+  sensitive   = true
+  default     = "pass"
+}
 variable "tag_key" {
   description = "The key of the AWS tag that will be attached to this HydroServer instance."
   type        = string

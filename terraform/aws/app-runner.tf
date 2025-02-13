@@ -17,20 +17,21 @@ resource "aws_apprunner_service" "api" {
 
   source_configuration {
     image_repository {
-      image_identifier = "${aws_ecr_repository.api_repository.repository_url}:latest"
+      image_identifier      = "${aws_ecr_repository.api_repository.repository_url}:latest"
       image_repository_type = "ECR"
       image_configuration {
         port = "8000"
         runtime_environment_secrets = {
-          DATABASE_URL         = aws_secretsmanager_secret.rds_database_url.arn
-          SECRET_KEY           = aws_secretsmanager_secret.api_secret_key.arn
+          DATABASE_URL = aws_secretsmanager_secret.rds_database_url.arn
+          SECRET_KEY   = aws_secretsmanager_secret.api_secret_key.arn
         }
         runtime_environment_variables = {
-          DEPLOYED             = "True"
-          DEPLOYMENT_BACKEND   = "aws"
-          PROXY_BASE_URL       = "https://www.example.com"
-          STATIC_BUCKET_NAME   = aws_s3_bucket.static_bucket.bucket
-          MEDIA_BUCKET_NAME    = aws_s3_bucket.media_bucket.bucket
+          DEPLOYED                   = "True"
+          DEPLOYMENT_BACKEND         = "aws"
+          STATIC_BUCKET_NAME         = aws_s3_bucket.static_bucket.bucket
+          MEDIA_BUCKET_NAME          = aws_s3_bucket.media_bucket.bucket
+          DEFAULT_SUPERUSER_EMAIL    = var.default_superuser_email
+          DEFAULT_SUPERUSER_PASSWORD = var.default_superuser_password
         }
       }
     }

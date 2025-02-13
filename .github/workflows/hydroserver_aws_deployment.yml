@@ -82,6 +82,8 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
+          -var "default_superuser_email=${{ secrets.DEFAULT_SUPERUSER_EMAIL || 'admin@hydroserver.org' }}" \
+          -var "default_superuser_password=${{ secrets.DEFAULT_SUPERUSER_PASSWORD || 'pass' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
@@ -96,6 +98,8 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
+          -var "default_superuser_email=${{ secrets.DEFAULT_SUPERUSER_EMAIL || 'admin@hydroserver.org' }}" \
+          -var "default_superuser_password=${{ secrets.DEFAULT_SUPERUSER_PASSWORD || 'pass' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
       - name: Log in to AWS ECR
@@ -118,6 +122,8 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
+          -var "default_superuser_email=${{ secrets.DEFAULT_SUPERUSER_EMAIL || 'admin@hydroserver.org' }}" \
+          -var "default_superuser_password=${{ secrets.DEFAULT_SUPERUSER_PASSWORD || 'pass' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
 
