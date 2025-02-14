@@ -180,7 +180,7 @@ jobs:
           APP_RUNNER_SERVICE_NAME="hydroserver-api-${{ github.event.inputs.environment }}"
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn" --output text)
           EXISTING_ENV_VARS=$(aws apprunner describe-service --service-arn "$SERVICE_ARN" \
-            --query "Service.SourceConfiguration.ImageRepository.ImageConfiguration.RuntimeEnvironmentVariables" --output json || echo '{}')
+            --query "Service.InstanceConfiguration.RuntimeEnvironmentVariables" --output json || echo '{}')
           declare -A CURRENT_VARS
           while IFS="=" read -r key value; do
             CURRENT_VARS[$key]=$value
@@ -190,18 +190,20 @@ jobs:
           [[ -n "${{ vars.ACCOUNT_SIGNUP_ENABLED }}" ]] && CURRENT_VARS["ACCOUNT_SIGNUP_ENABLED"]="${{ vars.ACCOUNT_SIGNUP_ENABLED }}"
           [[ -n "${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}" ]] && CURRENT_VARS["ACCOUNT_OWNERSHIP_ENABLED"]="${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}"
           [[ -n "${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}" ]] && CURRENT_VARS["SOCIALACCOUNT_SIGNUP_ONLY"]="${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}"
-          JSON_ENV_VARS=$(jq -n 'reduce inputs as $item ({}; .[$item.key] = $item.value)' \
+          JSON_ENV_VARS=$(jq -n 'reduce inputs as $item ([]; . += [{"Name": $item.key, "Value": $item.value}])' \
             < <(for key in "${!CURRENT_VARS[@]}"; do echo "{\"key\": \"$key\", \"value\": \"${CURRENT_VARS[$key]}\"}"; done))
           echo "$JSON_ENV_VARS" > env-vars.json
-          aws apprunner update-service --service-arn "$SERVICE_ARN" --source-configuration "{
-            \"AuthenticationConfiguration\": {
-              \"AccessRoleArn\": \"arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/AppRunnerECRAccessRole\"
-            },
-            \"ImageRepository\": {
-              \"ImageIdentifier\": \"${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest\",
-              \"ImageRepositoryType\": \"ECR\"
-            }
-          }" --environment-variables file://env-vars.json
+          aws apprunner update-service --service-arn "$SERVICE_ARN" \
+            --environment-variables file://env-vars.json \
+            --source-configuration "{
+              \"AuthenticationConfiguration\": {
+                \"AccessRoleArn\": \"arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/AppRunnerECRAccessRole\"
+              },
+              \"ImageRepository\": {
+                \"ImageIdentifier\": \"${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest\",
+                \"ImageRepositoryType\": \"ECR\"
+              }
+            }"
 
   teardown-hydroserver:
     needs: check-environment-variables
