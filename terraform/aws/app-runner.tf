@@ -299,7 +299,7 @@ resource "aws_iam_policy_attachment" "app_runner_ecr_access_policy_attachment" {
 # ---------------------------------
 
 resource "aws_ssm_parameter" "smtp_url" {
-  name        = "/hydroserver-${var.instance}-api/database-url"
+  name        = "/hydroserver-${var.instance}-api/smtp-url"
   type        = "SecureString"
   value       = "smtp://127.0.0.1:1025"
 
