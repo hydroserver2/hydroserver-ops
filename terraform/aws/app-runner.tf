@@ -22,14 +22,14 @@ resource "aws_apprunner_service" "api" {
       image_configuration {
         port = "8000"
         runtime_environment_secrets = {
-          DATABASE_URL                 = aws_ssm_parameter.database_url.arn
-          SMTP_URL                     = aws_ssm_parameter.smtp_url.arn
-          SECRET_KEY                   = aws_ssm_parameter.secret_key.arn
-          PROXY_BASE_URL               = aws_ssm_parameter.proxy_base_url.arn
-          DEBUG                        = aws_ssm_parameter.debug_mode.arn
-          ACCOUNT_SIGNUP_ENABLED       = aws_ssm_parameter.account_signup_enabled.arn
-          ACCOUNT_OWNERSHIP_ENABLED    = aws_ssm_parameter.account_ownership_enabled.arn
-          SOCIALACCOUNT_SIGNUP_ENABLED = aws_ssm_parameter.socialaccount_signup_only.arn
+          DATABASE_URL              = aws_ssm_parameter.database_url.arn
+          SMTP_URL                  = aws_ssm_parameter.smtp_url.arn
+          SECRET_KEY                = aws_ssm_parameter.secret_key.arn
+          PROXY_BASE_URL            = aws_ssm_parameter.proxy_base_url.arn
+          DEBUG                     = aws_ssm_parameter.debug_mode.arn
+          ACCOUNT_SIGNUP_ENABLED    = aws_ssm_parameter.account_signup_enabled.arn
+          ACCOUNT_OWNERSHIP_ENABLED = aws_ssm_parameter.account_ownership_enabled.arn
+          SOCIALACCOUNT_SIGNUP_ONLY = aws_ssm_parameter.socialaccount_signup_only.arn
         }
         runtime_environment_variables = {
           DEPLOYED                   = "True"
