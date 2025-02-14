@@ -22,8 +22,14 @@ resource "aws_apprunner_service" "api" {
       image_configuration {
         port = "8000"
         runtime_environment_secrets = {
-          DATABASE_URL = aws_secretsmanager_secret.rds_database_url.arn
-          SECRET_KEY   = aws_secretsmanager_secret.api_secret_key.arn
+          DATABASE_URL                 = aws_ssm_parameter.database_url.arn
+          SMTP_URL                     = aws_ssm_parameter.smtp_url.arn
+          SECRET_KEY                   = aws_ssm_parameter.secret_key.arn
+          PROXY_BASE_URL               = aws_ssm_parameter.proxy_base_url.arn
+          DEBUG                        = aws_ssm_parameter.debug_mode.arn
+          ACCOUNT_SIGNUP_ENABLED       = aws_ssm_parameter.account_signup_enabled.arn
+          ACCOUNT_OWNERSHIP_ENABLED    = aws_ssm_parameter.account_ownership_enabled.arn
+          SOCIALACCOUNT_SIGNUP_ENABLED = aws_ssm_parameter.socialaccount_signup_only.arn
         }
         runtime_environment_variables = {
           DEPLOYED                   = "True"
@@ -289,8 +295,68 @@ resource "aws_iam_policy_attachment" "app_runner_ecr_access_policy_attachment" {
 }
 
 # ---------------------------------
-# App Runner SMTP Connection
+# App Runner Environment Variables
 # ---------------------------------
+
+resource "aws_ssm_parameter" "smtp_url" {
+  name        = "/hydroserver-${var.instance}-api/database-url"
+  type        = "SecureString"
+  value       = "smtp://127.0.0.1:1025"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "proxy_base_url" {
+  name        = "/hydroserver-${var.instance}-api/proxy-base-url"
+  type        = "String"
+  value       = "https://www.example.com"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "account_signup_enabled" {
+  name        = "/hydroserver-${var.instance}-api/account-signup-enabled"
+  type        = "String"
+  value       = "True"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "account_ownership_enabled" {
+  name        = "/hydroserver-${var.instance}-api/account-ownership-enabled"
+  type        = "String"
+  value       = "True"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "socialaccount_signup_only" {
+  name        = "/hydroserver-${var.instance}-api/socialaccount-signup-only"
+  type        = "String"
+  value       = "False"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "debug_mode" {
+  name        = "/hydroserver-${var.instance}-api/debug-mode"
+  type        = "String"
+  value       = "True"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
 
 resource "aws_secretsmanager_secret" "smtp_url" {
   name = "hydroserver-${var.instance}-smtp-url"

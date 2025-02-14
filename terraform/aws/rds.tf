@@ -147,6 +147,26 @@ resource "aws_iam_role_policy_attachment" "enhanced_monitoring_role_attachment" 
 # AWS Secrets Manager
 # ---------------------------------
 
+resource "aws_ssm_parameter" "rds_database_url" {
+  name        = "/hydroserver-${var.instance}-api/database-url"
+  type        = "SecureString"
+  value       = var.database_url != "" ? var.database_url : "postgresql://${aws_db_instance.rds_db_instance[0].username}:${random_string.rds_db_user_password_prefix[0].result}${random_password.rds_db_user_password[0].result}@${aws_db_instance.rds_db_instance[0].endpoint}/hydroserver?sslmode=require"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "api_secret_key" {
+  name        = "/hydroserver-${var.instance}-api/secret-key"
+  type        = "SecureString"
+  value       = random_password.api_secret_key.result
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
 resource "aws_secretsmanager_secret" "rds_database_url" {
   name = "hydroserver-${var.instance}-database-url"
 
