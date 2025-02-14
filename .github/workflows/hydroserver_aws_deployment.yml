@@ -166,10 +166,10 @@ jobs:
           SECRETS=("DATABASE_URL" "SMTP_URL" "SECRET_KEY")
           SECRET_ARN="arn:aws:secretsmanager:${{ vars.AWS_REGION }}:${{ vars.AWS_ACCOUNT_ID }}:secret:hydroserver-api-${{ github.event.inputs.environment }}"
           for SECRET in "${SECRETS[@]}"; do
-            VALUE="${{ secrets[SECRET] }}"
+            VALUE=$(eval echo "\${{ secrets[$SECRET] }}")
             if [ -n "$VALUE" ]; then
               echo "Updating $SECRET in AWS Secrets Manager..."
-              aws secretsmanager update-secret --secret-id "$SECRET_ARN" --secret-string "{\"$SECRET\":\"$VALUE\"}"
+              aws secretsmanager put-secret-value --secret-id "$SECRET_ARN" --secret-string "$VALUE" --secret-key "$SECRET"
             else
               echo "$SECRET is not set, skipping..."
             fi
