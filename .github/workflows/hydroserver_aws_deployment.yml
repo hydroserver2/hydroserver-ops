@@ -163,18 +163,16 @@ jobs:
           docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest
       - name: Update AWS Secrets Manager Values
         run: |
-          SECRET_ARN="arn:aws:secretsmanager:${{ vars.AWS_REGION }}:${{ vars.AWS_ACCOUNT_ID }}:secret:hydroserver-api-${{ github.event.inputs.environment }}"
           if [ -n "${{ secrets.DATABASE_URL }}" ]; then
-            echo "Updating DATABASE_URL in AWS Secrets Manager..."
-            aws secretsmanager put-secret-value --secret-id "$SECRET_ARN" --secret-string "{\"DATABASE_URL\":\"${{ secrets.DATABASE_URL }}\"}"
+            aws secretsmanager put-secret-value --secret-id "arn:aws:secretsmanager:${{ vars.AWS_REGION }}:${{ vars.AWS_ACCOUNT_ID }}:secret/hydroserver-${{ github.event.inputs.environment }}-database-url" --secret-string "${{ secrets.DATABASE_URL }}"
           fi
+
           if [ -n "${{ secrets.SMTP_URL }}" ]; then
-            echo "Updating SMTP_URL in AWS Secrets Manager..."
-            aws secretsmanager put-secret-value --secret-id "$SECRET_ARN" --secret-string "{\"SMTP_URL\":\"${{ secrets.SMTP_URL }}\"}"
+            aws secretsmanager put-secret-value --secret-id "arn:aws:secretsmanager:${{ vars.AWS_REGION }}:${{ vars.AWS_ACCOUNT_ID }}:secret/hydroserver-${{ github.event.inputs.environment }}-smtp-url" --secret-string "${{ secrets.SMTP_URL }}"
           fi
+
           if [ -n "${{ secrets.SECRET_KEY }}" ]; then
-            echo "Updating SECRET_KEY in AWS Secrets Manager..."
-            aws secretsmanager put-secret-value --secret-id "$SECRET_ARN" --secret-string "{\"SECRET_KEY\":\"${{ secrets.SECRET_KEY }}\"}"
+            aws secretsmanager put-secret-value --secret-id "arn:aws:secretsmanager:${{ vars.AWS_REGION }}:${{ vars.AWS_ACCOUNT_ID }}:secret/hydroserver-${{ github.event.inputs.environment }}-secret-key" --secret-string "${{ secrets.SECRET_KEY }}"
           fi
       - name: Update AWS App Runner Service
         run: |
