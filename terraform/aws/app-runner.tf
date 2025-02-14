@@ -195,7 +195,7 @@ resource "aws_iam_policy" "app_runner_ssm_policy" {
           "ssm:GetParameters",
           "ssm:GetParameterHistory"
         ]
-        Resource = "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/hydroserver-${var.instance}-api/*"
+        Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/hydroserver-${var.instance}-api/*"
       }
     ]
   })
