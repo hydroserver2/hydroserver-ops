@@ -164,56 +164,42 @@ jobs:
       - name: Update AWS SSM Parameters
         run: |
           ENVIRONMENT="${{ github.event.inputs.environment }}"
-          declare -A PARAMS=(
-            ["/hydroserver-${ENVIRONMENT}-api/database-url"]="${{ secrets.DATABASE_URL }}:SecureString"
-            ["/hydroserver-${ENVIRONMENT}-api/secret-key"]="${{ secrets.SECRET_KEY }}:SecureString"
-            ["/hydroserver-${ENVIRONMENT}-api/smtp-url"]="${{ secrets.SMTP_URL }}:SecureString"
-            ["/hydroserver-${ENVIRONMENT}-api/debug-mode"]="${{ vars.DEBUG }}:String"
-            ["/hydroserver-${ENVIRONMENT}-api/proxy-base-url"]="${{ vars.PROXY_BASE_URL }}:String"
-            ["/hydroserver-${ENVIRONMENT}-api/account-ownership-enabled"]="${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}:String"
-            ["/hydroserver-${ENVIRONMENT}-api/account-signup-enabled"]="${{ vars.ACCOUNT_SIGNUP_ENABLED }}:String"
-            ["/hydroserver-${ENVIRONMENT}-api/socialaccount-signup-only"]="${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}:String"
+          declare -A PARAM_TYPES=(
+            ["/hydroserver-${ENVIRONMENT}-api/database-url"]="SecureString"
+            ["/hydroserver-${ENVIRONMENT}-api/secret-key"]="SecureString"
+            ["/hydroserver-${ENVIRONMENT}-api/smtp-url"]="SecureString"
+            ["/hydroserver-${ENVIRONMENT}-api/debug-mode"]="String"
+            ["/hydroserver-${ENVIRONMENT}-api/proxy-base-url"]="String"
+            ["/hydroserver-${ENVIRONMENT}-api/account-ownership-enabled"]="String"
+            ["/hydroserver-${ENVIRONMENT}-api/account-signup-enabled"]="String"
+            ["/hydroserver-${ENVIRONMENT}-api/socialaccount-signup-only"]="String"
           )
-          for PARAM in "${!PARAMS[@]}"; do
-            VALUE_TYPE="${PARAMS[$PARAM]}"
-            VALUE="${VALUE_TYPE%%:*}"
-            TYPE="${VALUE_TYPE##*:}"
+          declare -A PARAM_VALUES=(
+            ["/hydroserver-${ENVIRONMENT}-api/database-url"]="${{ secrets.DATABASE_URL }}"
+            ["/hydroserver-${ENVIRONMENT}-api/secret-key"]="${{ secrets.SECRET_KEY }}"
+            ["/hydroserver-${ENVIRONMENT}-api/smtp-url"]="${{ secrets.SMTP_URL }}"
+            ["/hydroserver-${ENVIRONMENT}-api/debug-mode"]="${{ vars.DEBUG }}"
+            ["/hydroserver-${ENVIRONMENT}-api/proxy-base-url"]="${{ vars.PROXY_BASE_URL }}"
+            ["/hydroserver-${ENVIRONMENT}-api/account-ownership-enabled"]="${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}"
+            ["/hydroserver-${ENVIRONMENT}-api/account-signup-enabled"]="${{ vars.ACCOUNT_SIGNUP_ENABLED }}"
+            ["/hydroserver-${ENVIRONMENT}-api/socialaccount-signup-only"]="${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}"
+          )
+          for PARAM in "${!PARAM_VALUES[@]}"; do
+            VALUE="${PARAM_VALUES[$PARAM]}"
+            TYPE="${PARAM_TYPES[$PARAM]}"
             if [ -n "$VALUE" ]; then
+              ESCAPED_VALUE=$(echo "$VALUE" | jq -Rsa .)
               echo "Updating $PARAM in AWS SSM Parameter Store..."
-              aws ssm put-parameter --name "$PARAM" --value "$VALUE" --type "$TYPE" --overwrite
+              aws ssm put-parameter --name "$PARAM" --value "$ESCAPED_VALUE" --type "$TYPE" --overwrite
             else
               echo "Skipping $PARAM as it is not defined."
             fi
           done
-      - name: Update AWS App Runner Service
+      - name: Deploy AWS App Runner Service
         run: |
           APP_RUNNER_SERVICE_NAME="hydroserver-api-${{ github.event.inputs.environment }}"
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn" --output text)
-          EXISTING_ENV_VARS=$(aws apprunner describe-service --service-arn "$SERVICE_ARN" \
-            --query "Service.InstanceConfiguration.RuntimeEnvironmentVariables" --output json || echo '{}')
-          declare -A CURRENT_VARS
-          while IFS="=" read -r key value; do
-            CURRENT_VARS[$key]=$value
-          done < <(echo "$EXISTING_ENV_VARS" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"')
-          [[ -n "${{ vars.PROXY_BASE_URL }}" ]] && CURRENT_VARS["PROXY_BASE_URL"]="${{ vars.PROXY_BASE_URL }}"
-          [[ -n "${{ vars.DEBUG }}" ]] && CURRENT_VARS["DEBUG"]="${{ vars.DEBUG }}"
-          [[ -n "${{ vars.ACCOUNT_SIGNUP_ENABLED }}" ]] && CURRENT_VARS["ACCOUNT_SIGNUP_ENABLED"]="${{ vars.ACCOUNT_SIGNUP_ENABLED }}"
-          [[ -n "${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}" ]] && CURRENT_VARS["ACCOUNT_OWNERSHIP_ENABLED"]="${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}"
-          [[ -n "${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}" ]] && CURRENT_VARS["SOCIALACCOUNT_SIGNUP_ONLY"]="${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}"
-          JSON_ENV_VARS=$(jq -n 'reduce inputs as $item ([]; . += [{"Name": $item.key, "Value": $item.value}])' \
-            < <(for key in "${!CURRENT_VARS[@]}"; do echo "{\"key\": \"$key\", \"value\": \"${CURRENT_VARS[$key]}\"}"; done))
-          echo "$JSON_ENV_VARS" > env-vars.json
-          aws apprunner update-service --service-arn "$SERVICE_ARN" \
-            --environment-variables file://env-vars.json \
-            --source-configuration "{
-              \"AuthenticationConfiguration\": {
-                \"AccessRoleArn\": \"arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/AppRunnerECRAccessRole\"
-              },
-              \"ImageRepository\": {
-                \"ImageIdentifier\": \"${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest\",
-                \"ImageRepositoryType\": \"ECR\"
-              }
-            }"
+          aws apprunner start-deployment --service-arn "$SERVICE_ARN"
 
   teardown-hydroserver:
     needs: check-environment-variables
