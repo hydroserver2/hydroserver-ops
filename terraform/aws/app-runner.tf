@@ -287,3 +287,20 @@ resource "aws_iam_policy_attachment" "app_runner_ecr_access_policy_attachment" {
   policy_arn = aws_iam_policy.app_runner_ecr_access_policy.arn
   roles      = [aws_iam_role.app_runner_access_role.name]
 }
+
+# ---------------------------------
+# App Runner SMTP Connection
+# ---------------------------------
+
+resource "aws_secretsmanager_secret" "smtp_url" {
+  name = "hydroserver-${var.instance}-smtp-url"
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "smtp_url_version" {
+  secret_id     = aws_secretsmanager_secret.smtp_url.id
+  secret_string = "smtp://127.0.0.1:1025"
+}
