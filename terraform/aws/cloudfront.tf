@@ -145,6 +145,13 @@ resource "aws_cloudfront_distribution" "url_map" {
   is_ipv6_enabled     = true
   web_acl_id          = aws_wafv2_web_acl.core_rules.arn
 
+  lifecycle {
+    ignore_changes = [
+      viewer_certificate,
+      aliases
+    ]
+  }
+
   tags = {
     (var.tag_key) = local.tag_value
   }
