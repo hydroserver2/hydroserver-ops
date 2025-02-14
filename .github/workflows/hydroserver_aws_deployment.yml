@@ -122,8 +122,15 @@ jobs:
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
 
   deploy-hydroserver-api:
-    needs: initialize-hydroserver
-    if: github.event.inputs.action == 'Initialize HydroServer Deployment' || github.event.inputs.action == 'Update HydroServer Deployment'
+    needs: 
+      - check-environment-variables
+      - initialize-hydroserver
+    if: >
+      success() &&
+      (
+        (github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.initialize-hydroserver.result == 'success') ||
+        (github.event.inputs.action == 'Update HydroServer Deployment')
+      )
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     defaults:
