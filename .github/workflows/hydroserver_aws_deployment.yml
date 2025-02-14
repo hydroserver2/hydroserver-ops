@@ -126,10 +126,11 @@ jobs:
       - check-environment-variables
       - initialize-hydroserver
     if: >
-      success() &&
+      always() && 
+      !contains(needs.*.result, 'failure') &&
       (
         (github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.initialize-hydroserver.result == 'success') ||
-        (github.event.inputs.action == 'Update HydroServer Deployment')
+        (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success')
       )
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
