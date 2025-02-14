@@ -75,11 +75,6 @@ resource "aws_subnet" "public_subnet_az2" {
   }
 }
 
-resource "aws_db_subnet_group" "public_subnet_group" {
-  name        = "hydroserver-${var.instance}-public-subnet-group"
-  subnet_ids  = [aws_subnet.public_subnet_az1.id, aws_subnet.public_subnet_az2.id]
-}
-
 
 # ---------------------------------
 # Internet Gateway (App Runner)
@@ -113,6 +108,20 @@ resource "aws_nat_gateway" "nat_gateway" {
   }
 }
 
+resource "aws_eip" "nat_eip_az2" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "nat_gateway_az2" {
+  allocation_id = aws_eip.nat_eip_az2.id
+  subnet_id     = aws_subnet.public_subnet_az2.id
+
+  tags = {
+    Name = "hydroserver-${var.instance}-nat-gateway-az2"
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
 
 # ---------------------------------
 # Route Tables (RDS)
@@ -132,6 +141,20 @@ resource "aws_route_table" "private_route_table" {
   }
 }
 
+resource "aws_route_table" "private_route_table_az2" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway_az2.id
+  }
+
+  tags = {
+    Name = "hydroserver-${var.instance}-private-route-table-az2"
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
 resource "aws_route_table_association" "private_route_association_az1" {
   subnet_id      = aws_subnet.private_subnet_az1.id
   route_table_id = aws_route_table.private_route_table.id
@@ -139,7 +162,20 @@ resource "aws_route_table_association" "private_route_association_az1" {
 
 resource "aws_route_table_association" "private_route_association_az2" {
   subnet_id      = aws_subnet.private_subnet_az2.id
-  route_table_id = aws_route_table.private_route_table.id
+  route_table_id = aws_route_table.private_route_table_az2.id
+}
+
+resource "aws_route" "private_nat_route_az1" {
+  route_table_id         = aws_route_table.private_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat_gateway.id
+}
+
+
+resource "aws_route" "private_nat_route_az2" {
+  route_table_id         = aws_route_table.private_route_table_az2.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat_gateway_az2.id
 }
 
 
