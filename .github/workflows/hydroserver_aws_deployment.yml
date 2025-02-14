@@ -161,20 +161,30 @@ jobs:
       - name: Push Docker Image to AWS ECR
         run: |
           docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest
-      - name: Update AWS Secrets Manager Values
+      - name: Update AWS SSM Parameters
         run: |
-          if [ -n "${{ secrets.DATABASE_URL }}" ]; then
-            echo "Updating DATABASE_URL in AWS Secrets Manager..."
-            aws secretsmanager put-secret-value --secret-id "hydroserver-aws-database-url" --secret-string "${{ secrets.DATABASE_URL }}"
-          fi
-          if [ -n "${{ secrets.SMTP_URL }}" ]; then
-            echo "Updating SMTP_URL in AWS Secrets Manager..."
-            aws secretsmanager put-secret-value --secret-id "hydroserver-aws-smtp-url" --secret-string "${{ secrets.SMTP_URL }}"
-          fi
-          if [ -n "${{ secrets.SECRET_KEY }}" ]; then
-            echo "Updating SECRET_KEY in AWS Secrets Manager..."
-            aws secretsmanager put-secret-value --secret-id "hydroserver-aws-secret-key" --secret-string "${{ secrets.SECRET_KEY }}"
-          fi
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+          declare -A PARAMS=(
+            ["/hydroserver-${ENVIRONMENT}-api/database-url"]="${{ secrets.DATABASE_URL }}:SecureString"
+            ["/hydroserver-${ENVIRONMENT}-api/secret-key"]="${{ secrets.SECRET_KEY }}:SecureString"
+            ["/hydroserver-${ENVIRONMENT}-api/smtp-url"]="${{ secrets.SMTP_URL }}:SecureString"
+            ["/hydroserver-${ENVIRONMENT}-api/debug-mode"]="${{ vars.DEBUG }}:String"
+            ["/hydroserver-${ENVIRONMENT}-api/proxy-base-url"]="${{ vars.PROXY_BASE_URL }}:String"
+            ["/hydroserver-${ENVIRONMENT}-api/account-ownership-enabled"]="${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}:String"
+            ["/hydroserver-${ENVIRONMENT}-api/account-signup-enabled"]="${{ vars.ACCOUNT_SIGNUP_ENABLED }}:String"
+            ["/hydroserver-${ENVIRONMENT}-api/socialaccount-signup-only"]="${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}:String"
+          )
+          for PARAM in "${!PARAMS[@]}"; do
+            VALUE_TYPE="${PARAMS[$PARAM]}"
+            VALUE="${VALUE_TYPE%%:*}"
+            TYPE="${VALUE_TYPE##*:}"
+            if [ -n "$VALUE" ]; then
+              echo "Updating $PARAM in AWS SSM Parameter Store..."
+              aws ssm put-parameter --name "$PARAM" --value "$VALUE" --type "$TYPE" --overwrite
+            else
+              echo "Skipping $PARAM as it is not defined."
+            fi
+          done
       - name: Update AWS App Runner Service
         run: |
           APP_RUNNER_SERVICE_NAME="hydroserver-api-${{ github.event.inputs.environment }}"
