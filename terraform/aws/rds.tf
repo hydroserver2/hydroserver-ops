@@ -157,29 +157,6 @@ resource "aws_ssm_parameter" "database_url" {
   }
 }
 
-resource "aws_ssm_parameter" "secret_key" {
-  name        = "/hydroserver-${var.instance}-api/secret-key"
-  type        = "SecureString"
-  value       = random_password.api_secret_key.result
-
-  tags = {
-    "${var.tag_key}" = local.tag_value
-  }
-}
-
-resource "aws_secretsmanager_secret" "rds_database_url" {
-  name = "hydroserver-${var.instance}-database-url"
-
-  tags = {
-    "${var.tag_key}" = local.tag_value
-  }
-}
-
-resource "aws_secretsmanager_secret_version" "rds_database_url_version" {
-  secret_id     = aws_secretsmanager_secret.rds_database_url.id
-  secret_string = var.database_url != "" ? var.database_url : "postgresql://${aws_db_instance.rds_db_instance[0].username}:${random_string.rds_db_user_password_prefix[0].result}${random_password.rds_db_user_password[0].result}@${aws_db_instance.rds_db_instance[0].endpoint}/hydroserver?sslmode=require"
-}
-
 resource "random_password" "api_secret_key" {
   length           = 50
   special          = true
@@ -189,15 +166,12 @@ resource "random_password" "api_secret_key" {
   override_special = "!@#$%^&*()-_=+{}[]|:;\"'<>,.?/"
 }
 
-resource "aws_secretsmanager_secret" "api_secret_key" {
-  name = "hydroserver-${var.instance}-api-secret-key"
+resource "aws_ssm_parameter" "secret_key" {
+  name        = "/hydroserver-${var.instance}-api/secret-key"
+  type        = "SecureString"
+  value       = random_password.api_secret_key.result
 
   tags = {
     "${var.tag_key}" = local.tag_value
   }
-}
-
-resource "aws_secretsmanager_secret_version" "api_secret_key_version" {
-  secret_id     = aws_secretsmanager_secret.api_secret_key.id
-  secret_string = random_password.api_secret_key.result
 }

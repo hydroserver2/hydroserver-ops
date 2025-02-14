@@ -182,27 +182,28 @@ resource "aws_iam_policy_attachment" "app_runner_rds_policy_attachment" {
   roles      = [aws_iam_role.app_runner_service_role.name]
 }
 
-resource "aws_iam_policy" "app_runner_secrets_policy" {
-  name  = "hydroserver-${var.instance}-app-runner-secrets-access-policy"
+resource "aws_iam_policy" "app_runner_ssm_policy" {
+  name = "hydroserver-${var.instance}-app-runner-ssm-access-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
-        Action   = "secretsmanager:GetSecretValue"
-        Resource = [
-          aws_secretsmanager_secret.rds_database_url.arn,
-          aws_secretsmanager_secret.api_secret_key.arn
+        Action   = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParameterHistory"
         ]
+        Resource = "arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter/hydroserver-${var.instance}-api/*"
       }
     ]
   })
 }
 
-resource "aws_iam_policy_attachment" "app_runner_secrets_policy_attachment" {
-  name       = "hydroserver-${var.instance}-app-runner-secrets-access-policy-attachment"
-  policy_arn = aws_iam_policy.app_runner_secrets_policy.arn
+resource "aws_iam_policy_attachment" "app_runner_ssm_policy_attachment" {
+  name       = "hydroserver-${var.instance}-app-runner-ssm-access-policy-attachment"
+  policy_arn = aws_iam_policy.app_runner_ssm_policy.arn
   roles      = [aws_iam_role.app_runner_service_role.name]
 }
 
@@ -356,17 +357,4 @@ resource "aws_ssm_parameter" "debug_mode" {
   tags = {
     "${var.tag_key}" = local.tag_value
   }
-}
-
-resource "aws_secretsmanager_secret" "smtp_url" {
-  name = "hydroserver-${var.instance}-smtp-url"
-
-  tags = {
-    "${var.tag_key}" = local.tag_value
-  }
-}
-
-resource "aws_secretsmanager_secret_version" "smtp_url_version" {
-  secret_id     = aws_secretsmanager_secret.smtp_url.id
-  secret_string = "smtp://127.0.0.1:1025"
 }
