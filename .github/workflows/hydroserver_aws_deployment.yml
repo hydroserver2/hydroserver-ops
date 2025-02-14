@@ -188,7 +188,7 @@ jobs:
             VALUE="${PARAM_VALUES[$PARAM]}"
             TYPE="${PARAM_TYPES[$PARAM]}"
             if [ -n "$VALUE" ]; then
-              ESCAPED_VALUE=$(echo "$VALUE" | jq -Rsa .)
+              ESCAPED_VALUE=$(printf "%s" "$VALUE" | jq -Rs .)
               echo "Updating $PARAM in AWS SSM Parameter Store..."
               aws ssm put-parameter --name "$PARAM" --value "$ESCAPED_VALUE" --type "$TYPE" --overwrite
             else
