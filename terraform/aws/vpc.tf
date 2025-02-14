@@ -165,19 +165,6 @@ resource "aws_route_table_association" "private_route_association_az2" {
   route_table_id = aws_route_table.private_route_table_az2.id
 }
 
-resource "aws_route" "private_nat_route_az1" {
-  route_table_id         = aws_route_table.private_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat_gateway.id
-}
-
-
-resource "aws_route" "private_nat_route_az2" {
-  route_table_id         = aws_route_table.private_route_table_az2.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat_gateway_az2.id
-}
-
 
 # ---------------------------------
 # Route Tables (App Runner)
