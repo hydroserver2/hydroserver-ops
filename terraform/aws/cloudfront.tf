@@ -177,6 +177,10 @@ resource "aws_cloudfront_distribution" "url_map" {
 # CloudFront Origin Lambda
 # ---------------------------------
 
+locals {
+  apprunner_url = aws_apprunner_service.api.service_url
+}
+
 data "template_file" "host_header_function" {
   template = <<-EOT
     exports.handler = async (event, context, callback) => {
@@ -187,7 +191,7 @@ data "template_file" "host_header_function" {
   EOT
 
   vars = {
-    apprunner_url = aws_apprunner_service.api.service_url
+    apprunner_url = local.apprunner_url
   }
 }
 
