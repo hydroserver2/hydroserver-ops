@@ -177,23 +177,30 @@ resource "aws_cloudfront_distribution" "url_map" {
 # CloudFront Origin Lambda
 # ---------------------------------
 
+data "template_file" "host_header_function" {
+  template = <<-EOT
+    exports.handler = async (event, context, callback) => {
+      const request = event.Records[0].cf.request;
+      request.headers.host[0].value = '${apprunner_url}';
+      return callback(null, request);
+    };
+  EOT
+
+  vars = {
+    apprunner_url = aws_apprunner_service.api.url
+  }
+}
+
 resource "aws_lambda_function" "host_header_function" {
   function_name = "hydroserver-${var.instance}-origin-request-header"
+  filename      = "${path.module}/host_header_function.js"
+  runtime       = "nodejs14.x"
+  role          = aws_iam_role.lambda_execution_role.arn
+  handler       = "host_header_function.handler"
 
-  code {
-    zip_file = <<-EOF
-      export const handler = async (event, context, callback) => {
-        const request = event.Records[0].cf.request;
-        request.headers.host[0].value = '${aws_apprunner_service.api.url}';
-        return callback(null, request);
-      };
-    EOF
+  tags = {
+    (var.tag_key) = local.tag_value
   }
-
-  runtime = "nodejs14.x"
-  handler = "index.handler"
-
-  role = aws_iam_role.lambda_execution_role.arn
 }
 
 resource "aws_iam_role" "lambda_execution_role" {
@@ -211,6 +218,10 @@ resource "aws_iam_role" "lambda_execution_role" {
       }
     ]
   })
+
+  tags = {
+    (var.tag_key) = local.tag_value
+  }
 }
 
 
