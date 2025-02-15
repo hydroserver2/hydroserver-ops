@@ -187,7 +187,7 @@ data "template_file" "host_header_function" {
   EOT
 
   vars = {
-    apprunner_url = aws_apprunner_service.api.url
+    apprunner_url = aws_apprunner_service.api.service_url
   }
 }
 
