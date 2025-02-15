@@ -181,23 +181,20 @@ locals {
   apprunner_url = aws_apprunner_service.api.service_url
 }
 
-data "template_file" "host_header_function" {
-  template = <<-EOT
+data "local_file" "host_header_function" {
+  content = <<-EOT
     exports.handler = async (event, context, callback) => {
       const request = event.Records[0].cf.request;
-      request.headers.host[0].value = '${apprunner_url}';
+      request.headers.host[0].value = '${local.apprunner_url}';
       return callback(null, request);
     };
   EOT
-
-  vars = {
-    apprunner_url = local.apprunner_url
-  }
+  filename = "${path.module}/host_header_function.js"
 }
 
 resource "aws_lambda_function" "host_header_function" {
   function_name = "hydroserver-${var.instance}-origin-request-header"
-  filename      = "${path.module}/host_header_function.js"
+  filename      = data.local_file.host_header_function.filename
   runtime       = "nodejs14.x"
   role          = aws_iam_role.lambda_execution_role.arn
   handler       = "host_header_function.handler"
