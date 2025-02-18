@@ -264,13 +264,11 @@ jobs:
           aws s3 sync ./dist s3://hydroserver-data-mgmt-app-${{ github.event.inputs.environment }}-${{ vars.AWS_ACCOUNT_ID }}/ --delete
       - name: Get CloudFront Distribution ID
         run: |
-          TAG_KEY="hydroserver-instance"
-          TAG_VALUE="aws"
           DISTRIBUTION_IDS=$(aws cloudfront list-distributions --query "DistributionList.Items[*].Id" --output text)
           for ID in $DISTRIBUTION_IDS; do
-            TAGS_JSON=$(aws cloudfront list-tags-for-resource --resource "arn:aws:cloudfront::$AWS_ACCOUNT_ID:distribution/$ID")
-            MATCHING_ID=$(echo "$TAGS_JSON" | jq -r --arg KEY "$TAG_KEY" --arg VALUE "$TAG_VALUE" '
-              if any(.Tags.Items[]; .Key == $KEY and .Value == $VALUE) then "'$ID'" else empty end
+            TAGS_JSON=$(aws cloudfront list-tags-for-resource --resource "arn:aws:cloudfront::${{ vars.AWS_ACCOUNT_ID }}:distribution/$ID")
+            MATCHING_ID=$(echo "$TAGS_JSON" | jq -r '
+              if any(.Tags.Items[]; .Key == "'"${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}"'" and .Value == "'"${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"'") then "'$ID'" else empty end
             ')
             if [ -n "$MATCHING_ID" ]; then
               CLOUDFRONT_ID=$MATCHING_ID
