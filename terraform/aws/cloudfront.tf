@@ -66,11 +66,6 @@ resource "aws_cloudfront_distribution" "url_map" {
       event_type     = "viewer-request"
       function_arn   = aws_cloudfront_function.x_forward_host.arn
     }
-    lambda_function_association {
-      event_type   = "origin-request"
-      lambda_arn   = aws_lambda_function.host_header_function.arn
-      include_body = false
-    }
   }
 
   ordered_cache_behavior {
@@ -86,11 +81,6 @@ resource "aws_cloudfront_distribution" "url_map" {
       event_type     = "viewer-request"
       function_arn   = aws_cloudfront_function.x_forward_host.arn
     }
-    lambda_function_association {
-      event_type   = "origin-request"
-      lambda_arn   = aws_lambda_function.host_header_function.arn
-      include_body = false
-    }
   }
 
   ordered_cache_behavior {
@@ -105,11 +95,6 @@ resource "aws_cloudfront_distribution" "url_map" {
     function_association {
       event_type     = "viewer-request"
       function_arn   = aws_cloudfront_function.x_forward_host.arn
-    }
-    lambda_function_association {
-      event_type   = "origin-request"
-      lambda_arn   = aws_lambda_function.host_header_function.arn
-      include_body = false
     }
   }
 
@@ -174,59 +159,6 @@ resource "aws_cloudfront_distribution" "url_map" {
 
 
 # ---------------------------------
-# CloudFront Origin Lambda
-# ---------------------------------
-
-locals {
-  apprunner_url = aws_apprunner_service.api.service_url
-}
-
-data "local_file" "host_header_function" {
-  content = <<-EOT
-    exports.handler = async (event, context, callback) => {
-      const request = event.Records[0].cf.request;
-      request.headers.host[0].value = '${local.apprunner_url}';
-      return callback(null, request);
-    };
-  EOT
-  filename = "${path.module}/host_header_function.js"
-}
-
-resource "aws_lambda_function" "host_header_function" {
-  function_name = "hydroserver-${var.instance}-origin-request-header"
-  filename      = data.local_file.host_header_function.filename
-  runtime       = "nodejs14.x"
-  role          = aws_iam_role.lambda_execution_role.arn
-  handler       = "host_header_function.handler"
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
-}
-
-resource "aws_iam_role" "lambda_execution_role" {
-  name = "hydroserver-${var.instance}-lambda-execution-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect    = "Allow",
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        },
-        Action    = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = {
-    (var.tag_key) = local.tag_value
-  }
-}
-
-
-# ---------------------------------
 # CloudFront Access Controls
 # ---------------------------------
 
@@ -235,7 +167,7 @@ data "aws_cloudfront_cache_policy" "cdn_managed_caching_disabled_cache_policy" {
 }
 
 data "aws_cloudfront_origin_request_policy" "cdn_managed_all_viewer_origin_request_policy" {
-  name = "Managed-AllViewer"
+  name = "Managed-AllViewerExceptHostHeader"
 }
 
 resource "aws_cloudfront_function" "frontend_routing" {
