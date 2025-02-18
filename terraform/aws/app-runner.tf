@@ -27,6 +27,7 @@ resource "aws_apprunner_service" "api" {
           SECRET_KEY                = aws_ssm_parameter.secret_key.arn
           PROXY_BASE_URL            = aws_ssm_parameter.proxy_base_url.arn
           DEBUG                     = aws_ssm_parameter.debug_mode.arn
+          DEFAULT_FROM_EMAIL        = aws_ssm_parameter.default_from_email.arn
           ACCOUNT_SIGNUP_ENABLED    = aws_ssm_parameter.account_signup_enabled.arn
           ACCOUNT_OWNERSHIP_ENABLED = aws_ssm_parameter.account_ownership_enabled.arn
           SOCIALACCOUNT_SIGNUP_ONLY = aws_ssm_parameter.socialaccount_signup_only.arn
@@ -304,6 +305,10 @@ resource "aws_ssm_parameter" "smtp_url" {
   type        = "SecureString"
   value       = "smtp://127.0.0.1:1025"
 
+  lifecycle {
+    ignore_changes = [value]
+  }
+
   tags = {
     "${var.tag_key}" = local.tag_value
   }
@@ -313,6 +318,24 @@ resource "aws_ssm_parameter" "proxy_base_url" {
   name        = "/hydroserver-${var.instance}-api/proxy-base-url"
   type        = "String"
   value       = "https://www.example.com"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "default_from_email" {
+  name        = "/hydroserver-${var.instance}-api/default-from-email"
+  type        = "String"
+  value       = "webmaster@localhost"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 
   tags = {
     "${var.tag_key}" = local.tag_value
@@ -324,6 +347,10 @@ resource "aws_ssm_parameter" "account_signup_enabled" {
   type        = "String"
   value       = "True"
 
+  lifecycle {
+    ignore_changes = [value]
+  }
+
   tags = {
     "${var.tag_key}" = local.tag_value
   }
@@ -333,6 +360,10 @@ resource "aws_ssm_parameter" "account_ownership_enabled" {
   name        = "/hydroserver-${var.instance}-api/account-ownership-enabled"
   type        = "String"
   value       = "True"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 
   tags = {
     "${var.tag_key}" = local.tag_value
@@ -344,6 +375,10 @@ resource "aws_ssm_parameter" "socialaccount_signup_only" {
   type        = "String"
   value       = "False"
 
+  lifecycle {
+    ignore_changes = [value]
+  }
+
   tags = {
     "${var.tag_key}" = local.tag_value
   }
@@ -353,6 +388,10 @@ resource "aws_ssm_parameter" "debug_mode" {
   name        = "/hydroserver-${var.instance}-api/debug-mode"
   type        = "String"
   value       = "True"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 
   tags = {
     "${var.tag_key}" = local.tag_value
