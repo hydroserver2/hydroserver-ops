@@ -278,7 +278,7 @@ jobs:
           echo "CLOUDFRONT_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
       - name: Invalidate CloudFront Distribution Cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_ID }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
 
   teardown-hydroserver:
     needs: check-environment-variables
