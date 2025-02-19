@@ -92,6 +92,26 @@ resource "google_compute_region_network_endpoint_group" "api_neg" {
   }
 }
 
+resource "google_secret_manager_secret" "smtp_url" {
+  secret_id = "hydroserver-${var.instance}-api-smtp-url"
+  replication {
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
+}
+
+resource "google_secret_manager_secret_version" "smtp_url_version" {
+  secret      = google_secret_manager_secret.smtp_url.id
+  secret_data = "smtp://127.0.0.1:1025"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
 
 # ---------------------------------
 # GCP Cloud Run Service Account

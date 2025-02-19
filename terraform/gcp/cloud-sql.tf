@@ -106,6 +106,10 @@ resource "google_secret_manager_secret" "database_url" {
 resource "google_secret_manager_secret_version" "database_url_version" {
   secret      = google_secret_manager_secret.database_url.id
   secret_data = var.database_url != "" ? var.database_url : "postgresql://${google_sql_user.db_user[0].name}:${google_sql_user.db_user[0].password}@/${google_sql_database.db[0].name}?host=/cloudsql/${google_sql_database_instance.db_instance[0].connection_name}"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "random_password" "api_secret_key" {
@@ -131,4 +135,8 @@ resource "google_secret_manager_secret" "api_secret_key" {
 resource "google_secret_manager_secret_version" "api_secret_key_version" {
   secret      = google_secret_manager_secret.hydroserver_api_secret_key.id
   secret_data = random_password.api_secret_key.result
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
