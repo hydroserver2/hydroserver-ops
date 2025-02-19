@@ -74,13 +74,11 @@ resource "google_cloud_run_v2_service" "api" {
     service_account = google_service_account.cloud_run_service_account.email
 
     dynamic "volumes" {
-      for_each = var.database_url == "" ? {} : {
-        cloudsql = google_sql_database_instance.db_instance[0].connection_name
-      }
+      for_each = var.database_url != "" ? ["apply"] : []
       content {
-        name = volumes.key
+        name = "cloudsql"
         cloud_sql_instance {
-          instances = [volumes.value]
+          instances = [google_sql_database_instance.db_instance[0].connection_name]
         }
       }
     }
