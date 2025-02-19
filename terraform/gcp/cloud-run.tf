@@ -66,7 +66,7 @@ resource "google_cloud_run_v2_service" "api" {
     service_account = google_service_account.cloud_run_service_account.email
 
     dynamic "volumes" {
-      for_each = for_each = coalesce(var.database_url, "") == "" ? [1] : []
+      for_each = coalesce(var.database_url, "") == "" ? [1] : []
       content {
         name = "cloudsql"
         cloud_sql_instance {
