@@ -177,6 +177,9 @@ jobs:
       - name: Push image to Google Artifact Registry
         run: |
           docker push ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest
+      - name: Update Cloud Run Secrets
+        run: |
+          echo -n "${{ secrets.SMTP_URL }}" | gcloud secrets versions add "hydroserver-${{ github.event.inputs.environment }}-api-smtp-url" --data-file=-
       - name: Update Cloud Run Service
         run: |
           gcloud run services update hydroserver-api-${{ github.event.inputs.environment }} \
