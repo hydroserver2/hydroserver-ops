@@ -94,6 +94,7 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
         continue-on-error: true
@@ -108,6 +109,7 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
       - name: Authenticate Docker to Google Artifact Registry
@@ -130,6 +132,7 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
+          -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 

@@ -31,6 +31,12 @@ variable "hydroserver_version" {
   type        = string
   default     = "latest"
 }
+variable "database_url" {
+  description = "A database connection for HydroServer to use."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
 variable "label_key" {
   description = "The key of the GCP label that will be attached to this HydroServer instance."
   type        = string

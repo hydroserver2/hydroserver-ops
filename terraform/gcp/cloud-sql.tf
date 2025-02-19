@@ -133,7 +133,7 @@ resource "google_secret_manager_secret" "api_secret_key" {
 }
 
 resource "google_secret_manager_secret_version" "api_secret_key_version" {
-  secret      = google_secret_manager_secret.hydroserver_api_secret_key.id
+  secret      = google_secret_manager_secret.api_secret_key.id
   secret_data = random_password.api_secret_key.result
 
   lifecycle {
