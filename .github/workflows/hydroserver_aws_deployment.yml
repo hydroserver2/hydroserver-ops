@@ -226,40 +226,40 @@ jobs:
       # - name: Get Latest HydroServer Version
       #   id: get_latest_tag
       #   run: echo "tag=$(curl -sL https://api.github.com/repos/hydroserver2/hydroserver-data-management-app/releases/latest | jq -r '.tag_name')" >> $GITHUB_OUTPUT
-      # - name: Checkout Frontend Repo
+      # - name: Checkout Data Management App Repo
       #   uses: actions/checkout@v4
       #   with:
       #     repository: hydroserver2/hydroserver-data-management-app
       #     ref: refs/tags/${{ github.event.inputs.hydroserver-version || steps.get_latest_tag.outputs.tag }}
-      #     path: frontend
-      - name: Checkout Frontend Repo
+      #     path: data_mgmt
+      - name: Checkout Data Management App Repo
         uses: actions/checkout@v4
         with:
           repository: hydroserver2/hydroserver-data-management-app
           ref: 238-workspaces
-          path: frontend
+          path: data_mgmt
       - name: Setup Node 18.x
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: data_mgmt/package-lock.json
       - name: Install Dependencies
-        working-directory: ./frontend
+        working-directory: ./data_mgmt
         run: npm ci
       - name: Configure Environment Variables
-        working-directory: ./frontend
+        working-directory: ./data_mgmt
         run: |
           cat << EOF > .env
           VITE_APP_VERSION=${{ github.event.inputs.hydroserver-version || steps.get_latest_tag.outputs.tag }}
           VITE_APP_GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_APP_GOOGLE_MAPS_MAP_ID=${{ secrets.GOOGLE_MAPS_MAP_ID }}
           VITE_APP_PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }}
-      - name: Build Frontend
-        working-directory: ./frontend
+      - name: Build Data Management App
+        working-directory: ./data_mgmt
         run: npm run build
       - name: Deploy to S3
-        working-directory: ./frontend
+        working-directory: ./data_mgmt
         run: |
           aws s3 sync ./dist s3://hydroserver-data-mgmt-app-${{ github.event.inputs.environment }}-${{ vars.AWS_ACCOUNT_ID }}/ --delete
       - name: Get CloudFront Distribution ID

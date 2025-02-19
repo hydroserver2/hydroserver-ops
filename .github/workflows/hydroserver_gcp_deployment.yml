@@ -59,16 +59,14 @@ jobs:
             echo "::set-output name=database_url_exists::true"
           fi
 
-  setup-hydroserver-database:
+  initialize-hydroserver:
     needs: check-environment-variables
-    if: needs.check-environment-variables.outputs.database_url_exists == 'false' && github.event.inputs.action == 'Initialize HydroServer Deployment'
+    if: github.event.inputs.action == 'Initialize HydroServer Deployment'
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    env: 
-      database_url: ${{ secrets.DATABASE_URL }}
     defaults:
       run:
-        working-directory: ./terraform/gcp/database
+        working-directory: ./terraform/gcp
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -87,7 +85,7 @@ jobs:
           terraform init \
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
+          -backend-config="prefix=state/hydroserver_${{ github.event.inputs.environment }}"
       - name: Terraform Plan
         id: plan
         run: |
@@ -106,117 +104,7 @@ jobs:
         run: |
           terraform apply \
           -auto-approve -input=false \
-          -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-
-  link-hydroserver-database:
-    needs: check-environment-variables
-    if: needs.check-environment-variables.outputs.database_url_exists == 'true' && github.event.inputs.action == 'Initialize HydroServer Deployment'
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    env: 
-      database_url: ${{ secrets.DATABASE_URL }}
-    defaults:
-      run:
-        working-directory: ./terraform/gcp/database/connection
-    steps:
-      - name: Checkout Ops Repo
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Configure GCP Credentials
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Terraform Init
-        run: |
-          terraform init \
-          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
-          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_database_${{ github.event.inputs.environment }}"
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform plan \
-          -no-color -input=false \
-          -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "database_url=${{ secrets.DATABASE_URL }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-        continue-on-error: true
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-      - name: Terraform Apply
-        run: |
-          terraform apply \
-          -auto-approve -input=false \
-          -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "database_url=${{ secrets.DATABASE_URL }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-
-  setup-hydroserver-services:
-    needs: [link-hydroserver-database, setup-hydroserver-database]
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    if: always() && (needs.link-hydroserver-database.result == 'success' || needs.setup-hydroserver-database.result == 'success') && github.event.inputs.action == 'Initialize HydroServer Deployment'
-    defaults:
-      run:
-        working-directory: ./terraform/gcp/app
-    steps:
-      - name: Checkout Ops Repo
-        uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Configure GCP Credentials
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.GCP_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      - name: Set up GCP SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Terraform Init
-        run: |
-          terraform init \
-          -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
-          -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_application_${{ github.event.inputs.environment }}"
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform plan \
-          -no-color -input=false \
-          -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.GCP_REGION }}" \
-          -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
-          -var "label_key=${{ vars.GCP_LABEL_KEY || 'hydroserver-instance' }}" \
-          -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
-        continue-on-error: true
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-      - name: Terraform Apply
-        run: |
-          terraform apply \
-          -auto-approve -input=false \
-          -target=google_artifact_registry_repository.hydroserver_api_repository \
+          -target=google_artifact_registry_repository.api_repository \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.GCP_REGION }}" \
           -var "project_id=${{ vars.GCP_PROJECT_ID }}" \
@@ -246,10 +134,21 @@ jobs:
           -var "label_value=${{ vars.GCP_LABEL_VALUE || github.event.inputs.environment }}"
 
   deploy-hydroserver-api:
-    needs: [check-environment-variables, setup-hydroserver-services]
+    needs: 
+      - check-environment-variables
+      - initialize-hydroserver
+    if: >
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      (
+        (github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.initialize-hydroserver.result == 'success') ||
+        (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success')
+      )
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: always() && ((github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.setup-hydroserver-services.result == 'success') || (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success'))
+    defaults:
+      run:
+        working-directory: ./terraform/gcp
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -283,24 +182,30 @@ jobs:
           gcloud run services update hydroserver-api-${{ github.event.inputs.environment }} \
           --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ github.event.inputs.environment }}/hydroserver-api-services:latest \
           --region ${{ vars.GCP_REGION }} \
-          --update-env-vars PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }} \
-          --update-env-vars ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }} \
           --update-env-vars GS_PROJECT_ID=${{ vars.GCP_PROJECT_ID }} \
-          --update-env-vars SMTP_URL=${{ vars.SMTP_URL }} \
-          --update-env-vars ACCOUNTS_EMAIL=${{ vars.ACCOUNTS_EMAIL }} \
-          --update-env-vars OAUTH_GOOGLE_CLIENT=${{ vars.OAUTH_GOOGLE_CLIENT }} \
-          --update-env-vars OAUTH_GOOGLE_SECRET=${{ vars.OAUTH_GOOGLE_SECRET }} \
-          --update-env-vars OAUTH_ORCID_CLIENT=${{ vars.OAUTH_ORCID_CLIENT }} \
-          --update-env-vars OAUTH_ORCID_SECRET=${{ vars.OAUTH_ORCID_SECRET }} \
-          --update-env-vars OAUTH_HYDROSHARE_CLIENT=${{ vars.OAUTH_HYDROSHARE_CLIENT }} \
-          --update-env-vars OAUTH_HYDROSHARE_SECRET=${{ vars.OAUTH_HYDROSHARE_SECRET }} \
           --update-env-vars DEBUG=${{ vars.DEBUG }} \
+          --update-env-vars PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }} \
+          --update-env-vars DEFAULT_FROM_EMAIL=${{ vars.DEFAULT_FROM_EMAIL }} \
+          --update-env-vars ACCOUNT_OWNERSHIP_ENABLED=${{ vars.ACCOUNT_OWNERSHIP_ENABLED }} \
+          --update-env-vars ACCOUNT_SIGNUP_ENABLED=${{ vars.ACCOUNT_SIGNUP_ENABLED }} \
+          --update-env-vars SOCIALACCOUNT_SIGNUP_ONLY=${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }} \
 
   deploy-hydroserver-data-mgmt-app:
-    needs: [check-environment-variables, setup-hydroserver-services]
+    needs: 
+      - check-environment-variables
+      - initialize-hydroserver
+    if: >
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      (
+        (github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.initialize-hydroserver.result == 'success') ||
+        (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success')
+      )
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: always() && ((github.event.inputs.action == 'Initialize HydroServer Deployment' && needs.setup-hydroserver-services.result == 'success') || (github.event.inputs.action == 'Update HydroServer Deployment' && needs.check-environment-variables.result == 'success'))
+    defaults:
+      run:
+        working-directory: ./terraform/gcp
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -316,55 +221,54 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
-      - name: Get Latest HydroServer Version
-        id: get_latest_tag
-        run: echo "tag=$(curl -sL https://api.github.com/repos/hydroserver2/hydroserver-data-management-app/releases/latest | jq -r '.tag_name')" >> $GITHUB_OUTPUT
-      - name: Checkout Data Management Repo
+      # - name: Get Latest HydroServer Version
+      #   id: get_latest_tag
+      #   run: echo "tag=$(curl -sL https://api.github.com/repos/hydroserver2/hydroserver-data-management-app/releases/latest | jq -r '.tag_name')" >> $GITHUB_OUTPUT
+      # - name: Checkout Data Management App Repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: hydroserver2/hydroserver-data-management-app
+      #     ref: refs/tags/${{ github.event.inputs.hydroserver-version || steps.get_latest_tag.outputs.tag }}
+      #     path: data_mgmt
+      - name: Checkout Data Management App Repo
         uses: actions/checkout@v4
         with:
           repository: hydroserver2/hydroserver-data-management-app
-          ref: refs/tags/${{ github.event.inputs.release == 'latest' && steps.get_latest_tag.outputs.tag || github.event.inputs.release }}
-          path: data-mgmt
+          ref: 238-workspaces
+          path: data_mgmt
       - name: Setup Node 18.x
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
           cache: npm
-          cache-dependency-path: data-mgmt/package-lock.json
+          cache-dependency-path: data_mgmt/package-lock.json
       - name: Install Dependencies
-        working-directory: ./data-mgmt
+        working-directory: ./data_mgmt
         run: npm ci
       - name: Configure Environment Variables
-        working-directory: ./data-mgmt
+        working-directory: ./data_mgmt
         run: |
           cat << EOF > .env
-          VITE_APP_VERSION=${{ github.event.inputs.release || steps.get_latest_tag.outputs.tag }}
+          VITE_APP_VERSION=${{ github.event.inputs.hydroserver-version || steps.get_latest_tag.outputs.tag }}
           VITE_APP_GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
           VITE_APP_GOOGLE_MAPS_MAP_ID=${{ secrets.GOOGLE_MAPS_MAP_ID }}
           VITE_APP_PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }}
-          VITE_APP_DISABLE_ACCOUNT_CREATION=${{ vars.DISABLE_ACCOUNT_CREATION == 'True' && 'true' || 'false' }}
-          VITE_APP_GOOGLE_OAUTH_ENABLED=${{ secrets.OAUTH_GOOGLE_CLIENT && 'true' || 'false' }}
-          VITE_APP_ORCID_OAUTH_ENABLED=${{ secrets.OAUTH_ORCID_CLIENT && 'true' || 'false' }}
-          VITE_APP_HYDROSHARE_OAUTH_ENABLED=${{ secrets.OAUTH_HYDROSHARE_CLIENT && 'true' || 'false' }}
       - name: Build Data Management App
-        working-directory: ./data-mgmt
+        working-directory: ./data_mgmt
         run: npm run build
       - name: Deploy to Cloud Storage
-        working-directory: ./data-mgmt
+        working-directory: ./data_mgmt
         run: |
           gsutil -m rsync -r -d ./dist gs://hydroserver-data-mgmt-app-${{ github.event.inputs.environment }}-${{ vars.GCP_PROJECT_ID }}/
-      # - name: Invalidate CloudFront Distribution Cache
-      #   run: |
-      #     aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_ID }} --paths "/*"
 
-  teardown-hydroserver-services:
+  teardown-hydroserver:
     needs: check-environment-variables
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     if: success() && github.event.inputs.action == 'Teardown HydroServer Deployment'
     defaults:
       run:
-        working-directory: ./terraform/gcp/app
+        working-directory: ./terraform/gcp
     steps:
       - name: Checkout Ops Repo
         uses: actions/checkout@v4
@@ -383,7 +287,7 @@ jobs:
           terraform init \
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
-          -backend-config="prefix=state/hydroserver_application_${{ github.event.inputs.environment }}"
+          -backend-config="prefix=state/hydroserver_${{ github.event.inputs.environment }}"
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |

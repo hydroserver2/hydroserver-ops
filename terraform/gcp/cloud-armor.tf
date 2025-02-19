@@ -1,9 +1,9 @@
-# -------------------------------------------------- #
-# Cloud Armor Security Policy                        #
-# -------------------------------------------------- #
+# ---------------------------------
+# Cloud Armor Security Policy
+# ---------------------------------
 
-resource "google_compute_security_policy" "hydroserver_security_policy" {
-  name        = "hydroserver-security-policy-${var.instance}"
+resource "google_compute_security_policy" "security_policy" {
+  name        = "hydroserver-${var.instance}-security-policy"
   description = "WAF policy for HydroServer Load Balancer"
 
   adaptive_protection_config {
