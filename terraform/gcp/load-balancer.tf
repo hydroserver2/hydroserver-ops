@@ -58,11 +58,11 @@ resource "google_compute_url_map" "url_map" {
     }
     path_rule {
       paths   = ["/static/*"]
-      service = google_compute_backend_bucket.static_bucket.self_link
+      service = google_compute_backend_bucket.static_bucket_backend.self_link
     }
     path_rule {
       paths   = ["/photos/*"]
-      service = google_compute_backend_bucket.media_bucket.self_link
+      service = google_compute_backend_bucket.media_bucket_backend.self_link
     }
   }
 }
