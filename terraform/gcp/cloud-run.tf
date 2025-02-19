@@ -26,57 +26,58 @@ resource "google_cloud_run_v2_service" "api" {
         mount_path = "/cloudsql"
       }
 
-    dynamic "env" {
-      for_each = {
-        DATABASE_URL = google_secret_manager_secret.database_url.id
-        SMTP_URL     = google_secret_manager_secret.smtp_url.id
-        SECRET_KEY   = google_secret_manager_secret.api_secret_key.id
-      }
-      content {
-        name = env.key
-        value_source {
-          secret_key_ref {
-            secret  = env.value
-            version = "latest"
+      dynamic "env" {
+        for_each = {
+          DATABASE_URL = google_secret_manager_secret.database_url.id
+          SMTP_URL     = google_secret_manager_secret.smtp_url.id
+          SECRET_KEY   = google_secret_manager_secret.api_secret_key.id
+        }
+        content {
+          name = env.key
+          value_source {
+            secret_key_ref {
+              secret  = env.value
+              version = "latest"
+            }
           }
         }
       }
-    }
 
-    dynamic "env" {
-      for_each = {
-        USE_CLOUD_SQL_AUTH_PROXY  = "true"
-        DEPLOYED                  = "True"
-        DEPLOYMENT_BACKEND        = "gcp"
-        STATIC_BUCKET_NAME        = google_storage_bucket.static_bucket.name
-        MEDIA_BUCKET_NAME         = google_storage_bucket.media_bucket.name
-        PROXY_BASE_URL            = ""
-        DEBUG                     = ""
-        DEFAULT_FROM_EMAIL        = ""
-        ACCOUNT_SIGNUP_ENABLED    = ""
-        ACCOUNT_OWNERSHIP_ENABLED = ""
-        SOCIALACCOUNT_SIGNUP_ONLY = ""
-      }
-      content {
-        name  = env.key
-        value = env.value
-      }
-    }
-
-    service_account = google_service_account.cloud_run_service_account.email
-
-    dynamic "volumes" {
-      for_each = coalesce(var.database_url, "") == "" ? [1] : []
-      content {
-        name = "cloudsql"
-        cloud_sql_instance {
-          instances = [google_sql_database_instance.db_instance[0].connection_name]
+      dynamic "env" {
+        for_each = {
+          USE_CLOUD_SQL_AUTH_PROXY  = "true"
+          DEPLOYED                  = "True"
+          DEPLOYMENT_BACKEND        = "gcp"
+          STATIC_BUCKET_NAME        = google_storage_bucket.static_bucket.name
+          MEDIA_BUCKET_NAME         = google_storage_bucket.media_bucket.name
+          PROXY_BASE_URL            = ""
+          DEBUG                     = ""
+          DEFAULT_FROM_EMAIL        = ""
+          ACCOUNT_SIGNUP_ENABLED    = ""
+          ACCOUNT_OWNERSHIP_ENABLED = ""
+          SOCIALACCOUNT_SIGNUP_ONLY = ""
+        }
+        content {
+          name  = env.key
+          value = env.value
         }
       }
-    }
 
-    labels = {
-      "${var.label_key}" = local.label_value
+      service_account = google_service_account.cloud_run_service_account.email
+
+      dynamic "volumes" {
+        for_each = coalesce(var.database_url, "") == "" ? [1] : []
+        content {
+          name = "cloudsql"
+          cloud_sql_instance {
+            instances = [google_sql_database_instance.db_instance[0].connection_name]
+          }
+        }
+      }
+
+      labels = {
+        "${var.label_key}" = local.label_value
+      }
     }
   }
 }
