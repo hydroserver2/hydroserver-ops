@@ -7,6 +7,12 @@ resource "google_cloud_run_v2_service" "api" {
   location = var.region
   ingress = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
 
+  depends_on = [
+    google_secret_manager_secret_version.database_url_version,
+    google_secret_manager_secret_version.smtp_url_version,
+    google_secret_manager_secret_version.api_secret_key_version
+  ]
+
   template {
     containers {
       image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
