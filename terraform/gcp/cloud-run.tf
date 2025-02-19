@@ -3,9 +3,10 @@
 # ---------------------------------
 
 resource "google_cloud_run_v2_service" "api" {
-  name     = "hydroserver-api-${var.instance}"
-  location = var.region
-  ingress = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
+  name                = "hydroserver-api-${var.instance}"
+  location            = var.region
+  ingress             = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
+  deletion_protection = false
 
   depends_on = [
     google_secret_manager_secret_version.database_url_version,
@@ -72,8 +73,17 @@ resource "google_cloud_run_v2_service" "api" {
 
     service_account = google_service_account.cloud_run_service_account.email
 
-    dynamic "volumes" {
-      for_each = (var.database_url != "" && var.database_url != null) ? [1] : []
+    # dynamic "volumes" {
+    #   for_each = (var.database_url != "" && var.database_url != null) ? [1] : []
+    #   content {
+    #     name = "cloudsql"
+    #     cloud_sql_instance {
+    #       instances = [google_sql_database_instance.db_instance[0].connection_name]
+    #     }
+    #   }
+    # }
+
+    volumes {
       content {
         name = "cloudsql"
         cloud_sql_instance {
