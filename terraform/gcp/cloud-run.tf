@@ -130,11 +130,11 @@ resource "google_project_iam_member" "cloud_run_sql_access" {
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_access" {
-  for_each = toset([
-    google_secret_manager_secret.database_url.id,
-    google_secret_manager_secret.smtp_url.id,
-    google_secret_manager_secret.api_secret_key.id,
-  ])
+  for_each = {
+    "database_url"   = google_secret_manager_secret.database_url.id,
+    "smtp_url"       = google_secret_manager_secret.smtp_url.id,
+    "api_secret_key" = google_secret_manager_secret.api_secret_key.id
+  }
   project   = data.google_project.gcp_project.project_id
   secret_id = each.value
   role      = "roles/secretmanager.secretAccessor"
