@@ -99,12 +99,14 @@ resource "aws_cloudfront_distribution" "url_map" {
   }
 
   ordered_cache_behavior {
-    path_pattern           = "/photos/*"
+    path_pattern           = "/media/*"
     target_origin_id       = "media"
     viewer_protocol_policy = "redirect-to-https"
 
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
+
+    trusted_signers = ["self"]
 
     forwarded_values {
       query_string = false
