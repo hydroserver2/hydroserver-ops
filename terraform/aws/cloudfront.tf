@@ -106,7 +106,7 @@ resource "aws_cloudfront_distribution" "url_map" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
 
-    trusted_signers = ["self"]
+    trusted_key_groups = [aws_cloudfront_key_group.cloudfront_key_group.id]
 
     forwarded_values {
       query_string = false
@@ -157,6 +157,26 @@ resource "aws_cloudfront_distribution" "url_map" {
   tags = {
     (var.tag_key) = local.tag_value
   }
+}
+
+
+# ---------------------------------
+# RSA Key Pair
+# ---------------------------------
+
+resource "tls_private_key" "cloudfront_signing_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_cloudfront_public_key" "cloudfront_pub_key" {
+  name        = "hydroserver-${var.instance}-public-key"
+  encoded_key = tls_private_key.cloudfront_signing_key.public_key_pem
+}
+
+resource "aws_cloudfront_key_group" "cloudfront_key_group" {
+  name  = "hydroserver-${var.instance}-key-group"
+  items = [aws_cloudfront_public_key.cloudfront_pub_key.id]
 }
 
 
