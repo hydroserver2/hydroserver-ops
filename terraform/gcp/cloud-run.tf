@@ -83,13 +83,6 @@ resource "google_cloud_run_v2_service" "api" {
       }
     }
 
-    # volumes {
-    #   name = "cloudsql"
-    #   cloud_sql_instance {
-    #     instances = [google_sql_database_instance.db_instance[0].connection_name]
-    #   }
-    # }
-
     labels = {
       "${var.label_key}" = local.label_value
     }
