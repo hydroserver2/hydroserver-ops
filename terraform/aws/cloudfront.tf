@@ -179,6 +179,26 @@ resource "aws_cloudfront_key_group" "cloudfront_key_group" {
   items = [aws_cloudfront_public_key.cloudfront_pub_key.id]
 }
 
+resource "aws_ssm_parameter" "signing_key_id" {
+  name        = "/hydroserver-${var.instance}-api/signing-key-id"
+  type        = "String"
+  value       = aws_cloudfront_public_key.cloudfront_pub_key.id
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "signing_key" {
+  name        = "/hydroserver-${var.instance}-api/signing-key"
+  type        = "SecureString"
+  value       = tls_private_key.cloudfront_signing_key.private_key_pem
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
 
 # ---------------------------------
 # CloudFront Access Controls

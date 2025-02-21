@@ -25,6 +25,8 @@ resource "aws_apprunner_service" "api" {
           DATABASE_URL              = aws_ssm_parameter.database_url.arn
           SMTP_URL                  = aws_ssm_parameter.smtp_url.arn
           SECRET_KEY                = aws_ssm_parameter.secret_key.arn
+          AWS_CLOUDFRONT_KEY_ID     = aws_ssm_parameter.signing_key_id.arn
+          AWS_CLOUDFRONT_KEY        = aws_ssm_parameter.signing_key.arn
           PROXY_BASE_URL            = aws_ssm_parameter.proxy_base_url.arn
           DEBUG                     = aws_ssm_parameter.debug_mode.arn
           DEFAULT_FROM_EMAIL        = aws_ssm_parameter.default_from_email.arn
