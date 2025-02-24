@@ -43,14 +43,15 @@ resource "google_compute_backend_bucket" "data_mgmt_bucket_backend" {
 
 resource "google_compute_url_map" "url_map" {
   name = "hydroserver-api-${var.instance}-url-map"
+  default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.self_link
 
   host_rule {
     hosts        = ["*"]
-    path_matcher = "default-routing"
+    path_matcher = "allPaths"
   }
 
   path_matcher {
-    name            = "default-routing"
+    name            = "allPaths"
     default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.self_link
 
     path_rule {
