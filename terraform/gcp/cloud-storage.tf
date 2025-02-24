@@ -49,6 +49,7 @@ resource "google_storage_bucket" "data_mgmt_app_bucket" {
 
   website {
     main_page_suffix = "index.html"
+    not_found_page   = "index.html"
   }
 }
 

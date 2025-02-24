@@ -42,14 +42,15 @@ resource "google_compute_backend_bucket" "data_mgmt_bucket_backend" {
 # ---------------------------------
 
 resource "google_compute_url_map" "url_map" {
-  name            = "hydroserver-api-${var.instance}-url-map"
-  default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.id
+  name = "hydroserver-api-${var.instance}-url-map"
+
   host_rule {
     hosts        = ["*"]
-    path_matcher = "allpaths"
+    path_matcher = "default-routing"
   }
+
   path_matcher {
-    name            = "allpaths"
+    name            = "default-routing"
     default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.self_link
 
     path_rule {
@@ -64,16 +65,9 @@ resource "google_compute_url_map" "url_map" {
       paths   = ["/photos/*"]
       service = google_compute_backend_bucket.media_bucket_backend.self_link
     }
-    route_rules {
-      priority = 0
-      match_rules {
-        prefix_match = "/" 
-      }
-      route_action {
-        url_rewrite {
-          path_prefix_rewrite = "/index.html"
-        }
-      }
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_bucket.data_mgmt_bucket_backend.self_link
     }
   }
 }
