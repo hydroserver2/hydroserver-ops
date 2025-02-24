@@ -47,11 +47,11 @@ resource "google_compute_url_map" "url_map" {
 
   host_rule {
     hosts        = ["*"]
-    path_matcher = "allPaths"
+    path_matcher = "allpaths"
   }
 
   path_matcher {
-    name            = "allPaths"
+    name            = "allpaths"
     default_service = google_compute_backend_bucket.data_mgmt_bucket_backend.self_link
 
     path_rule {
