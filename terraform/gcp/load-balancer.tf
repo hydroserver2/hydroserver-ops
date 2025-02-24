@@ -64,6 +64,17 @@ resource "google_compute_url_map" "url_map" {
       paths   = ["/photos/*"]
       service = google_compute_backend_bucket.media_bucket_backend.self_link
     }
+    route_rules {
+      priority = 0
+      match_rules {
+        prefix_match = "/" 
+      }
+      route_action {
+        url_rewrite {
+          path_prefix_rewrite = "/index.html"
+        }
+      }
+    }
   }
 }
 
