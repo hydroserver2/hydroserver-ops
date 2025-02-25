@@ -76,18 +76,15 @@ resource "google_compute_url_map" "url_map" {
 resource "google_compute_target_https_proxy" "https_proxy" {
   name    = "hydroserver-${var.instance}-https-proxy"
   url_map = google_compute_url_map.url_map.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.temporary_ssl_cert.id]
+  ssl_certificates = [data.google_compute_ssl_certificate.ssl_certificate.id]
 
   lifecycle {
     ignore_changes = [ssl_certificates]
   }
 }
 
-resource "google_compute_managed_ssl_certificate" "temporary_ssl_cert" {
-  name = "hydroserver-${var.instance}-temp-ssl-cert"
-  managed {
-    domains = ["hydroserver.example.com"]
-  }
+data "google_compute_ssl_certificate" "ssl_certificate" {
+  name = var.ssl_certificate_name
 }
 
 resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {

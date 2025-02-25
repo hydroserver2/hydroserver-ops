@@ -138,9 +138,11 @@ resource "aws_cloudfront_distribution" "url_map" {
     }
   }
 
+  aliases = [local.domain]
+
   viewer_certificate {
-    cloudfront_default_certificate = true
-    minimum_protocol_version       = "TLSv1.2_2021"
+    acm_certificate_arn      = var.acm_certificate_arn
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   enabled             = true

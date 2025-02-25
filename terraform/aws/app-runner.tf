@@ -298,6 +298,51 @@ resource "aws_iam_policy_attachment" "app_runner_ecr_access_policy_attachment" {
   roles      = [aws_iam_role.app_runner_access_role.name]
 }
 
+
+# ---------------------------------
+# Default Admin Credentials
+# ---------------------------------
+
+resource "random_password" "admin_password" {
+  length      = 12
+  lower       = true
+  min_lower   = 1
+  upper       = true
+  min_upper   = 1
+  numeric     = true
+  min_numeric = 1
+  special     = true
+  min_special = 1
+}
+
+resource "aws_ssm_parameter" "admin_email" {
+  name      = "/hydroserver-${var.instance}-api/default-admin-email"
+  type      = "SecureString"
+  value     = local.admin_email
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
+resource "aws_ssm_parameter" "admin_password" {
+  name      = "/hydroserver-${var.instance}-api/default-admin-password"
+  type      = "SecureString"
+  value     = random_password.admin_password.result
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+
+  tags = {
+    "${var.tag_key}" = local.tag_value
+  }
+}
+
 # ---------------------------------
 # App Runner Environment Variables
 # ---------------------------------
@@ -319,7 +364,7 @@ resource "aws_ssm_parameter" "smtp_url" {
 resource "aws_ssm_parameter" "proxy_base_url" {
   name        = "/hydroserver-${var.instance}-api/proxy-base-url"
   type        = "String"
-  value       = "https://www.example.com"
+  value       = var.proxy_base_url
 
   lifecycle {
     ignore_changes = [value]
@@ -333,7 +378,7 @@ resource "aws_ssm_parameter" "proxy_base_url" {
 resource "aws_ssm_parameter" "default_from_email" {
   name        = "/hydroserver-${var.instance}-api/default-from-email"
   type        = "String"
-  value       = "webmaster@localhost"
+  value       = local.accounts_email
 
   lifecycle {
     ignore_changes = [value]

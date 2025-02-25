@@ -31,6 +31,15 @@ variable "hydroserver_version" {
   type        = string
   default     = "latest"
 }
+variable "proxy_base_url" {
+  description = "The URL HydroServer will be served from."
+  type        = string
+  default     = "https://www.example.com"
+}
+variable "ssl_certificate_name" {
+  description = "The name of the classic SSL certificate HydroServer will use."
+  type        = string
+}
 variable "database_url" {
   description = "A database connection for HydroServer to use."
   type        = string
@@ -49,7 +58,11 @@ variable "label_value" {
 }
 
 locals {
-  label_value = var.label_value != "" ? var.label_value : var.instance
+  domain_match   = regex("https?://(?!www\\.)([^/]+)", var.proxy_base_url)
+  domain         = local.domain_match[0]
+  admin_email    = "hs-admin@${local.domain}"
+  accounts_email = "no-reply@{local.domain}"
+  label_value    = var.label_value != "" ? var.label_value : var.instance
 }
 
 data "google_project" "gcp_project" {

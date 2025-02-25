@@ -35,9 +35,11 @@ resource "google_cloud_run_v2_service" "api" {
 
       dynamic "env" {
         for_each = {
-          DATABASE_URL = google_secret_manager_secret.database_url.id
-          SMTP_URL     = google_secret_manager_secret.smtp_url.id
-          SECRET_KEY   = google_secret_manager_secret.api_secret_key.id
+          DEFAULT_ADMIN_EMAIL    = google_secret_manager_secret.default_admin_email.id
+          DEFAULT_ADMIN_PASSWORD = google_secret_manager_secret.default_admin_password.id
+          DATABASE_URL           = google_secret_manager_secret.database_url.id
+          SMTP_URL               = google_secret_manager_secret.smtp_url.id
+          SECRET_KEY             = google_secret_manager_secret.api_secret_key.id
         }
         content {
           name = env.key
@@ -57,9 +59,9 @@ resource "google_cloud_run_v2_service" "api" {
           DEPLOYMENT_BACKEND        = "gcp"
           STATIC_BUCKET_NAME        = google_storage_bucket.static_bucket.name
           MEDIA_BUCKET_NAME         = google_storage_bucket.media_bucket.name
-          PROXY_BASE_URL            = ""
+          PROXY_BASE_URL            = var.proxy_base_url
           DEBUG                     = ""
-          DEFAULT_FROM_EMAIL        = ""
+          DEFAULT_FROM_EMAIL        = local.accounts_email
           ACCOUNT_SIGNUP_ENABLED    = ""
           ACCOUNT_OWNERSHIP_ENABLED = ""
           SOCIALACCOUNT_SIGNUP_ONLY = ""
@@ -108,11 +110,80 @@ resource "google_secret_manager_secret" "smtp_url" {
       }
     }
   }
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
 }
 
 resource "google_secret_manager_secret_version" "smtp_url_version" {
   secret      = google_secret_manager_secret.smtp_url.id
   secret_data = "smtp://127.0.0.1:1025"
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
+
+# ---------------------------------
+# Default Admin Credentials
+# ---------------------------------
+
+resource "random_password" "admin_password" {
+  length      = 12
+  lower       = true
+  min_lower   = 1
+  upper       = true
+  min_upper   = 1
+  numeric     = true
+  min_numeric = 1
+  special     = true
+  min_special = 1
+}
+
+resource "google_secret_manager_secret" "default_admin_email" {
+  secret_id = "hydroserver-${var.instance}-default-admin-email"
+  replication {
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
+}
+
+resource "google_secret_manager_secret_version" "default_admin_email_version" {
+  secret      = google_secret_manager_secret.default_admin_email.id
+  secret_data = local.admin_email
+
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
+}
+
+resource "google_secret_manager_secret" "default_admin_password" {
+  secret_id = "hydroserver-${var.instance}-default-admin-password"
+  replication {
+    user_managed {
+      replicas {
+        location = var.region
+      }
+    }
+  }
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
+}
+
+resource "google_secret_manager_secret_version" "default_admin_password_version" {
+  secret      = google_secret_manager_secret.default_admin_password.id
+  secret_data = random_password.admin_password.result
 
   lifecycle {
     ignore_changes = [secret_data]
@@ -145,9 +216,11 @@ resource "google_project_iam_member" "cloud_run_sql_access" {
 
 resource "google_secret_manager_secret_iam_member" "secret_access" {
   for_each = {
-    "database_url"   = google_secret_manager_secret.database_url.id,
-    "smtp_url"       = google_secret_manager_secret.smtp_url.id,
-    "api_secret_key" = google_secret_manager_secret.api_secret_key.id
+    "default_admin_email"    = google_secret_manager_secret.default_admin_email.id,
+    "default_admin_password" = google_secret_manager_secret.default_admin_password.id,
+    "database_url"           = google_secret_manager_secret.database_url.id,
+    "smtp_url"               = google_secret_manager_secret.smtp_url.id,
+    "api_secret_key"         = google_secret_manager_secret.api_secret_key.id
   }
   project   = data.google_project.gcp_project.project_id
   secret_id = each.value

@@ -8,6 +8,10 @@ resource "google_storage_bucket" "static_bucket" {
   project       = var.project_id
   force_destroy = false
   uniform_bucket_level_access = false
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
 }
 
 resource "google_storage_bucket_iam_member" "static_bucket_public_access" {
@@ -27,6 +31,10 @@ resource "google_storage_bucket" "media_bucket" {
   project       = var.project_id
   force_destroy = false
   uniform_bucket_level_access = false
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
 }
 
 resource "google_storage_bucket_iam_member" "media_bucket_public_access" {
@@ -50,6 +58,10 @@ resource "google_storage_bucket" "data_mgmt_app_bucket" {
   website {
     main_page_suffix = "index.html"
     not_found_page   = "index.html"
+  }
+
+  labels = {
+    "${var.label_key}" = local.label_value
   }
 }
 

@@ -101,6 +101,10 @@ resource "google_secret_manager_secret" "database_url" {
       }
     }
   }
+
+  labels = {
+    "${var.label_key}" = local.label_value
+  }
 }
 
 resource "google_secret_manager_secret_version" "database_url_version" {
@@ -129,6 +133,10 @@ resource "google_secret_manager_secret" "api_secret_key" {
         location = var.region
       }
     }
+  }
+
+  labels = {
+    "${var.label_key}" = local.label_value
   }
 }
 
