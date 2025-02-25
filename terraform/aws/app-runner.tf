@@ -22,17 +22,19 @@ resource "aws_apprunner_service" "api" {
       image_configuration {
         port = "8000"
         runtime_environment_secrets = {
-          DATABASE_URL              = aws_ssm_parameter.database_url.arn
-          SMTP_URL                  = aws_ssm_parameter.smtp_url.arn
-          SECRET_KEY                = aws_ssm_parameter.secret_key.arn
-          AWS_CLOUDFRONT_KEY_ID     = aws_ssm_parameter.signing_key_id.arn
-          AWS_CLOUDFRONT_KEY        = aws_ssm_parameter.signing_key.arn
-          PROXY_BASE_URL            = aws_ssm_parameter.proxy_base_url.arn
-          DEBUG                     = aws_ssm_parameter.debug_mode.arn
-          DEFAULT_FROM_EMAIL        = aws_ssm_parameter.default_from_email.arn
-          ACCOUNT_SIGNUP_ENABLED    = aws_ssm_parameter.account_signup_enabled.arn
-          ACCOUNT_OWNERSHIP_ENABLED = aws_ssm_parameter.account_ownership_enabled.arn
-          SOCIALACCOUNT_SIGNUP_ONLY = aws_ssm_parameter.socialaccount_signup_only.arn
+          DATABASE_URL               = aws_ssm_parameter.database_url.arn
+          SMTP_URL                   = aws_ssm_parameter.smtp_url.arn
+          SECRET_KEY                 = aws_ssm_parameter.secret_key.arn
+          AWS_CLOUDFRONT_KEY_ID      = aws_ssm_parameter.signing_key_id.arn
+          AWS_CLOUDFRONT_KEY         = aws_ssm_parameter.signing_key.arn
+          PROXY_BASE_URL             = aws_ssm_parameter.proxy_base_url.arn
+          DEBUG                      = aws_ssm_parameter.debug_mode.arn
+          DEFAULT_SUPERUSER_EMAIL    = aws_ssm_parameter.admin_email.arn
+          DEFAULT_SUPERUSER_PASSWORD = aws_ssm_parameter.admin_password.arn
+          DEFAULT_FROM_EMAIL         = aws_ssm_parameter.default_from_email.arn
+          ACCOUNT_SIGNUP_ENABLED     = aws_ssm_parameter.account_signup_enabled.arn
+          ACCOUNT_OWNERSHIP_ENABLED  = aws_ssm_parameter.account_ownership_enabled.arn
+          SOCIALACCOUNT_SIGNUP_ONLY  = aws_ssm_parameter.socialaccount_signup_only.arn
         }
         runtime_environment_variables = {
           DEPLOYED                   = "True"

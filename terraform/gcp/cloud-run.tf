@@ -35,11 +35,11 @@ resource "google_cloud_run_v2_service" "api" {
 
       dynamic "env" {
         for_each = {
-          DEFAULT_ADMIN_EMAIL    = google_secret_manager_secret.default_admin_email.id
-          DEFAULT_ADMIN_PASSWORD = google_secret_manager_secret.default_admin_password.id
-          DATABASE_URL           = google_secret_manager_secret.database_url.id
-          SMTP_URL               = google_secret_manager_secret.smtp_url.id
-          SECRET_KEY             = google_secret_manager_secret.api_secret_key.id
+          DEFAULT_SUPERUSER_EMAIL    = google_secret_manager_secret.default_admin_email.id
+          DEFAULT_SUPERUSER_PASSWORD = google_secret_manager_secret.default_admin_password.id
+          DATABASE_URL               = google_secret_manager_secret.database_url.id
+          SMTP_URL                   = google_secret_manager_secret.smtp_url.id
+          SECRET_KEY                 = google_secret_manager_secret.api_secret_key.id
         }
         content {
           name = env.key
