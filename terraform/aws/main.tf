@@ -56,7 +56,7 @@ locals {
   domain_match   = regex("https?://([^/]+)", var.proxy_base_url)
   domain         = replace(local.domain_match[0], "www.", "")
   admin_email    = "hs-admin@${local.domain}"
-  accounts_email = "no-reply@{local.domain}"
+  accounts_email = "no-reply@${local.domain}"
   tag_value      = var.tag_value != "" ? var.tag_value : var.instance
 }
 
