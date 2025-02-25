@@ -58,8 +58,8 @@ variable "label_value" {
 }
 
 locals {
-  domain_match   = regex("https?://(?!www\\.)([^/]+)", var.proxy_base_url)
-  domain         = local.domain_match[0]
+  domain_match   = regex("https?://([^/]+)", var.proxy_base_url)
+  domain         = replace(local.domain_match[0], "www.", "")
   admin_email    = "hs-admin@${local.domain}"
   accounts_email = "no-reply@{local.domain}"
   label_value    = var.label_value != "" ? var.label_value : var.instance

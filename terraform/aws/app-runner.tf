@@ -304,7 +304,7 @@ resource "aws_iam_policy_attachment" "app_runner_ecr_access_policy_attachment" {
 # ---------------------------------
 
 resource "random_password" "admin_password" {
-  length      = 12
+  length      = 20
   lower       = true
   min_lower   = 1
   upper       = true

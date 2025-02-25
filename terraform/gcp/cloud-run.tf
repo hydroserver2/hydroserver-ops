@@ -131,7 +131,7 @@ resource "google_secret_manager_secret_version" "smtp_url_version" {
 # ---------------------------------
 
 resource "random_password" "admin_password" {
-  length      = 12
+  length      = 20
   lower       = true
   min_lower   = 1
   upper       = true
