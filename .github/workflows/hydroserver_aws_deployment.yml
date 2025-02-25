@@ -83,8 +83,8 @@ jobs:
           -no-color -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
-          -var "proxy_base_url=${{ secrets.PROXY_BASE_URL }}" \
-          -var "acm_certificate_arn=${{ secrets.AWS_ACM_CERTIFICATE_ARN }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
@@ -99,8 +99,8 @@ jobs:
           -target=aws_ecr_repository.api_repository \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
-          -var "proxy_base_url=${{ secrets.PROXY_BASE_URL }}" \
-          -var "acm_certificate_arn=${{ secrets.AWS_ACM_CERTIFICATE_ARN }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
@@ -123,8 +123,8 @@ jobs:
           -auto-approve -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
-          -var "proxy_base_url=${{ secrets.PROXY_BASE_URL }}" \
-          -var "acm_certificate_arn=${{ secrets.AWS_ACM_CERTIFICATE_ARN }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
           -var "tag_value=${{ vars.AWS_TAG_VALUE || github.event.inputs.environment }}"
