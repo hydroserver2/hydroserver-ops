@@ -319,6 +319,8 @@ jobs:
           terraform plan -destroy -no-color -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}"
         continue-on-error: true
       - name: Terraform Plan Destroy Status
         if: steps.plan_destroy.outcome == 'failure'
@@ -327,4 +329,6 @@ jobs:
         run: |
           terraform destroy -auto-approve -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
-          -var "region=${{ vars.AWS_REGION }}"
+          -var "region=${{ vars.AWS_REGION }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}"

@@ -300,7 +300,9 @@ jobs:
           terraform plan -destroy -no-color -input=false \
           -var instance="${{ github.event.inputs.environment }}" \
           -var region="${{ vars.GCP_REGION }}" \
-          -var project_id="${{ vars.GCP_PROJECT_ID }}"
+          -var project_id="${{ vars.GCP_PROJECT_ID }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "ssl_certificate_name=${{ vars.GCP_SSL_CERTIFICATE_NAME }}"
         continue-on-error: true
       - name: Terraform Plan Destroy Status
         if: steps.plan_destroy.outcome == 'failure'
@@ -310,4 +312,6 @@ jobs:
           terraform destroy -auto-approve -input=false \
           -var instance="${{ github.event.inputs.environment }}" \
           -var region="${{ vars.GCP_REGION }}" \
-          -var project_id="${{ vars.GCP_PROJECT_ID }}"
+          -var project_id="${{ vars.GCP_PROJECT_ID }}" \
+          -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "ssl_certificate_name=${{ vars.GCP_SSL_CERTIFICATE_NAME }}"
