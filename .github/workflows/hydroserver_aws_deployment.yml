@@ -327,6 +327,7 @@ jobs:
         run: exit 1
       - name: Terraform Destroy
         run: |
+          terraform state rm aws_db_instance.rds_db_instance || true
           terraform destroy -auto-approve -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \

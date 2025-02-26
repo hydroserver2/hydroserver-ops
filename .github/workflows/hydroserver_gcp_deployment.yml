@@ -309,6 +309,7 @@ jobs:
         run: exit 1
       - name: Terraform Destroy
         run: |
+          terraform state rm google_sql_database_instance.db_instance || true
           terraform destroy -auto-approve -input=false \
           -var instance="${{ github.event.inputs.environment }}" \
           -var region="${{ vars.GCP_REGION }}" \
