@@ -297,8 +297,9 @@ jobs:
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
-          terraform state rm google_sql_database_instance.db_instance || true
+          terraform state rm google_sql_user.db_user || true
           terraform state rm google_sql_database.db || true
+          terraform state rm google_sql_database_instance.db_instance || true
           terraform plan -destroy -no-color -input=false \
           -var instance="${{ github.event.inputs.environment }}" \
           -var region="${{ vars.GCP_REGION }}" \
