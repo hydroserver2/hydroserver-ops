@@ -316,6 +316,7 @@ jobs:
       - name: Terraform Plan Destroy
         id: plan_destroy
         run: |
+          terraform state rm aws_db_instance.rds_db_instance || true
           terraform plan -destroy -no-color -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
@@ -327,7 +328,6 @@ jobs:
         run: exit 1
       - name: Terraform Destroy
         run: |
-          terraform state rm aws_db_instance.rds_db_instance || true
           terraform destroy -auto-approve -input=false \
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
