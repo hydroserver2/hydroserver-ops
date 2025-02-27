@@ -188,7 +188,7 @@ jobs:
           [ -n "${{ vars.DEBUG }}" ] && ENV_VARS+="DEBUG=${{ vars.DEBUG }}," || ENV_VARS+="DEBUG=True,"
           [ -n "${{ vars.PROXY_BASE_URL }}" ] && ENV_VARS+="PROXY_BASE_URL=${{ vars.PROXY_BASE_URL }},"
           [ -n "${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}" ] && ENV_VARS+="ACCOUNT_OWNERSHIP_ENABLED=${{ vars.ACCOUNT_OWNERSHIP_ENABLED }}," || ENV_VARS+="ACCOUNT_OWNERSHIP_ENABLED=False,"
-          [ -n "${{ vars.ACCOUNT_SIGNUP_ENABLED }}" ] && ENV_VARS+="ACCOUNT_SIGNUP_ENABLED=${{ vars.ACCOUNT_SIGNUP_ENABLED }}," || ENV_VARS+="ACCOUNT_SIGNUP_ENABLED=False,"
+          [ -n "${{ vars.ACCOUNT_SIGNUP_ENABLED }}" ] && ENV_VARS+="ACCOUNT_SIGNUP_ENABLED=${{ vars.ACCOUNT_SIGNUP_ENABLED }}," || ENV_VARS+="ACCOUNT_SIGNUP_ENABLED=True,"
           [ -n "${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}" ] && ENV_VARS+="SOCIALACCOUNT_SIGNUP_ONLY=${{ vars.SOCIALACCOUNT_SIGNUP_ONLY }}," || ENV_VARS+="SOCIALACCOUNT_SIGNUP_ONLY=False,"
           ENV_VARS=${ENV_VARS%,}
           gcloud run services update hydroserver-api-${{ github.event.inputs.environment }} \
