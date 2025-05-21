@@ -3,7 +3,7 @@ name: GCP Deploy
 on:
   push:
     branches:
-      - main
+      - ms-dev
 
 jobs:
   deploy:
