@@ -1,4 +1,4 @@
-name: GCP Deploy
+name: test-
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: gcp-dev
 
     steps:
       - name: Checkout code
