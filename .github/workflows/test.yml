@@ -13,6 +13,7 @@ jobs:
     permissions:  # Add this section
         id-token: write
         contents: read
+        actions: write
 
     steps:
       - name: Checkout code
