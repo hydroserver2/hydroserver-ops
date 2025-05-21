@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: gcp-dev
 
+    permissions:  # Add this section
+        id-token: write
+        contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
