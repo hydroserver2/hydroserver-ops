@@ -1,0 +1,42 @@
+name: List Files in GCS Bucket
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: 'The command to run'
+        default: 'test'
+        required: true
+        type: string
+      instance:
+        description: 'The instance to run the command on'
+        default: 'gcp-dev'
+        required: true
+        type: choice
+        options:
+          - 'beta'
+          - 'www'
+
+jobs:
+  deploy:
+    name: Run '${{ github.event.inputs.cmd }}' on ${{ inputs.instance }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: code checkout
+      uses: actions/checkout@v3
+
+    - uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Setup GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: hydroshare-${{ inputs.instance }}
+        location: us-central1
+        
+    - name: List files in GCS bucket
+      run: |
+          BUCKET_NAME="hydroshare-postgis-dumps"
+          echo "Listing files in bucket: $BUCKET_NAME"
+          gcloud storage ls --recursive gs://hydroshare-postgis-dumps/**
