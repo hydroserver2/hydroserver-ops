@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    #environment: gcp-dev
+    environment: gcp-dev
 
     permissions:  # Add this section
         id-token: write
