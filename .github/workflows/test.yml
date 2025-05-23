@@ -1,4 +1,4 @@
-ame: test workflow update
+name: test workflow update
 
 on:
   push:
