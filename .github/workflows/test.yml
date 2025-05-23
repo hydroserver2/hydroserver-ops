@@ -1,4 +1,4 @@
-name: test workflow update
+ame: test workflow update
 
 on:
   push:
@@ -22,17 +22,11 @@ jobs:
       - name: Authenticate with Workload Identity Federation
         uses: google-github-actions/auth@v2
         with:
-          #workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           workload_identity_provider: projects/879339769955/locations/global/workloadIdentityPools/github-action-pool/providers/github
-          #service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
-          service_account: github-actions-sa@hydroserver-2.iam.gserviceaccount.com
-          #credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          #project_id: ${{ secrets.GCP_PROJECT_ID }}
-          project_id: hydroserver-2
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Echo a message
         run: |
