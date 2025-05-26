@@ -30,6 +30,6 @@ jobs:
 
       - name: Echo a message
         run: |
-          # echo "This is a test message from the GCP Deploy workflow using Workload Identity Federation."
+          # echo "This is a test message from the GCP Deploy workflow using Workload Identity Federation." 
           echo "Listing files in bucket: $BUCKET_NAME"
           gcloud storage ls --recursive gs://hydroserver-2-bk/**
