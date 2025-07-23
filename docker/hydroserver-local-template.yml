@@ -2,16 +2,16 @@ version: '3'
 
 services:
 
-  timescaledb:
-    image: timescale/timescaledb:latest-pg13  # Newer versions of Postgres won't work with ARM processors.
+  postgres:
+    image: postgres:17
     environment:
-      POSTGRES_DB: tsdb
+      POSTGRES_DB: hsdb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: pass
     ports:
       - "5435:5432"
     volumes:
-      - timescale_data:/var/lib/postgresql/data
+      - postgresql_data:/var/lib/postgresql/data
 
   django:
     image: python:3.11
@@ -25,7 +25,6 @@ services:
       - |
         pip install -r requirements.txt
         python manage.py migrate
-        python manage.py configure_timescaledb
         python manage.py collectstatic --noinput
         python manage.py runserver 0.0.0.0:8000
     depends_on:
@@ -55,5 +54,5 @@ services:
       - nodejs
 
 volumes:
-  timescale_data:
+  postgresql_data:
   staticfiles:
