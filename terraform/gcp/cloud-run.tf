@@ -60,6 +60,7 @@ resource "google_cloud_run_v2_service" "api" {
           USE_CLOUD_SQL_AUTH_PROXY  = "true"
           DEPLOYED                  = "True"
           DEPLOYMENT_BACKEND        = "gcp"
+          USE_TASKS_BACKEND         = "True"
           STATIC_BUCKET_NAME        = google_storage_bucket.static_bucket.name
           MEDIA_BUCKET_NAME         = google_storage_bucket.media_bucket.name
           PROXY_BASE_URL            = var.proxy_base_url
@@ -273,7 +274,7 @@ resource "google_cloud_run_v2_worker_pool" "hydroserver_worker" {
     containers {
       image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
       command = ["sh", "-c"]
-      args    = ["python manage.py dbworker"]
+      args    = ["python manage.py db_worker"]
 
       resources {
         limits = {
@@ -311,6 +312,7 @@ resource "google_cloud_run_v2_worker_pool" "hydroserver_worker" {
           USE_CLOUD_SQL_AUTH_PROXY  = "true"
           DEPLOYED                  = "True"
           DEPLOYMENT_BACKEND        = "gcp"
+          USE_TASKS_BACKEND         = "True"
           STATIC_BUCKET_NAME        = google_storage_bucket.static_bucket.name
           MEDIA_BUCKET_NAME         = google_storage_bucket.media_bucket.name
           PROXY_BASE_URL            = var.proxy_base_url
