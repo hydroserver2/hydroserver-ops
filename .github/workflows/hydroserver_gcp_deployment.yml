@@ -75,6 +75,7 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
+          -upgrade \
           -backend-config="impersonate_service_account=${{ vars.GCP_SERVICE_ACCOUNT }}" \
           -backend-config="bucket=${{ vars.TERRAFORM_BUCKET }}" \
           -backend-config="prefix=state/hydroserver_${{ github.event.inputs.environment }}"
