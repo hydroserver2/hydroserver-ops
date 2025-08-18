@@ -261,6 +261,88 @@ resource "google_cloud_run_v2_job" "hydroserver_init" {
 
 
 # ---------------------------------
+# GCP Cloud Run Worker Pool Service
+# ---------------------------------
+
+resource "google_cloud_run_v2_worker_pool" "hydroserver_worker" {
+  name         = "hydroserver-worker-pool-${var.instance}"
+  location     = var.region
+  launch_stage = "BETA"
+
+  template {
+    containers {
+      image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
+      command = ["sh", "-c"]
+      args    = ["python manage.py dbworker"]
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "2Gi"
+        }
+      }
+
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
+      }
+
+      dynamic "env" {
+        for_each = {
+          DEFAULT_SUPERUSER_EMAIL    = google_secret_manager_secret.default_admin_email.id
+          DEFAULT_SUPERUSER_PASSWORD = google_secret_manager_secret.default_admin_password.id
+          DATABASE_URL               = google_secret_manager_secret.database_url.id
+          SMTP_URL                   = google_secret_manager_secret.smtp_url.id
+          SECRET_KEY                 = google_secret_manager_secret.api_secret_key.id
+        }
+        content {
+          name = env.key
+          value_source {
+            secret_key_ref {
+              secret  = env.value
+              version = "latest"
+            }
+          }
+        }
+      }
+
+      dynamic "env" {
+        for_each = {
+          USE_CLOUD_SQL_AUTH_PROXY  = "true"
+          DEPLOYED                  = "True"
+          DEPLOYMENT_BACKEND        = "gcp"
+          STATIC_BUCKET_NAME        = google_storage_bucket.static_bucket.name
+          MEDIA_BUCKET_NAME         = google_storage_bucket.media_bucket.name
+          PROXY_BASE_URL            = var.proxy_base_url
+          DEBUG                     = ""
+          DEFAULT_FROM_EMAIL        = local.accounts_email
+          ACCOUNT_SIGNUP_ENABLED    = ""
+          ACCOUNT_OWNERSHIP_ENABLED = ""
+          SOCIALACCOUNT_SIGNUP_ONLY = ""
+        }
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
+    }
+
+    service_account = google_service_account.cloud_run_service_account.email
+
+    dynamic "volumes" {
+      for_each = length(google_sql_database_instance.db_instance) > 0 ? [google_sql_database_instance.db_instance[0].connection_name] : []
+      content {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [volumes.value]
+        }
+      }
+    }
+  }
+}
+
+
+# ---------------------------------
 # Default Admin Credentials
 # ---------------------------------
 
