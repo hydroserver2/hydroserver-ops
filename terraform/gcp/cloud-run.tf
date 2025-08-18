@@ -264,6 +264,19 @@ resource "google_cloud_run_v2_job" "hydroserver_init" {
 # GCP Cloud Run Worker Pool Service
 # ---------------------------------
 
+resource "google_cloud_run_v2_worker_pool" "workerpooltest" {
+  name     = "cloudrun-worker-pool"
+  location = "us-central1"
+  deletion_protection = false
+  launch_stage = "BETA"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
+    }
+  }
+}
+
 resource "google_cloud_run_v2_worker_pool" "hydroserver_worker" {
   name         = "hydroserver-worker-pool-${var.instance}"
   location     = var.region
