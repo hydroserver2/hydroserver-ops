@@ -264,27 +264,20 @@ resource "google_cloud_run_v2_job" "hydroserver_init" {
 # GCP Cloud Run Worker Pool Service
 # ---------------------------------
 
-resource "google_cloud_run_v2_worker_pool" "workerpooltest" {
-  name     = "cloudrun-worker-pool"
-  location = "us-central1"
+resource "google_cloud_run_v2_service" "worker" {
+  name                = "hydroserver-worker-${var.instance}"
+  location            = var.region
   deletion_protection = false
-  launch_stage = "BETA"
+
+  depends_on = [
+    google_secret_manager_secret_version.database_url_version,
+    google_secret_manager_secret_version.smtp_url_version,
+    google_secret_manager_secret_version.api_secret_key_version
+  ]
 
   template {
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
-    }
-  }
-}
-
-resource "google_cloud_run_v2_worker_pool" "hydroserver_worker" {
-  name         = "hydroserver-worker-pool-${var.instance}"
-  location     = var.region
-  launch_stage = "BETA"
-
-  template {
-    containers {
-      image = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
+      image   = "${var.region}-docker.pkg.dev/${data.google_project.gcp_project.project_id}/${var.instance}/hydroserver-api-services:latest"
       command = ["sh", "-c"]
       args    = ["python manage.py dbworker"]
 
@@ -351,6 +344,22 @@ resource "google_cloud_run_v2_worker_pool" "hydroserver_worker" {
         }
       }
     }
+
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 1
+    }
+
+    labels = {
+      "${var.label_key}" = local.label_value
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      "template[0].containers[0].resources",
+      "template[0].scaling"
+    ]
   }
 }
 
