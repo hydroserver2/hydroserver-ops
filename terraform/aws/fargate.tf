@@ -62,6 +62,11 @@ resource "aws_ecs_task_definition" "hydroserver_worker" {
   ])
 }
 
+resource "aws_cloudwatch_log_group" "ecs_worker" {
+  name              = "/ecs/hydroserver-worker-${var.instance}"
+  retention_in_days = 30
+}
+
 
 # ---------------------------------
 # ECS Fargate Service
