@@ -17,8 +17,8 @@ resource "aws_ecs_task_definition" "hydroserver_worker" {
   network_mode             = "awsvpc"
   cpu                      = "1024"  # 1 vCPU
   memory                   = "2048"  # 2 GB
-  execution_role_arn       = aws_iam_role.app_runner_access_role.arn
-  task_role_arn            = aws_iam_role.app_runner_service_role.arn
+  execution_role_arn       = aws_iam_role.ecs_worker_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_worker_task_role.arn
 
   container_definitions = jsonencode([
     {
@@ -85,4 +85,73 @@ resource "aws_ecs_service" "hydroserver_worker" {
 
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
+}
+
+
+# ---------------------------------
+# ECS Task Role
+# ---------------------------------
+
+resource "aws_iam_role" "ecs_worker_task_role" {
+  name = "hydroserver-${var.instance}-ecs-worker-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "sts:AssumeRole"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_policy_attachment" "ecs_worker_role_ssm" {
+  name       = "hydroserver-${var.instance}-ecs-ssm-attachment"
+  roles      = [aws_iam_role.ecs_worker_task_role.name]
+  policy_arn = aws_iam_policy.app_runner_ssm_policy.arn
+}
+
+resource "aws_iam_policy_attachment" "ecs_worker_task_role_s3" {
+  name       = "hydroserver-${var.instance}-ecs-s3-attachment"
+  roles      = [aws_iam_role.ecs_worker_task_role.name]
+  policy_arn = aws_iam_policy.app_runner_s3_policy.arn
+}
+
+resource "aws_iam_policy_attachment" "ecs_worker_task_role_rds" {
+  name       = "hydroserver-${var.instance}-ecs-worker-rds-attachment"
+  roles      = [aws_iam_role.ecs_worker_task_role.name]
+  policy_arn = aws_iam_policy.app_runner_rds_policy[0].arn
+}
+
+# ---------------------------------
+# ECS Execution Role
+# ---------------------------------
+
+resource "aws_iam_role" "ecs_worker_execution_role" {
+  name = "hydroserver-${var.instance}-ecs-worker-execution-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "sts:AssumeRole"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_policy_attachment" "ecs_worker_execution_ecr" {
+  name       = "hydroserver-${var.instance}-ecs-worker-ecr-attachment"
+  roles      = [aws_iam_role.ecs_worker_execution_role.name]
+  policy_arn = aws_iam_policy.app_runner_ecr_access_policy.arn
+}
+
+resource "aws_iam_policy_attachment" "ecs_worker_execution_logs" {
+  name       = "hydroserver-${var.instance}-ecs-worker-logs-attachment"
+  roles      = [aws_iam_role.ecs_worker_execution_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
