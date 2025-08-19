@@ -60,6 +60,7 @@ resource "aws_batch_job_definition" "hydroserver_init" {
     environment = [
       { name = "DEPLOYED", value = "True" },
       { name = "DEPLOYMENT_BACKEND", value = "aws" },
+      { name = "USE_TASKS_BACKEND", value = "True" },
       { name = "LOAD_DEFAULT_DATA", value = "False" },
       { name = "STATIC_BUCKET_NAME", value = aws_s3_bucket.static_bucket.bucket },
       { name = "MEDIA_BUCKET_NAME", value = aws_s3_bucket.media_bucket.bucket }

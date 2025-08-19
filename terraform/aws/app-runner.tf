@@ -44,6 +44,7 @@ resource "aws_apprunner_service" "api" {
         runtime_environment_variables = {
           DEPLOYED                   = "True"
           DEPLOYMENT_BACKEND         = "aws"
+          USE_TASKS_BACKEND          = "True"
           STATIC_BUCKET_NAME         = aws_s3_bucket.static_bucket.bucket
           MEDIA_BUCKET_NAME          = aws_s3_bucket.media_bucket.bucket
         }
