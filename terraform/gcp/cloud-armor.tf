@@ -62,12 +62,6 @@ variable "cloud_armor_rules" {
     },
     {
       action      = "deny(403)"
-      priority    = 1003
-      description = "Prevent Local File Inclusion (LFI)"
-      expression  = "evaluatePreconfiguredWaf('lfi-v33-stable', {'sensitivity': 1})"
-    },
-    {
-      action      = "deny(403)"
       priority    = 1004
       description = "Prevent Protocol Violations"
       expression  = "evaluatePreconfiguredWaf('protocolattack-v33-stable', {'sensitivity': 1})"
