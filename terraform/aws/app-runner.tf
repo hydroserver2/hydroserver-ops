@@ -33,7 +33,7 @@ resource "aws_apprunner_service" "api" {
           AWS_CLOUDFRONT_KEY_ID      = aws_ssm_parameter.signing_key_id.arn
           AWS_CLOUDFRONT_KEY         = aws_ssm_parameter.signing_key.arn
           PROXY_BASE_URL             = aws_ssm_parameter.proxy_base_url.arn
-          TRUSTED_ORIGINS            = aws_ssm_parameter.trusted_origins
+          TRUSTED_ORIGINS            = aws_ssm_parameter.trusted_origins.arn
           DEBUG                      = aws_ssm_parameter.debug_mode.arn
           DEFAULT_SUPERUSER_EMAIL    = aws_ssm_parameter.admin_email.arn
           DEFAULT_SUPERUSER_PASSWORD = aws_ssm_parameter.admin_password.arn
