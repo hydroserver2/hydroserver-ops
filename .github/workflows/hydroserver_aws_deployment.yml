@@ -161,14 +161,14 @@ jobs:
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
       - name: Pull image from GHCR
         run: |
-          docker pull ghcr.io/hydroserver2/hydroserver-api-services:${{ github.event.inputs.release }}
+          docker pull ghcr.io/hydroserver2/hydroserver-services:${{ github.event.inputs.release }}
       - name: Tag Docker Image for ECR
         run: |
-          docker tag ghcr.io/hydroserver2/hydroserver-api-services:${{ github.event.inputs.release }} \
-          ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest
+          docker tag ghcr.io/hydroserver2/hydroserver-services:${{ github.event.inputs.release }} \
+          ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-${{ github.event.inputs.environment }}:latest
       - name: Push Docker Image to AWS ECR
         run: |
-          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-api-${{ github.event.inputs.environment }}:latest
+          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/hydroserver-${{ github.event.inputs.environment }}:latest
       - name: Update AWS SSM Parameters
         run: |
           ENVIRONMENT="${{ github.event.inputs.environment }}"
@@ -213,7 +213,7 @@ jobs:
             --container-overrides "{\"environment\":[{\"name\":\"LOAD_DEFAULT_DATA\",\"value\":\"$LOAD_DEFAULT_DATA\"}]}"
       - name: Deploy AWS App Runner Service
         run: |
-          APP_RUNNER_SERVICE_NAME="hydroserver-api-${{ github.event.inputs.environment }}"
+          APP_RUNNER_SERVICE_NAME="hydroserver-${{ github.event.inputs.environment }}"
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn" --output text)
           aws apprunner start-deployment --service-arn "$SERVICE_ARN"
       - name: Get CloudFront Distribution ID
