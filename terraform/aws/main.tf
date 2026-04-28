@@ -36,6 +36,11 @@ variable "proxy_base_url" {
   type        = string
   default     = "https://www.example.com"
 }
+variable "trusted_origins" {
+  description = "A comma-separated list of trusted origins in addition to the PROXY_BASE_URL",
+  type        = string
+  default     = ""
+}
 variable "acm_certificate_arn" {
   description = "The ARN of the ACM certificate HydroServer will use."
   type        = string
