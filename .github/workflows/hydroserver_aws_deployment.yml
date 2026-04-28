@@ -213,7 +213,7 @@ jobs:
             --container-overrides "{\"environment\":[{\"name\":\"LOAD_DEFAULT_DATA\",\"value\":\"$LOAD_DEFAULT_DATA\"}]}"
       - name: Deploy AWS App Runner Service
         run: |
-          APP_RUNNER_SERVICE_NAME="hydroserver-${{ github.event.inputs.environment }}"
+          APP_RUNNER_SERVICE_NAME="hydroserver-api-${{ github.event.inputs.environment }}"
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$APP_RUNNER_SERVICE_NAME'].ServiceArn" --output text)
           aws apprunner start-deployment --service-arn "$SERVICE_ARN"
       - name: Get CloudFront Distribution ID
