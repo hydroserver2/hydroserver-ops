@@ -100,6 +100,7 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "trusted_origins=${{ vars.TRUSTED_ORIGINS }}" \
           -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
@@ -124,6 +125,7 @@ jobs:
           -var "instance=${{ github.event.inputs.environment }}" \
           -var "region=${{ vars.AWS_REGION }}" \
           -var "proxy_base_url=${{ vars.PROXY_BASE_URL }}" \
+          -var "trusted_origins=${{ vars.TRUSTED_ORIGINS }}" \
           -var "acm_certificate_arn=${{ vars.AWS_ACM_CERTIFICATE_ARN }}" \
           -var "database_url=${{ secrets.DATABASE_URL || '' }}" \
           -var "tag_key=${{ vars.AWS_TAG_KEY || 'hydroserver-instance' }}" \
@@ -178,6 +180,7 @@ jobs:
             ["/hydroserver-${ENVIRONMENT}-api/smtp-url"]="SecureString"
             ["/hydroserver-${ENVIRONMENT}-api/debug-mode"]="String"
             ["/hydroserver-${ENVIRONMENT}-api/proxy-base-url"]="String"
+            ["/hydroserver-${ENVIRONMENT}-api/trusted-origins"]="String"
             ["/hydroserver-${ENVIRONMENT}-api/account-ownership-enabled"]="String"
             ["/hydroserver-${ENVIRONMENT}-api/account-signup-enabled"]="String"
             ["/hydroserver-${ENVIRONMENT}-api/socialaccount-signup-only"]="String"
