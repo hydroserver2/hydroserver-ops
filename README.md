@@ -8,7 +8,7 @@ Organizations or individuals who want to deploy their own HydroServer instance t
 
 Detailed deployment documentation is available below:
 
-- [Deploying to AWS](https://hydroserver2.github.io/hydroserver/deployment/aws/manage-aws-deployment.html)
-- [Deploying to GCP](https://hydroserver2.github.io/hydroserver/deployment/gcp/manage-gcp-deployment.html)
+- [Deploying to AWS](https://hydroserver.org/hosting-and-deployment/tutorials/deploying-to-amazon-web-services.html)
+- [Deploying to GCP](https://hydroserver.org/hosting-and-deployment/tutorials/deploying-to-google-cloud-platform.html)
 
 Please review the documentation before running any GitHub Actions workflows.
